@@ -7,6 +7,8 @@
 
 import { useRef } from "react";
 import { motion, useInView } from "framer-motion";
+import CountdownTimer from "@/components/CountdownTimer";
+import { openCheckout } from "@/lib/checkout";
 import {
   Moon,
   AlertTriangle,
@@ -108,9 +110,13 @@ export default function Upsell1() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
           >
-            <div className="inline-flex items-center gap-2 bg-red-500/10 border border-red-500/20 rounded-full px-4 py-1.5 mb-6">
+            <div className="inline-flex items-center gap-2 bg-red-500/10 border border-red-500/20 rounded-full px-4 py-1.5 mb-4">
               <Zap className="w-3.5 h-3.5 text-red-400" />
               <span className="text-red-400 text-sm font-medium">WAIT! Your Order Is Almost Complete...</span>
+            </div>
+
+            <div className="mb-6">
+              <CountdownTimer minutes={15} storageKey="upsell1-countdown" />
             </div>
 
             <h1 className="font-[var(--font-display)] text-3xl sm:text-4xl md:text-5xl font-bold leading-tight mb-6">
@@ -235,6 +241,9 @@ export default function Upsell1() {
 
             {/* Price card */}
             <div className="border border-amber/25 rounded-2xl p-8 sm:p-10 bg-card/40 backdrop-blur-sm mb-8">
+              <div className="flex justify-center mb-4">
+                <CountdownTimer minutes={15} label="Offer closes in:" storageKey="upsell1-countdown" />
+              </div>
               <p className="text-foreground/50 text-sm uppercase tracking-widest mb-3">Add to your order</p>
               <div className="mb-6">
                 <span className="text-foreground/30 line-through text-xl mr-3">$37</span>
@@ -242,7 +251,7 @@ export default function Upsell1() {
               </div>
 
               <button
-                onClick={() => window.open("#", "_blank")}
+                onClick={() => openCheckout("upsell1")}
                 className="cta-pulse w-full inline-flex items-center justify-center gap-3 bg-amber hover:bg-amber-light text-background font-bold px-8 py-5 rounded-xl text-lg transition-all duration-300 hover:scale-[1.02]"
               >
                 YES! ADD THE AUDIO PACK FOR JUST $10

@@ -7,6 +7,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { motion, useInView } from "framer-motion";
+import { openCheckout } from "@/lib/checkout";
 import {
   Moon,
   Brain,
@@ -20,6 +21,8 @@ import {
   Star,
   ChevronDown,
   Clock,
+  HelpCircle,
+  ChevronRight,
 } from "lucide-react";
 
 const HERO_BG = "https://d2xsxph8kpxj0f.cloudfront.net/310419663032296198/RrG9k2uFQkqVyNWK8WEbxj/hero-night-sky-NMuEwEY3PXoTVuUCDHvJtJ.webp";
@@ -72,6 +75,44 @@ const forYouIf = [
   "You're sick of feeling tired, anxious, and irritable.",
   "You want a real, lasting solution, not another quick fix.",
 ];
+
+// FAQ Accordion Item
+function FAQItem({ question, answer }: { question: string; answer: string }) {
+  const [isOpen, setIsOpen] = useState(false);
+  return (
+    <div
+      className={`border rounded-xl transition-all duration-300 ${
+        isOpen ? "border-amber/20 bg-card/40" : "border-border/30 bg-card/10 hover:bg-card/20"
+      }`}
+    >
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className="w-full flex items-center justify-between gap-4 p-5 sm:p-6 text-left"
+      >
+        <span className="font-[var(--font-display)] text-base sm:text-lg font-medium text-foreground/85">
+          {question}
+        </span>
+        <ChevronRight
+          className={`w-5 h-5 text-amber/50 shrink-0 transition-transform duration-300 ${
+            isOpen ? "rotate-90" : ""
+          }`}
+        />
+      </button>
+      <motion.div
+        initial={false}
+        animate={{ height: isOpen ? "auto" : 0, opacity: isOpen ? 1 : 0 }}
+        transition={{ duration: 0.3, ease: "easeInOut" }}
+        className="overflow-hidden"
+      >
+        <div className="px-5 sm:px-6 pb-5 sm:pb-6">
+          <p className="text-foreground/55 leading-relaxed text-sm sm:text-base">
+            {answer}
+          </p>
+        </div>
+      </motion.div>
+    </div>
+  );
+}
 
 export default function Home() {
   const [scrollY, setScrollY] = useState(0);
@@ -464,7 +505,7 @@ export default function Home() {
           {/* CTA Button */}
           <FadeInSection delay={0.4}>
             <button
-              onClick={() => window.open("#", "_blank")}
+              onClick={() => openCheckout("frontEnd")}
               className="cta-pulse w-full sm:w-auto inline-flex items-center justify-center gap-3 bg-amber hover:bg-amber-light text-background font-bold px-10 py-5 rounded-xl text-xl transition-all duration-300 hover:scale-105"
             >
               YES, I WANT TO SLEEP TONIGHT! GIVE ME THE $5 RESET NOW
@@ -510,6 +551,59 @@ export default function Home() {
         </div>
       </section>
 
+      {/* ===== FAQ SECTION ===== */}
+      <section className="py-24 lg:py-32">
+        <div className="max-w-3xl mx-auto px-4">
+          <FadeInSection>
+            <div className="text-center mb-12">
+              <div className="inline-flex items-center gap-2 mb-4">
+                <HelpCircle className="w-5 h-5 text-amber/60" />
+              </div>
+              <h2 className="font-[var(--font-display)] text-3xl sm:text-4xl font-bold">
+                Frequently Asked Questions
+              </h2>
+            </div>
+          </FadeInSection>
+
+          <div className="space-y-3">
+            {[
+              {
+                q: "Is this just another ebook with generic sleep tips?",
+                a: "No. This is a structured, interactive 7-night program based on Cognitive Behavioral Therapy for Insomnia (CBT-I) — the clinically-proven \"gold standard\" treatment recommended by doctors and sleep scientists. Each night gives you one specific, powerful action to take.",
+              },
+              {
+                q: "How is this different from melatonin or sleeping pills?",
+                a: "Melatonin and sleeping pills mask the symptoms without fixing the root cause. The Deep Sleep Reset retrains your brain's natural sleep mechanisms so you can fall asleep and stay asleep without any external aids. The results are permanent, not temporary.",
+              },
+              {
+                q: "What if I've tried everything and nothing works?",
+                a: "That's exactly who this program is designed for. CBT-I has been shown to be effective even for people with chronic insomnia who have tried multiple other treatments. The techniques work with your body's biology, not against it.",
+              },
+              {
+                q: "How quickly will I see results?",
+                a: "Many people report noticeable improvements by Night 3 or 4. By the end of the 7-night protocol, most users experience significantly deeper, more restful sleep. The full benefits compound over the following weeks.",
+              },
+              {
+                q: "Do I need any special equipment or apps?",
+                a: "No. Everything you need is included in the program. All you need is a quiet space, a bed, and 15-20 minutes before bedtime each night. The guided audio sessions can be played on any device.",
+              },
+              {
+                q: "What if it doesn't work for me?",
+                a: "You're covered by our 30-day \"Sleep Soundly or It's Free\" guarantee. If you don't experience a dramatic improvement in your sleep, just email us and we'll refund every penny. No questions asked.",
+              },
+              {
+                q: "Is my payment secure?",
+                a: "Absolutely. We use industry-standard 256-bit SSL encryption for all transactions. Your payment information is never stored on our servers.",
+              },
+            ].map((faq, i) => (
+              <FadeInSection key={i} delay={i * 0.05}>
+                <FAQItem question={faq.q} answer={faq.a} />
+              </FadeInSection>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* ===== FINAL CTA ===== */}
       <section className="py-24 lg:py-32 relative">
         <div className="absolute inset-0 bg-gradient-to-b from-background via-navy-light/50 to-background" />
@@ -527,7 +621,7 @@ export default function Home() {
             </p>
 
             <button
-              onClick={() => window.open("#", "_blank")}
+              onClick={() => openCheckout("frontEnd")}
               className="cta-pulse w-full sm:w-auto inline-flex items-center justify-center gap-3 bg-amber hover:bg-amber-light text-background font-bold px-10 py-5 rounded-xl text-xl transition-all duration-300 hover:scale-105"
             >
               CLICK HERE TO GET INSTANT ACCESS FOR JUST $5

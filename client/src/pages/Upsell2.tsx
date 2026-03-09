@@ -6,6 +6,8 @@
 
 import { useRef } from "react";
 import { motion, useInView } from "framer-motion";
+import CountdownTimer from "@/components/CountdownTimer";
+import { openCheckout } from "@/lib/checkout";
 import {
   Moon,
   BarChart3,
@@ -94,9 +96,13 @@ export default function Upsell2() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
           >
-            <div className="inline-flex items-center gap-2 bg-amber/10 border border-amber/20 rounded-full px-4 py-1.5 mb-6">
+            <div className="inline-flex items-center gap-2 bg-amber/10 border border-amber/20 rounded-full px-4 py-1.5 mb-4">
               <Trophy className="w-3.5 h-3.5 text-amber" />
               <span className="text-amber text-sm font-medium">One Last Thing To Guarantee Your Success...</span>
+            </div>
+
+            <div className="mb-6">
+              <CountdownTimer minutes={10} storageKey="upsell2-countdown" />
             </div>
 
             <h1 className="font-[var(--font-display)] text-3xl sm:text-4xl md:text-5xl font-bold leading-tight mb-6">
@@ -183,9 +189,13 @@ export default function Upsell2() {
       <section className="py-20 relative">
         <div className="max-w-2xl mx-auto px-4 text-center">
           <FadeIn>
-            <p className="text-foreground/60 text-lg mb-8">
+            <p className="text-foreground/60 text-lg mb-4">
               Get the complete toolkit for a single, one-time payment:
             </p>
+
+            <div className="flex justify-center mb-8">
+              <CountdownTimer minutes={10} label="Final offer closes in:" storageKey="upsell2-countdown" />
+            </div>
 
             {/* Price card */}
             <div className="border border-amber/25 rounded-2xl p-8 sm:p-10 bg-card/40 backdrop-blur-sm mb-8">
@@ -212,7 +222,7 @@ export default function Upsell2() {
               </div>
 
               <button
-                onClick={() => window.open("#", "_blank")}
+                onClick={() => openCheckout("upsell2")}
                 className="cta-pulse w-full inline-flex items-center justify-center gap-3 bg-amber hover:bg-amber-light text-background font-bold px-8 py-5 rounded-xl text-lg transition-all duration-300 hover:scale-[1.02]"
               >
                 YES! ADD THE TOOLKIT FOR JUST $10
