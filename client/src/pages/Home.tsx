@@ -460,24 +460,54 @@ export default function Home() {
             </p>
           </FadeInSection>
 
-          {/* Video Embed Placeholder */}
+          {/* Video Testimonial — Replace VIDEO_ID with your YouTube video ID */}
           <FadeInSection delay={0.1}>
             <div className="max-w-3xl mx-auto mb-16">
-              <div className="relative aspect-video rounded-2xl overflow-hidden border border-border/30 bg-navy-light/30 group">
-                <div className="absolute inset-0 flex flex-col items-center justify-center gap-4">
-                  <div className="w-20 h-20 rounded-full bg-amber/20 flex items-center justify-center group-hover:bg-amber/30 transition-colors duration-300">
-                    <div className="w-0 h-0 border-l-[20px] border-l-amber border-t-[12px] border-t-transparent border-b-[12px] border-b-transparent ml-1.5" />
-                  </div>
-                  <p className="text-foreground/40 text-sm">Watch: How Sarah Fixed 10 Years of Insomnia in 7 Nights</p>
+              <div className="relative aspect-video rounded-2xl overflow-hidden border border-amber/10 shadow-2xl shadow-amber/5 group">
+                {/* Gradient overlay for depth */}
+                <div className="absolute inset-0 bg-gradient-to-br from-navy-light/60 via-[#0d1220] to-navy-light/40" />
+                
+                {/* Animated background particles */}
+                <div className="absolute inset-0 overflow-hidden">
+                  <div className="absolute top-1/4 left-1/4 w-32 h-32 bg-amber/5 rounded-full blur-3xl animate-pulse" />
+                  <div className="absolute bottom-1/3 right-1/4 w-24 h-24 bg-blue-500/5 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
                 </div>
-                {/* Replace this div with actual video embed:
-                <iframe
-                  src="https://www.youtube.com/embed/YOUR_VIDEO_ID"
-                  className="absolute inset-0 w-full h-full"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                  allowFullScreen
-                /> */}
+
+                {/* Play button and text */}
+                <div className="absolute inset-0 flex flex-col items-center justify-center gap-5 z-10">
+                  <div className="relative">
+                    {/* Pulse ring */}
+                    <div className="absolute inset-0 w-24 h-24 rounded-full bg-amber/20 animate-ping" style={{ animationDuration: '2s' }} />
+                    <div className="relative w-24 h-24 rounded-full bg-amber/20 border-2 border-amber/30 flex items-center justify-center group-hover:bg-amber/30 group-hover:border-amber/50 transition-all duration-500 group-hover:scale-110">
+                      <div className="w-0 h-0 border-l-[22px] border-l-amber border-t-[14px] border-t-transparent border-b-[14px] border-b-transparent ml-2" />
+                    </div>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-foreground/70 font-medium text-base">Watch Sarah's Story</p>
+                    <p className="text-foreground/35 text-sm mt-1">How she fixed 10 years of insomnia in just 7 nights</p>
+                  </div>
+                  <div className="flex items-center gap-2 text-foreground/25 text-xs">
+                    <div className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />
+                    <span>2:47</span>
+                  </div>
+                </div>
+
+                {/* 
+                  TO EMBED YOUR VIDEO:
+                  1. Remove everything inside this container div (from gradient overlay to play button)
+                  2. Uncomment the iframe below
+                  3. Replace YOUR_VIDEO_ID with your actual YouTube video ID
+                  
+                  <iframe
+                    src="https://www.youtube.com/embed/YOUR_VIDEO_ID?rel=0&modestbranding=1"
+                    className="absolute inset-0 w-full h-full"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                    title="Customer Testimonial Video"
+                  />
+                */}
               </div>
+              <p className="text-center text-foreground/25 text-xs mt-3">* Results may vary. Individual experiences differ.</p>
             </div>
           </FadeInSection>
 

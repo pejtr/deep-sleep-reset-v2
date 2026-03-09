@@ -2,6 +2,8 @@ import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import MetaPixel from "@/components/MetaPixel";
 import ExitIntentPopup from "@/components/ExitIntentPopup";
+import StickyMobileCTA from "@/components/StickyMobileCTA";
+import SocialProofToast from "@/components/SocialProofToast";
 import NotFound from "@/pages/NotFound";
 import { Route, Switch } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
@@ -35,6 +37,8 @@ function App() {
         <TooltipProvider>
           <MetaPixel />
           <ExitIntentPopup />
+          <StickyMobileCTA />
+          <SocialProofToast />
           <Toaster />
           <Router />
         </TooltipProvider>
