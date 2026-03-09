@@ -1,14 +1,13 @@
 /*
- * SalesChatbot — "Lucie" AI Sales Assistant
+ * SalesChatbot — "Lucy / Lucie" AI Sales Assistant
  * 
  * Personality: Inspired by Leila Hormozi — confident, direct, value-focused, genuinely caring
  * Trigger: Shows after 45s on page OR 50% scroll
- * Hidden by default, admin-controllable
+ * Email capture: After 2 user messages, Lucy asks for email naturally
  * i18n: Strings from useLanguage()
  */
-
 import { useCallback, useEffect, useRef, useState } from "react";
-import { MessageCircle, X, Send, Moon } from "lucide-react";
+import { MessageCircle, X, Send, Moon, Mail, CheckCircle } from "lucide-react";
 import { trpc } from "@/lib/trpc";
 import { Streamdown } from "streamdown";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -16,6 +15,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 interface ChatMessage {
   role: "user" | "assistant";
   content: string;
+  isEmailCapture?: boolean;
 }
 
 export default function SalesChatbot() {
@@ -28,8 +28,16 @@ export default function SalesChatbot() {
   const [hasBeenTriggered, setHasBeenTriggered] = useState(false);
   const [showPulse, setShowPulse] = useState(false);
   const [stickyCtaVisible, setStickyCtaVisible] = useState(false);
+  const [userMessageCount, setUserMessageCount] = useState(0);
+  const [emailCaptured, setEmailCaptured] = useState(false);
+  const [emailInput, setEmailInput] = useState("");
+  const [emailSubmitting, setEmailSubmitting] = useState(false);
+  const [showEmailForm, setShowEmailForm] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const emailInputRef = useRef<HTMLInputElement>(null);
+
+  const leadCaptureMutation = trpc.leads.capture.useMutation();
 
   // Track sticky CTA visibility to avoid overlap on mobile
   useEffect(() => {
@@ -50,7 +58,7 @@ export default function SalesChatbot() {
   // Auto-scroll to bottom
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages, isTyping]);
+  }, [messages, isTyping, showEmailForm]);
 
   // Focus input when chat opens
   useEffect(() => {
@@ -59,23 +67,26 @@ export default function SalesChatbot() {
     }
   }, [isOpen]);
 
+  // Focus email input when email form shows
+  useEffect(() => {
+    if (showEmailForm) {
+      setTimeout(() => emailInputRef.current?.focus(), 100);
+    }
+  }, [showEmailForm]);
+
   // Trigger after 45s or 50% scroll
   useEffect(() => {
     if (hasBeenTriggered) return;
-
     const timer = setTimeout(() => {
       triggerChatbot();
     }, 45000);
-
     const handleScroll = () => {
       const scrollPercent = (window.scrollY / (document.documentElement.scrollHeight - window.innerHeight)) * 100;
       if (scrollPercent >= 50) {
         triggerChatbot();
       }
     };
-
     window.addEventListener("scroll", handleScroll, { passive: true });
-
     return () => {
       clearTimeout(timer);
       window.removeEventListener("scroll", handleScroll);
@@ -97,9 +108,41 @@ export default function SalesChatbot() {
     setTimeout(() => setShowPulse(false), 10000);
   }, [hasBeenTriggered, t.chatbot.proactiveMessages]);
 
+  const handleEmailSubmit = async () => {
+    const email = emailInput.trim();
+    if (!email || emailSubmitting) return;
+    // Basic email validation
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return;
+
+    setEmailSubmitting(true);
+    try {
+      // Get A/B variant from localStorage if set
+      const abVariant = localStorage.getItem("dsr-ab-variant") || undefined;
+      await leadCaptureMutation.mutateAsync({ email, source: "chatbot", abVariant });
+      setEmailCaptured(true);
+      setShowEmailForm(false);
+      // Fire Meta Pixel Lead event
+      if (typeof window !== "undefined" && (window as any).fbq) {
+        (window as any).fbq("track", "Lead", { content_name: "chatbot_email_capture" });
+      }
+      // Add confirmation message from Lucy
+      const confirmMsg = locale === "es"
+        ? "Perfecto! 🌙 Tu guía de sueño está en camino. Mientras tanto, ¿hay algo más que pueda ayudarte?"
+        : "Perfect! 🌙 Your sleep guide is on its way. In the meantime, is there anything else I can help you with?";
+      setMessages(prev => [...prev, { role: "assistant", content: confirmMsg }]);
+    } catch {
+      // Silently fail — don't disrupt the chat
+    } finally {
+      setEmailSubmitting(false);
+    }
+  };
+
   const sendMessage = async () => {
     const trimmed = input.trim();
     if (!trimmed || isTyping) return;
+
+    const newCount = userMessageCount + 1;
+    setUserMessageCount(newCount);
 
     const newMessages: ChatMessage[] = [...messages, { role: "user", content: trimmed }];
     setMessages(newMessages);
@@ -108,12 +151,21 @@ export default function SalesChatbot() {
 
     try {
       const result = await chatMutation.mutateAsync({
-        messages: newMessages,
+        messages: newMessages.map(m => ({ role: m.role, content: m.content })),
         scrollPercent: Math.round((window.scrollY / (document.documentElement.scrollHeight - window.innerHeight)) * 100),
-
       });
 
-      setMessages(prev => [...prev, { role: "assistant", content: result.reply }]);
+      // After 2 user messages, trigger email capture (if not already captured)
+      if (newCount >= 2 && !emailCaptured && !showEmailForm) {
+        // Lucy's reply + email ask combined
+        const emailAskMsg = locale === "es"
+          ? result.reply + "\n\n💌 ¿Puedo enviarte una guía gratuita de sueño a tu correo?"
+          : result.reply + "\n\n💌 Can I send you a free sleep guide to your email?";
+        setMessages(prev => [...prev, { role: "assistant", content: emailAskMsg }]);
+        setTimeout(() => setShowEmailForm(true), 800);
+      } else {
+        setMessages(prev => [...prev, { role: "assistant", content: result.reply }]);
+      }
     } catch (err) {
       setMessages(prev => [
         ...prev,
@@ -198,6 +250,55 @@ export default function SalesChatbot() {
                 </div>
               </div>
             )}
+
+            {/* Email capture inline form */}
+            {showEmailForm && !emailCaptured && (
+              <div className="flex justify-start">
+                <div className="max-w-[90%] bg-amber/10 border border-amber/20 rounded-2xl rounded-bl-md px-3.5 py-3 text-sm">
+                  <div className="flex items-center gap-2 mb-2 text-amber/80">
+                    <Mail className="w-3.5 h-3.5 shrink-0" />
+                    <span className="text-xs font-medium">
+                      {locale === "es" ? "Envíame tu email" : "Drop your email"}
+                    </span>
+                  </div>
+                  <div className="flex gap-2">
+                    <input
+                      ref={emailInputRef}
+                      type="email"
+                      value={emailInput}
+                      onChange={e => setEmailInput(e.target.value)}
+                      onKeyDown={e => e.key === "Enter" && handleEmailSubmit()}
+                      placeholder={locale === "es" ? "tu@email.com" : "you@email.com"}
+                      className="flex-1 bg-white/5 border border-white/10 rounded-lg px-2.5 py-1.5 text-xs text-foreground/90 placeholder:text-foreground/30 outline-none focus:border-amber/40 transition-colors min-w-0"
+                    />
+                    <button
+                      onClick={handleEmailSubmit}
+                      disabled={emailSubmitting || !emailInput.trim()}
+                      className="px-3 py-1.5 bg-amber text-background text-xs font-semibold rounded-lg hover:bg-amber/90 disabled:opacity-40 disabled:cursor-not-allowed transition-all shrink-0"
+                    >
+                      {emailSubmitting ? "..." : (locale === "es" ? "Enviar" : "Send")}
+                    </button>
+                  </div>
+                  <button
+                    onClick={() => setShowEmailForm(false)}
+                    className="mt-1.5 text-xs text-foreground/30 hover:text-foreground/50 transition-colors"
+                  >
+                    {locale === "es" ? "No gracias" : "No thanks"}
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Email captured confirmation badge */}
+            {emailCaptured && (
+              <div className="flex justify-center">
+                <div className="flex items-center gap-1.5 bg-green-500/10 border border-green-500/20 rounded-full px-3 py-1 text-xs text-green-400">
+                  <CheckCircle className="w-3 h-3" />
+                  {locale === "es" ? "¡Guía enviada!" : "Guide sent!"}
+                </div>
+              </div>
+            )}
+
             <div ref={messagesEndRef} />
           </div>
 

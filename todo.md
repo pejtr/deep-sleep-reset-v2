@@ -84,3 +84,7 @@
 - [ ] Přidat /blog route a blog stránky do App.tsx
 - [ ] Ověřit Stripe live mode readiness (live klíče)
 - [ ] Finální audit funnelu před Meta ads spuštěním
+
+## Phase 11: Conversion Optimization
+- [x] Add email capture flow to SalesChatbot (after engagement, before CTA)
+- [x] Implement A/B test for homepage headline (track variant → conversion rate)

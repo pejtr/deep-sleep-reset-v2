@@ -1,6 +1,6 @@
 import { eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { InsertUser, users } from "../drizzle/schema";
+import { InsertLead, InsertUser, leads, users } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
 let _db: ReturnType<typeof drizzle> | null = null;
@@ -90,3 +90,23 @@ export async function getUserByOpenId(openId: string) {
 }
 
 // TODO: add feature queries here as your schema grows.
+
+/**
+ * Save a lead email captured via chatbot or opt-in form.
+ * Silently ignores duplicate emails (unique constraint).
+ */
+export async function saveLead(data: InsertLead): Promise<void> {
+  const db = await getDb();
+  if (!db) {
+    console.warn("[Database] Cannot save lead: database not available");
+    return;
+  }
+  try {
+    await db.insert(leads).values(data).onDuplicateKeyUpdate({
+      set: { source: data.source }, // update source if email already exists
+    });
+  } catch (error) {
+    console.error("[Database] Failed to save lead:", error);
+    // Don't throw — lead capture should never break the chatbot
+  }
+}

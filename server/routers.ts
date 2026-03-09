@@ -5,6 +5,7 @@ import { systemRouter } from "./_core/systemRouter";
 import { publicProcedure, protectedProcedure, router } from "./_core/trpc";
 import { createCheckoutSession, createBundleCheckoutSession, PRODUCTS, type ProductKey } from "./stripe/index";
 import { invokeLLM } from "./_core/llm";
+import { saveLead } from "./db";
 
 const productKeySchema = z.enum(["frontEnd", "exitDiscount", "upsell1", "upsell2"]);
 
@@ -50,6 +51,24 @@ export const appRouter = router({
           metadata: ctx.user ? { userId: String(ctx.user.id) } : undefined,
         });
         return result;
+      }),
+  }),
+
+  // Lead capture — email collected via chatbot or opt-in forms
+  leads: router({
+    capture: publicProcedure
+      .input(z.object({
+        email: z.string().email(),
+        source: z.string().default("chatbot"),
+        abVariant: z.string().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        await saveLead({
+          email: input.email,
+          source: input.source,
+          abVariant: input.abVariant,
+        });
+        return { success: true };
       }),
   }),
 

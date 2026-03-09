@@ -44,3 +44,22 @@ export const orders = mysqlTable("orders", {
 
 export type Order = typeof orders.$inferSelect;
 export type InsertOrder = typeof orders.$inferInsert;
+
+/**
+ * Leads table — email addresses captured via chatbot or opt-in forms.
+ * Used for follow-up email sequences and retargeting.
+ */
+export const leads = mysqlTable("leads", {
+  id: int("id").autoincrement().primaryKey(),
+  email: varchar("email", { length: 320 }).notNull().unique(),
+  /** Source of the lead: chatbot, exit_popup, order_bump, etc. */
+  source: varchar("source", { length: 64 }).default("chatbot").notNull(),
+  /** A/B test variant they were shown */
+  abVariant: varchar("abVariant", { length: 32 }),
+  /** Whether they converted (purchased) */
+  converted: int("converted").default(0).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type Lead = typeof leads.$inferSelect;
+export type InsertLead = typeof leads.$inferInsert;

@@ -15,6 +15,13 @@
       "when": 1773071194903,
       "tag": "0001_right_shocker",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1773088916272,
+      "tag": "0002_wide_goblin_queen",
+      "breakpoints": true
     }
   ]
 }
