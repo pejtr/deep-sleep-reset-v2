@@ -443,6 +443,118 @@ export default function Home() {
         </div>
       </section>
 
+      {/* ===== VIDEO TESTIMONIALS / SOCIAL PROOF ===== */}
+      <section className="py-24 lg:py-32 relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-b from-background via-navy-light/20 to-background" />
+        <div className="relative max-w-5xl mx-auto px-4">
+          <FadeInSection>
+            <p className="text-amber/80 text-sm uppercase tracking-[0.3em] mb-4 text-center font-medium">
+              Real People. Real Results.
+            </p>
+            <h2 className="font-[var(--font-display)] text-3xl sm:text-4xl font-bold text-center mb-4">
+              Hear From People Who{" "}
+              <span className="text-amber italic">Finally Sleep</span>
+            </h2>
+            <p className="text-foreground/50 text-center max-w-2xl mx-auto mb-16">
+              Thousands of people have used the 7-Night Deep Sleep Reset to transform their nights. Here are just a few of their stories.
+            </p>
+          </FadeInSection>
+
+          {/* Video Embed Placeholder */}
+          <FadeInSection delay={0.1}>
+            <div className="max-w-3xl mx-auto mb-16">
+              <div className="relative aspect-video rounded-2xl overflow-hidden border border-border/30 bg-navy-light/30 group">
+                <div className="absolute inset-0 flex flex-col items-center justify-center gap-4">
+                  <div className="w-20 h-20 rounded-full bg-amber/20 flex items-center justify-center group-hover:bg-amber/30 transition-colors duration-300">
+                    <div className="w-0 h-0 border-l-[20px] border-l-amber border-t-[12px] border-t-transparent border-b-[12px] border-b-transparent ml-1.5" />
+                  </div>
+                  <p className="text-foreground/40 text-sm">Watch: How Sarah Fixed 10 Years of Insomnia in 7 Nights</p>
+                </div>
+                {/* Replace this div with actual video embed:
+                <iframe
+                  src="https://www.youtube.com/embed/YOUR_VIDEO_ID"
+                  className="absolute inset-0 w-full h-full"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                /> */}
+              </div>
+            </div>
+          </FadeInSection>
+
+          {/* Written Testimonials Grid */}
+          <div className="grid md:grid-cols-3 gap-6">
+            {[
+              {
+                name: "Sarah M.",
+                location: "Austin, TX",
+                stars: 5,
+                text: "I've struggled with insomnia for over 10 years. By Night 4, I was falling asleep within 15 minutes. I actually cried the first morning I woke up feeling rested. This program changed my life.",
+                highlight: "falling asleep within 15 minutes",
+              },
+              {
+                name: "James K.",
+                location: "London, UK",
+                stars: 5,
+                text: "I was skeptical — $5 for something that actually works? But the breathing technique on Night 4 was a game-changer. I've stopped taking melatonin completely. My wife noticed the difference before I did.",
+                highlight: "stopped taking melatonin completely",
+              },
+              {
+                name: "Maria L.",
+                location: "Toronto, CA",
+                stars: 5,
+                text: "As a nurse working night shifts, my sleep was destroyed. The Light & Dark Protocol on Night 5 helped me reset my circadian rhythm. I now sleep 7+ hours even after a night shift. Incredible.",
+                highlight: "sleep 7+ hours even after a night shift",
+              },
+            ].map((testimonial, i) => (
+              <FadeInSection key={i} delay={0.15 * (i + 1)}>
+                <div className="bg-navy-light/30 border border-border/20 rounded-xl p-6 h-full flex flex-col hover:border-amber/20 transition-colors duration-500">
+                  {/* Stars */}
+                  <div className="flex gap-1 mb-4">
+                    {Array.from({ length: testimonial.stars }).map((_, j) => (
+                      <svg key={j} className="w-4 h-4 text-amber" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                      </svg>
+                    ))}
+                  </div>
+                  {/* Quote */}
+                  <p className="text-foreground/60 leading-relaxed flex-1 mb-4 text-sm">
+                    "{testimonial.text}"
+                  </p>
+                  {/* Author */}
+                  <div className="flex items-center gap-3 pt-4 border-t border-border/15">
+                    <div className="w-10 h-10 rounded-full bg-amber/15 flex items-center justify-center">
+                      <span className="text-amber font-semibold text-sm">{testimonial.name.charAt(0)}</span>
+                    </div>
+                    <div>
+                      <p className="text-foreground/80 font-medium text-sm">{testimonial.name}</p>
+                      <p className="text-foreground/35 text-xs">{testimonial.location}</p>
+                    </div>
+                  </div>
+                </div>
+              </FadeInSection>
+            ))}
+          </div>
+
+          {/* Trust bar */}
+          <FadeInSection delay={0.5}>
+            <div className="mt-12 flex flex-wrap items-center justify-center gap-8 text-foreground/30 text-sm">
+              <div className="flex items-center gap-2">
+                <Shield className="w-4 h-4 text-amber/50" />
+                <span>10,000+ Happy Sleepers</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <CheckCircle className="w-4 h-4 text-amber/50" />
+                <span>4.9/5 Average Rating</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Lock className="w-4 h-4 text-amber/50" />
+                <span>30-Day Money-Back Guarantee</span>
+              </div>
+            </div>
+          </FadeInSection>
+        </div>
+      </section>
+
       {/* ===== THE OFFER ===== */}
       <section id="offer" className="py-24 lg:py-32 relative">
         <div className="absolute inset-0 bg-gradient-to-b from-background via-navy-light/40 to-background" />

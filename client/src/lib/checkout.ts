@@ -1,53 +1,80 @@
 /*
  * Checkout URL Configuration
  * 
- * Replace placeholder URLs with your actual Stripe/Gumroad checkout links.
  * All CTA buttons across the funnel reference these URLs.
+ * Replace the placeholder URLs below with your actual payment links.
  * 
- * SETUP INSTRUCTIONS:
+ * GUMROAD SETUP (Recommended for beginners):
  * 
- * Option A: Gumroad
- *   1. Create products at https://gumroad.com
- *   2. Set prices: Front-end $5, Upsell 1 $10, Upsell 2 $10
- *   3. Copy the checkout URLs and paste below
+ *   1. Create a free account at https://gumroad.com
+ *   2. Create 3 products:
+ *      - "The 7-Night Deep Sleep Reset" → $5
+ *      - "The Anxiety Dissolve Audio Pack" → $10
+ *      - "The Sleep Optimizer Toolkit" → $10
+ *   3. For each product, go to Settings → After Purchase → Redirect URL:
+ *      - Front-end:  https://YOUR-DOMAIN/upsell-1
+ *      - Upsell 1:   https://YOUR-DOMAIN/upsell-2
+ *      - Upsell 2:   https://YOUR-DOMAIN/thank-you?value=25&product=Complete+Bundle
+ *   4. Copy each product's checkout URL and paste below
+ *   5. Gumroad URLs look like: https://YOURNAME.gumroad.com/l/PRODUCT_ID
  * 
- * Option B: Stripe Payment Links
- *   1. Create Payment Links at https://dashboard.stripe.com/payment-links
- *   2. Set prices and configure success URLs
- *   3. Copy the Payment Link URLs and paste below
+ * STRIPE PAYMENT LINKS (Alternative):
  * 
- * Option C: ThriveCart / other
- *   1. Create funnels with the 3 products
- *   2. Copy checkout URLs and paste below
+ *   1. Go to https://dashboard.stripe.com/payment-links
+ *   2. Create 3 Payment Links with the same prices
+ *   3. Set "After payment" → Redirect to your upsell/thank-you URLs
+ *   4. Copy the Payment Link URLs and paste below
+ *   5. Stripe URLs look like: https://buy.stripe.com/XXXXX
  * 
- * SUCCESS URL SETUP:
- * After payment, redirect customers to your Thank You page:
- *   - Front-end: https://yourdomain.com/thank-you?value=5&product=Deep+Sleep+Reset
- *   - Upsell 1:  https://yourdomain.com/thank-you?value=10&product=Anxiety+Dissolve+Audio+Pack
- *   - Upsell 2:  https://yourdomain.com/thank-you?value=10&product=Sleep+Optimizer+Toolkit
+ * IMPORTANT: Set redirect URLs so the funnel flows correctly:
+ *   Front-end purchase → redirects to /upsell-1
+ *   Upsell 1 purchase  → redirects to /upsell-2
+ *   Upsell 2 purchase  → redirects to /thank-you?value=25&product=Complete+Bundle
+ *   "No thanks" links   → already handled in the code (skip to next step)
  */
 
 export const CHECKOUT_URLS = {
   /** $5 Front-end: The 7-Night Deep Sleep Reset */
-  frontEnd: "#",  // ← Replace with your checkout URL
+  frontEnd: "https://YOUR-STORE.gumroad.com/l/deep-sleep-reset",
 
   /** $10 Upsell 1: The Anxiety Dissolve Audio Pack */
-  upsell1: "#",   // ← Replace with your checkout URL
+  upsell1: "https://YOUR-STORE.gumroad.com/l/anxiety-dissolve-audio",
 
   /** $10 Upsell 2: The Sleep Optimizer Toolkit */
-  upsell2: "#",   // ← Replace with your checkout URL
+  upsell2: "https://YOUR-STORE.gumroad.com/l/sleep-optimizer-toolkit",
 } as const;
 
 /**
- * Open checkout in a new tab and fire Meta Pixel event
+ * Open checkout in a new tab and fire Meta Pixel InitiateCheckout event
  */
 export function openCheckout(product: keyof typeof CHECKOUT_URLS) {
   const url = CHECKOUT_URLS[product];
-  if (url === "#") {
-    // Show a helpful message during development
-    console.warn(
-      `[Checkout] No URL configured for "${product}". Update CHECKOUT_URLS in src/lib/checkout.ts`
-    );
+
+  // Fire Meta Pixel event
+  const w = window as unknown as { fbq?: (...args: unknown[]) => void };
+  if (w.fbq) {
+    const values: Record<string, number> = {
+      frontEnd: 5,
+      upsell1: 10,
+      upsell2: 10,
+    };
+    w.fbq("track", "InitiateCheckout", {
+      value: values[product] || 0,
+      currency: "USD",
+      content_name: product,
+    });
   }
+
+  // Check if it's still a placeholder
+  if (url.includes("YOUR-STORE")) {
+    console.warn(
+      `[Checkout] Placeholder URL detected for "${product}". Update CHECKOUT_URLS in src/lib/checkout.ts with your real Gumroad/Stripe link.`
+    );
+    alert(
+      "Checkout is not configured yet.\n\nTo set up payments, edit the file:\nsrc/lib/checkout.ts\n\nReplace the placeholder URLs with your Gumroad or Stripe payment links."
+    );
+    return;
+  }
+
   window.open(url, "_blank");
 }
