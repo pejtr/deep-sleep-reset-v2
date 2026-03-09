@@ -5,7 +5,7 @@ import { systemRouter } from "./_core/systemRouter";
 import { publicProcedure, protectedProcedure, router } from "./_core/trpc";
 import { createCheckoutSession, createBundleCheckoutSession, PRODUCTS, type ProductKey } from "./stripe/index";
 import { invokeLLM } from "./_core/llm";
-import { saveLead, saveChatInsight, saveChatSurvey, getOrdersByEmail } from "./db";
+import { saveLead, saveChatInsight, saveChatSurvey, getOrdersByEmail, getAdminStats, getFunnelStats, getRecentOrders, getRecentLeads, getRecentChatInsights, getRecentChatSurveys, getDailyRevenue } from "./db";
 
 const productKeySchema = z.enum(["frontEnd", "exitDiscount", "upsell1", "upsell2"]);
 
@@ -175,6 +175,74 @@ Extract:
           comment: input.comment,
         });
         return { success: true };
+      }),
+  }),
+
+  // Admin analytics — owner-only access
+  admin: router({
+    stats: protectedProcedure
+      .use(({ ctx, next }) => {
+        if (ctx.user.role !== 'admin') throw new Error('Forbidden');
+        return next({ ctx });
+      })
+      .query(async () => {
+        return getAdminStats();
+      }),
+
+    funnel: protectedProcedure
+      .use(({ ctx, next }) => {
+        if (ctx.user.role !== 'admin') throw new Error('Forbidden');
+        return next({ ctx });
+      })
+      .query(async () => {
+        return getFunnelStats();
+      }),
+
+    orders: protectedProcedure
+      .use(({ ctx, next }) => {
+        if (ctx.user.role !== 'admin') throw new Error('Forbidden');
+        return next({ ctx });
+      })
+      .input(z.object({ limit: z.number().int().min(1).max(200).default(50) }).optional())
+      .query(async ({ input }) => {
+        return getRecentOrders(input?.limit ?? 50);
+      }),
+
+    leads: protectedProcedure
+      .use(({ ctx, next }) => {
+        if (ctx.user.role !== 'admin') throw new Error('Forbidden');
+        return next({ ctx });
+      })
+      .input(z.object({ limit: z.number().int().min(1).max(200).default(100) }).optional())
+      .query(async ({ input }) => {
+        return getRecentLeads(input?.limit ?? 100);
+      }),
+
+    chatInsights: protectedProcedure
+      .use(({ ctx, next }) => {
+        if (ctx.user.role !== 'admin') throw new Error('Forbidden');
+        return next({ ctx });
+      })
+      .query(async () => {
+        return getRecentChatInsights(100);
+      }),
+
+    chatSurveys: protectedProcedure
+      .use(({ ctx, next }) => {
+        if (ctx.user.role !== 'admin') throw new Error('Forbidden');
+        return next({ ctx });
+      })
+      .query(async () => {
+        return getRecentChatSurveys(100);
+      }),
+
+    dailyRevenue: protectedProcedure
+      .use(({ ctx, next }) => {
+        if (ctx.user.role !== 'admin') throw new Error('Forbidden');
+        return next({ ctx });
+      })
+      .query(async () => {
+        return getDailyRevenue();
       }),
   }),
 

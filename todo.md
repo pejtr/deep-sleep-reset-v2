@@ -106,3 +106,13 @@
 - [ ] Fire server-side Lead event from leads.capture tRPC procedure
 - [ ] Fire server-side InitiateCheckout event from checkout.createBundleSession
 - [ ] Write vitest tests for CAPI helper
+
+## Phase 14: Admin Panel — Conversion & Real-time Analytics
+- [x] Admin analytics tRPC procedures (revenue, orders, funnel, chatbot insights)
+- [x] Admin dashboard page with KPI cards (revenue, conversions, AOV, CVR)
+- [x] Funnel drop-off visualization (order → upsell1 → upsell2 → thank-you)
+- [x] Orders table with search, filter, pagination
+- [x] Chatbot insights & survey results table
+- [x] Real-time refresh (auto-poll every 30s)
+- [x] Admin route guard (owner-only access)
+- [x] Admin navigation entry in header/sidebar

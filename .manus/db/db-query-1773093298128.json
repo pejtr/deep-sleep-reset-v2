@@ -1,0 +1,17 @@
+{
+  "query": "SELECT id, openId, name, email, role FROM users LIMIT 10;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 4VFjuiBDjCy66KV.dcd9224b4f92 --database RrG9k2uFQkqVyNWK8WEbxj --execute SELECT id, openId, name, email, role FROM users LIMIT 10;",
+  "rows": [
+    {
+      "id": "1",
+      "openId": "6ByYoPSMEfVP5cm6CknbBG",
+      "name": "AI CREDITS",
+      "email": "jad3tru3@gmail.com",
+      "role": "admin"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\topenId\tname\temail\trole\n1\t6ByYoPSMEfVP5cm6CknbBG\tAI CREDITS\tjad3tru3@gmail.com\tadmin\n",
+  "stderr": "",
+  "execution_time_ms": 54
+}
