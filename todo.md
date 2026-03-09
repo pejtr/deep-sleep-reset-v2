@@ -65,3 +65,11 @@
 - [x] Generate AI TTS audio files using Gemini TTS API
 - [x] Upload audio files to CDN
 - [ ] Wire audio player to actual CDN URLs in Upsell1 / member area
+
+## Phase 9: Favicon + SEO + Meta Pixel
+- [x] Nasadit Meta Pixel base code (ID: 2291810691310549) do index.html
+- [x] Purchase event na ThankYou stránce
+- [x] SEO meta tagy + Open Graph + structured data (Product schema)
+- [x] Nastavit logo jako favicon (moon icon, CDN URL v index.html)
+- [x] ViewContent event na sales page (Home.tsx)
+- [x] InitiateCheckout event na /order stránce (OrderBump.tsx)

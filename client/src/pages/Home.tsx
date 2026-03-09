@@ -11,6 +11,7 @@ import { motion, useInView } from "framer-motion";
 import { getVariant } from "@/lib/ab-test";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Link, useLocation } from "wouter";
+import { trackEvent } from "@/components/MetaPixel";
 import {
   Moon,
   Brain,
@@ -171,6 +172,19 @@ export default function Home() {
     const handleScroll = () => setScrollY(window.scrollY);
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  // Fire ViewContent event once on page load
+  const viewContentFired = useRef(false);
+  useEffect(() => {
+    if (viewContentFired.current) return;
+    viewContentFired.current = true;
+    trackEvent("ViewContent", {
+      content_name: "Deep Sleep Reset — 7-Night Protocol",
+      content_type: "product",
+      value: 5.00,
+      currency: "USD",
+    });
   }, []);
 
   const goToOrder = () => {

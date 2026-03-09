@@ -15,6 +15,7 @@ import { motion } from "framer-motion";
 import { Moon, CheckCircle, Headphones, BarChart3, Lock, ArrowRight, Star } from "lucide-react";
 import { openBundleCheckout, openCheckout, type ProductKey } from "@/lib/checkout";
 import { Link, useSearch } from "wouter";
+import { trackEvent } from "@/components/MetaPixel";
 
 const AUDIO_SESSIONS = [
   { title: "The Emergency Calm Audio", duration: "5 min", desc: "Instant relief when anxiety spikes — use it anywhere, anytime." },
@@ -51,6 +52,14 @@ export default function OrderBump() {
     const products: ProductKey[] = [primaryKey];
     if (addAudio) products.push("upsell1");
     if (addToolkit) products.push("upsell2");
+
+    // Fire InitiateCheckout event before redirecting to Stripe
+    trackEvent("InitiateCheckout", {
+      value: totalPrice,
+      currency: "USD",
+      num_items: products.length,
+      content_ids: products,
+    });
 
     if (products.length === 1) {
       await openCheckout(primaryKey);
