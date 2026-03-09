@@ -10,12 +10,13 @@
  *   - Bump 2: Sleep Optimizer Toolkit ($10) — optional
  */
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Moon, CheckCircle, Headphones, BarChart3, Lock, ArrowRight, Star } from "lucide-react";
 import { openBundleCheckout, openCheckout, type ProductKey } from "@/lib/checkout";
 import { Link, useSearch } from "wouter";
 import { trackEvent } from "@/components/MetaPixel";
+import ReturningCustomerBanner from "@/components/ReturningCustomerBanner";
 
 const AUDIO_SESSIONS = [
   { title: "The Emergency Calm Audio", duration: "5 min", desc: "Instant relief when anxiety spikes — use it anywhere, anytime." },
@@ -93,6 +94,9 @@ export default function OrderBump() {
       </div>
 
       <div className="max-w-3xl mx-auto px-4 py-10">
+        {/* Returning customer one-click upgrade banner */}
+        <ReturningCustomerBanner />
+
         {/* Headline */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}

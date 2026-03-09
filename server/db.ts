@@ -1,6 +1,6 @@
 import { eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { InsertLead, InsertUser, leads, users } from "../drizzle/schema";
+import { chatInsights, chatSurveys, InsertChatInsight, InsertChatSurvey, InsertLead, InsertUser, leads, orders, users } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
 let _db: ReturnType<typeof drizzle> | null = null;
@@ -90,6 +90,62 @@ export async function getUserByOpenId(openId: string) {
 }
 
 // TODO: add feature queries here as your schema grows.
+
+/**
+ * Save AI-extracted chat insights for a session.
+ * Upserts by sessionId so we keep the latest extraction.
+ */
+export async function saveChatInsight(data: InsertChatInsight): Promise<void> {
+  const db = await getDb();
+  if (!db) {
+    console.warn("[Database] Cannot save chat insight: database not available");
+    return;
+  }
+  try {
+    await db.insert(chatInsights).values(data).onDuplicateKeyUpdate({
+      set: {
+        sleepIssue: data.sleepIssue,
+        objection: data.objection,
+        intentLevel: data.intentLevel,
+        tags: data.tags,
+        email: data.email,
+      },
+    });
+  } catch (error) {
+    console.error("[Database] Failed to save chat insight:", error);
+  }
+}
+
+/**
+ * Save a chatbot satisfaction survey response.
+ */
+export async function saveChatSurvey(data: InsertChatSurvey): Promise<void> {
+  const db = await getDb();
+  if (!db) {
+    console.warn("[Database] Cannot save chat survey: database not available");
+    return;
+  }
+  try {
+    await db.insert(chatSurveys).values(data);
+  } catch (error) {
+    console.error("[Database] Failed to save chat survey:", error);
+  }
+}
+
+/**
+ * Check if an email has a completed order (returning customer detection).
+ */
+export async function getOrdersByEmail(email: string) {
+  const db = await getDb();
+  if (!db) return [];
+  try {
+    return await db.select().from(orders)
+      .where(eq(orders.customerEmail, email))
+      .limit(5);
+  } catch {
+    return [];
+  }
+}
 
 /**
  * Save a lead email captured via chatbot or opt-in form.

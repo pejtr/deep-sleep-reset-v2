@@ -4,10 +4,12 @@
  * Personality: Inspired by Leila Hormozi — confident, direct, value-focused, genuinely caring
  * Trigger: Shows after 45s on page OR 50% scroll
  * Email capture: After 2 user messages, Lucy asks for email naturally
+ * Survey: After 5+ messages, show 1-5 star satisfaction survey
+ * Insights: After conversation ends (chat closed), extract AI insights
  * i18n: Strings from useLanguage()
  */
 import { useCallback, useEffect, useRef, useState } from "react";
-import { MessageCircle, X, Send, Moon, Mail, CheckCircle } from "lucide-react";
+import { MessageCircle, X, Send, Moon, Mail, CheckCircle, Star } from "lucide-react";
 import { trpc } from "@/lib/trpc";
 import { Streamdown } from "streamdown";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -15,7 +17,17 @@ import { useLanguage } from "@/contexts/LanguageContext";
 interface ChatMessage {
   role: "user" | "assistant";
   content: string;
-  isEmailCapture?: boolean;
+}
+
+// Generate a stable session ID for this browser session
+function getSessionId(): string {
+  const key = "dsr-chat-session";
+  let id = sessionStorage.getItem(key);
+  if (!id) {
+    id = `sess_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`;
+    sessionStorage.setItem(key, id);
+  }
+  return id;
 }
 
 export default function SalesChatbot() {
@@ -30,14 +42,30 @@ export default function SalesChatbot() {
   const [stickyCtaVisible, setStickyCtaVisible] = useState(false);
   const [userMessageCount, setUserMessageCount] = useState(0);
   const [emailCaptured, setEmailCaptured] = useState(false);
+  const [capturedEmail, setCapturedEmail] = useState<string | undefined>();
   const [emailInput, setEmailInput] = useState("");
   const [emailSubmitting, setEmailSubmitting] = useState(false);
   const [showEmailForm, setShowEmailForm] = useState(false);
+
+  // Survey state
+  const [showSurvey, setShowSurvey] = useState(false);
+  const [surveyRating, setSurveyRating] = useState(0);
+  const [surveyHover, setSurveyHover] = useState(0);
+  const [surveyComment, setSurveyComment] = useState("");
+  const [surveySubmitted, setSurveySubmitted] = useState(false);
+  const [surveySubmitting, setSurveySubmitting] = useState(false);
+
+  // Insights extraction state
+  const [insightsExtracted, setInsightsExtracted] = useState(false);
+
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const emailInputRef = useRef<HTMLInputElement>(null);
+  const sessionId = useRef(getSessionId());
 
   const leadCaptureMutation = trpc.leads.capture.useMutation();
+  const chatInsightsMutation = trpc.chatInsights.save.useMutation();
+  const chatSurveyMutation = trpc.chatSurveys.submit.useMutation();
 
   // Track sticky CTA visibility to avoid overlap on mobile
   useEffect(() => {
@@ -58,7 +86,7 @@ export default function SalesChatbot() {
   // Auto-scroll to bottom
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages, isTyping, showEmailForm]);
+  }, [messages, isTyping, showEmailForm, showSurvey]);
 
   // Focus input when chat opens
   useEffect(() => {
@@ -73,6 +101,38 @@ export default function SalesChatbot() {
       setTimeout(() => emailInputRef.current?.focus(), 100);
     }
   }, [showEmailForm]);
+
+  // Extract insights when chat closes (if enough messages and not already extracted)
+  const extractInsights = useCallback(async (msgs: ChatMessage[]) => {
+    if (insightsExtracted || msgs.length < 3) return;
+    const userMsgs = msgs.filter(m => m.role === "user");
+    if (userMsgs.length < 2) return;
+
+    setInsightsExtracted(true);
+    try {
+      await chatInsightsMutation.mutateAsync({
+        sessionId: sessionId.current,
+        email: capturedEmail,
+        messages: msgs.map(m => ({ role: m.role, content: m.content })),
+      });
+    } catch {
+      // Silent — insights extraction should never break UX
+    }
+  }, [insightsExtracted, capturedEmail, chatInsightsMutation]);
+
+  // Handle chat close — extract insights and maybe show survey
+  const handleClose = useCallback(() => {
+    setIsOpen(false);
+    // Extract insights in background
+    extractInsights(messages);
+    // Show survey after 5+ user messages and not yet shown
+    if (userMessageCount >= 5 && !surveySubmitted && !showSurvey) {
+      setTimeout(() => {
+        setShowSurvey(true);
+        setIsOpen(true); // Re-open to show survey
+      }, 500);
+    }
+  }, [messages, userMessageCount, surveySubmitted, showSurvey, extractInsights]);
 
   // Trigger after 45s or 50% scroll
   useEffect(() => {
@@ -99,41 +159,63 @@ export default function SalesChatbot() {
     setIsVisible(true);
     setShowPulse(true);
 
-    // Pick a random proactive message from translations
     const proactiveMessages = t.chatbot.proactiveMessages;
     const proactiveMsg = proactiveMessages[Math.floor(Math.random() * proactiveMessages.length)];
     setMessages([{ role: "assistant", content: proactiveMsg }]);
 
-    // Stop pulse after 10s
     setTimeout(() => setShowPulse(false), 10000);
   }, [hasBeenTriggered, t.chatbot.proactiveMessages]);
 
   const handleEmailSubmit = async () => {
     const email = emailInput.trim();
     if (!email || emailSubmitting) return;
-    // Basic email validation
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return;
 
     setEmailSubmitting(true);
     try {
-      // Get A/B variant from localStorage if set
       const abVariant = localStorage.getItem("dsr-ab-variant") || undefined;
       await leadCaptureMutation.mutateAsync({ email, source: "chatbot", abVariant });
+      // Store email for returning customer detection on /order page
+      localStorage.setItem("dsr-lead-email", email);
       setEmailCaptured(true);
+      setCapturedEmail(email);
       setShowEmailForm(false);
-      // Fire Meta Pixel Lead event
       if (typeof window !== "undefined" && (window as any).fbq) {
         (window as any).fbq("track", "Lead", { content_name: "chatbot_email_capture" });
       }
-      // Add confirmation message from Lucy
       const confirmMsg = locale === "es"
         ? "Perfecto! 🌙 Tu guía de sueño está en camino. Mientras tanto, ¿hay algo más que pueda ayudarte?"
         : "Perfect! 🌙 Your sleep guide is on its way. In the meantime, is there anything else I can help you with?";
       setMessages(prev => [...prev, { role: "assistant", content: confirmMsg }]);
     } catch {
-      // Silently fail — don't disrupt the chat
+      // Silent
     } finally {
       setEmailSubmitting(false);
+    }
+  };
+
+  const handleSurveySubmit = async () => {
+    if (surveyRating === 0 || surveySubmitting) return;
+    setSurveySubmitting(true);
+    try {
+      await chatSurveyMutation.mutateAsync({
+        sessionId: sessionId.current,
+        email: capturedEmail,
+        rating: surveyRating,
+        comment: surveyComment.trim() || undefined,
+      });
+      setSurveySubmitted(true);
+      setShowSurvey(false);
+      // Add thank you message
+      const thankMsg = locale === "es"
+        ? "¡Gracias por tu valoración! 🌙 Nos ayuda a mejorar."
+        : "Thank you for your feedback! 🌙 It helps us improve.";
+      setMessages(prev => [...prev, { role: "assistant", content: thankMsg }]);
+    } catch {
+      setSurveySubmitted(true);
+      setShowSurvey(false);
+    } finally {
+      setSurveySubmitting(false);
     }
   };
 
@@ -157,7 +239,6 @@ export default function SalesChatbot() {
 
       // After 2 user messages, trigger email capture (if not already captured)
       if (newCount >= 2 && !emailCaptured && !showEmailForm) {
-        // Lucy's reply + email ask combined
         const emailAskMsg = locale === "es"
           ? result.reply + "\n\n💌 ¿Puedo enviarte una guía gratuita de sueño a tu correo?"
           : result.reply + "\n\n💌 Can I send you a free sleep guide to your email?";
@@ -165,6 +246,17 @@ export default function SalesChatbot() {
         setTimeout(() => setShowEmailForm(true), 800);
       } else {
         setMessages(prev => [...prev, { role: "assistant", content: result.reply }]);
+      }
+
+      // After 5 user messages, show survey prompt once
+      if (newCount === 5 && !surveySubmitted) {
+        const surveyPromptMsg = locale === "es"
+          ? "¿Cómo te ha parecido nuestra conversación hasta ahora? Me encantaría saber tu opinión 😊"
+          : "How has our conversation been so far? I'd love to hear your thoughts 😊";
+        setTimeout(() => {
+          setMessages(prev => [...prev, { role: "assistant", content: surveyPromptMsg }]);
+          setTimeout(() => setShowSurvey(true), 600);
+        }, 1500);
       }
     } catch (err) {
       setMessages(prev => [
@@ -196,7 +288,7 @@ export default function SalesChatbot() {
           className="w-[360px] max-w-[calc(100vw-2rem)] bg-[#0d1220] border border-amber/20 rounded-2xl shadow-2xl shadow-black/40 flex flex-col overflow-hidden"
           style={{
             animation: "chatSlideUp 0.3s ease-out forwards",
-            maxHeight: "min(520px, calc(100vh - 120px))",
+            maxHeight: "min(560px, calc(100vh - 120px))",
           }}
         >
           {/* Header */}
@@ -212,7 +304,7 @@ export default function SalesChatbot() {
               <p className="text-foreground/40 text-xs">{t.chatbot.title} • {t.chatbot.status}</p>
             </div>
             <button
-              onClick={() => setIsOpen(false)}
+              onClick={handleClose}
               className="p-1.5 rounded-lg hover:bg-white/5 text-foreground/40 hover:text-foreground/70 transition-colors"
             >
               <X className="w-4 h-4" />
@@ -273,8 +365,8 @@ export default function SalesChatbot() {
                     />
                     <button
                       onClick={handleEmailSubmit}
-                      disabled={emailSubmitting || !emailInput.trim()}
-                      className="px-3 py-1.5 bg-amber text-background text-xs font-semibold rounded-lg hover:bg-amber/90 disabled:opacity-40 disabled:cursor-not-allowed transition-all shrink-0"
+                      disabled={emailSubmitting}
+                      className="bg-amber/20 hover:bg-amber/30 text-amber px-2.5 py-1.5 rounded-lg text-xs font-medium transition-colors disabled:opacity-50 shrink-0"
                     >
                       {emailSubmitting ? "..." : (locale === "es" ? "Enviar" : "Send")}
                     </button>
@@ -295,6 +387,64 @@ export default function SalesChatbot() {
                 <div className="flex items-center gap-1.5 bg-green-500/10 border border-green-500/20 rounded-full px-3 py-1 text-xs text-green-400">
                   <CheckCircle className="w-3 h-3" />
                   {locale === "es" ? "¡Guía enviada!" : "Guide sent!"}
+                </div>
+              </div>
+            )}
+
+            {/* Satisfaction Survey */}
+            {showSurvey && !surveySubmitted && (
+              <div className="flex justify-start">
+                <div className="max-w-[95%] bg-amber/5 border border-amber/15 rounded-2xl rounded-bl-md px-3.5 py-3 text-sm w-full">
+                  <p className="text-foreground/70 text-xs font-medium mb-2">
+                    {locale === "es" ? "¿Cómo valoras esta conversación?" : "How would you rate this chat?"}
+                  </p>
+                  {/* Star rating */}
+                  <div className="flex gap-1 mb-2">
+                    {[1, 2, 3, 4, 5].map(star => (
+                      <button
+                        key={star}
+                        onMouseEnter={() => setSurveyHover(star)}
+                        onMouseLeave={() => setSurveyHover(0)}
+                        onClick={() => setSurveyRating(star)}
+                        className="transition-transform hover:scale-110"
+                      >
+                        <Star
+                          className={`w-6 h-6 transition-colors ${
+                            star <= (surveyHover || surveyRating)
+                              ? "text-amber fill-amber"
+                              : "text-foreground/20"
+                          }`}
+                        />
+                      </button>
+                    ))}
+                  </div>
+                  {/* Optional comment */}
+                  {surveyRating > 0 && (
+                    <textarea
+                      value={surveyComment}
+                      onChange={e => setSurveyComment(e.target.value)}
+                      placeholder={locale === "es" ? "Comentario opcional..." : "Optional comment..."}
+                      rows={2}
+                      className="w-full bg-white/5 border border-white/10 rounded-lg px-2.5 py-1.5 text-xs text-foreground/80 placeholder:text-foreground/25 outline-none focus:border-amber/30 transition-colors resize-none mb-2"
+                    />
+                  )}
+                  <div className="flex gap-2">
+                    {surveyRating > 0 && (
+                      <button
+                        onClick={handleSurveySubmit}
+                        disabled={surveySubmitting}
+                        className="bg-amber/20 hover:bg-amber/30 text-amber px-3 py-1.5 rounded-lg text-xs font-medium transition-colors disabled:opacity-50"
+                      >
+                        {surveySubmitting ? "..." : (locale === "es" ? "Enviar" : "Submit")}
+                      </button>
+                    )}
+                    <button
+                      onClick={() => setShowSurvey(false)}
+                      className="text-xs text-foreground/30 hover:text-foreground/50 transition-colors px-2"
+                    >
+                      {locale === "es" ? "Omitir" : "Skip"}
+                    </button>
+                  </div>
                 </div>
               </div>
             )}
@@ -329,7 +479,7 @@ export default function SalesChatbot() {
 
       {/* Toggle Button */}
       <button
-        onClick={() => setIsOpen(!isOpen)}
+        onClick={() => isOpen ? handleClose() : setIsOpen(true)}
         className={`relative w-14 h-14 rounded-full shadow-lg transition-all duration-300 hover:scale-110 ${
           isOpen
             ? "bg-foreground/10 border border-foreground/20"

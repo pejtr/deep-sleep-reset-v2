@@ -88,3 +88,17 @@
 ## Phase 11: Conversion Optimization
 - [x] Add email capture flow to SalesChatbot (after engagement, before CTA)
 - [x] Implement A/B test for homepage headline (track variant → conversion rate)
+
+## Phase 12: Chatbot & Checkout Enhancements
+- [x] AI key info extraction from chat (sleep issues, objections, intent signals)
+- [x] Satisfaction survey at end of chatbot conversation (1-5 stars + comment)
+- [x] One-click purchase for returning customers (detect prior purchase, skip order bump)
+
+## Phase 13: Meta Conversions API (Server-Side)
+- [ ] Get Meta Pixel Access Token from Events Manager
+- [ ] Add META_PIXEL_ID and META_CAPI_TOKEN to secrets
+- [ ] Create server/meta-capi.ts helper for sending events
+- [ ] Fire server-side Purchase event from Stripe webhook (after successful payment)
+- [ ] Fire server-side Lead event from leads.capture tRPC procedure
+- [ ] Fire server-side InitiateCheckout event from checkout.createBundleSession
+- [ ] Write vitest tests for CAPI helper

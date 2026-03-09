@@ -63,3 +63,44 @@ export const leads = mysqlTable("leads", {
 
 export type Lead = typeof leads.$inferSelect;
 export type InsertLead = typeof leads.$inferInsert;
+
+/**
+ * Chat insights — AI-extracted key information from chatbot conversations.
+ * Tracks sleep issues, objections, intent signals for personalization.
+ */
+export const chatInsights = mysqlTable("chat_insights", {
+  id: int("id").autoincrement().primaryKey(),
+  /** Lead email or session ID */
+  sessionId: varchar("sessionId", { length: 128 }).notNull(),
+  email: varchar("email", { length: 320 }),
+  /** Extracted sleep issue category */
+  sleepIssue: varchar("sleepIssue", { length: 128 }),
+  /** User's main objection to buying */
+  objection: varchar("objection", { length: 255 }),
+  /** Purchase intent level: low, medium, high */
+  intentLevel: mysqlEnum("intentLevel", ["low", "medium", "high"]).default("low").notNull(),
+  /** Raw extracted keywords/tags */
+  tags: text("tags"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type ChatInsight = typeof chatInsights.$inferSelect;
+export type InsertChatInsight = typeof chatInsights.$inferInsert;
+
+/**
+ * Chat surveys — satisfaction feedback at end of chatbot conversation.
+ */
+export const chatSurveys = mysqlTable("chat_surveys", {
+  id: int("id").autoincrement().primaryKey(),
+  sessionId: varchar("sessionId", { length: 128 }).notNull(),
+  email: varchar("email", { length: 320 }),
+  /** 1-5 star rating */
+  rating: int("rating").notNull(),
+  /** Optional comment */
+  comment: text("comment"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type ChatSurvey = typeof chatSurveys.$inferSelect;
+export type InsertChatSurvey = typeof chatSurveys.$inferInsert;

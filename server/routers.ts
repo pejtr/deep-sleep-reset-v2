@@ -5,7 +5,7 @@ import { systemRouter } from "./_core/systemRouter";
 import { publicProcedure, protectedProcedure, router } from "./_core/trpc";
 import { createCheckoutSession, createBundleCheckoutSession, PRODUCTS, type ProductKey } from "./stripe/index";
 import { invokeLLM } from "./_core/llm";
-import { saveLead } from "./db";
+import { saveLead, saveChatInsight, saveChatSurvey, getOrdersByEmail } from "./db";
 
 const productKeySchema = z.enum(["frontEnd", "exitDiscount", "upsell1", "upsell2"]);
 
@@ -54,6 +54,26 @@ export const appRouter = router({
       }),
   }),
 
+  // Returning customer check — detect prior purchases by email
+  customers: router({
+    checkReturning: publicProcedure
+      .input(z.object({
+        email: z.string().email(),
+      }))
+      .query(async ({ input }) => {
+        const existingOrders = await getOrdersByEmail(input.email);
+        const hasPurchased = existingOrders.some(o => o.status === "completed");
+        const purchasedProducts = existingOrders
+          .filter(o => o.status === "completed")
+          .map(o => o.productKey);
+        return {
+          isReturning: hasPurchased,
+          purchasedProducts,
+          orderCount: existingOrders.length,
+        };
+      }),
+  }),
+
   // Lead capture — email collected via chatbot or opt-in forms
   leads: router({
     capture: publicProcedure
@@ -67,6 +87,92 @@ export const appRouter = router({
           email: input.email,
           source: input.source,
           abVariant: input.abVariant,
+        });
+        return { success: true };
+      }),
+  }),
+
+  // Chat insights — AI-extracted key info from conversations
+  chatInsights: router({
+    save: publicProcedure
+      .input(z.object({
+        sessionId: z.string(),
+        email: z.string().email().optional(),
+        messages: z.array(z.object({
+          role: z.enum(["user", "assistant"]),
+          content: z.string(),
+        })),
+      }))
+      .mutation(async ({ input }) => {
+        // Use LLM to extract key info from the conversation
+        const extractPrompt = `Analyze this chatbot conversation and extract key information. Return JSON only.
+
+Conversation:
+${input.messages.map(m => `${m.role}: ${m.content}`).join("\n")}
+
+Extract:
+- sleepIssue: main sleep problem mentioned (e.g. "can't fall asleep", "wakes up at night", "racing mind", "early waking", "general insomnia", or null)
+- objection: main reason they haven't bought yet (e.g. "price", "skeptical", "tried before", "not sure it works", or null)
+- intentLevel: purchase intent level ("low", "medium", or "high" based on their interest)
+- tags: comma-separated keywords from their messages`;
+
+        try {
+          const result = await invokeLLM({
+            messages: [{ role: "user", content: extractPrompt }],
+            response_format: {
+              type: "json_schema",
+              json_schema: {
+                name: "chat_insight",
+                strict: true,
+                schema: {
+                  type: "object",
+                  properties: {
+                    sleepIssue: { type: ["string", "null"] },
+                    objection: { type: ["string", "null"] },
+                    intentLevel: { type: "string", enum: ["low", "medium", "high"] },
+                    tags: { type: ["string", "null"] },
+                  },
+                  required: ["sleepIssue", "objection", "intentLevel", "tags"],
+                  additionalProperties: false,
+                },
+              },
+            },
+          });
+
+          const content = result.choices[0]?.message?.content;
+          const parsed = typeof content === "string" ? JSON.parse(content) : {};
+
+          await saveChatInsight({
+            sessionId: input.sessionId,
+            email: input.email,
+            sleepIssue: parsed.sleepIssue || null,
+            objection: parsed.objection || null,
+            intentLevel: parsed.intentLevel || "low",
+            tags: parsed.tags || null,
+          });
+        } catch (err) {
+          console.error("[ChatInsights] Failed to extract insights:", err);
+        }
+
+        return { success: true };
+      }),
+  }),
+
+  // Chat surveys — satisfaction feedback at end of conversation
+  chatSurveys: router({
+    submit: publicProcedure
+      .input(z.object({
+        sessionId: z.string(),
+        email: z.string().email().optional(),
+        rating: z.number().int().min(1).max(5),
+        comment: z.string().max(500).optional(),
+      }))
+      .mutation(async ({ input }) => {
+        await saveChatSurvey({
+          sessionId: input.sessionId,
+          email: input.email,
+          rating: input.rating,
+          comment: input.comment,
         });
         return { success: true };
       }),
