@@ -36,13 +36,13 @@ const SHIELD_IMG = "https://d2xsxph8kpxj0f.cloudfront.net/310419663032296198/RrG
 // Animated section wrapper
 function FadeInSection({ children, className = "", delay = 0 }: { children: React.ReactNode; className?: string; delay?: number }) {
   const ref = useRef(null);
-  const isInView = useInView(ref, { once: true, margin: "-80px" });
+  const isInView = useInView(ref, { once: true, margin: "-100px" });
   return (
     <motion.div
       ref={ref}
-      initial={{ opacity: 0, y: 40 }}
-      animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 40 }}
-      transition={{ duration: 0.8, delay, ease: "easeOut" }}
+      initial={{ opacity: 0, y: 50, filter: "blur(8px)" }}
+      animate={isInView ? { opacity: 1, y: 0, filter: "blur(0px)" } : { opacity: 0, y: 50, filter: "blur(8px)" }}
+      transition={{ duration: 0.9, delay, ease: [0.25, 0.46, 0.45, 0.94] }}
       className={className}
     >
       {children}
@@ -160,14 +160,17 @@ export default function Home() {
       <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
         {/* Parallax background */}
         <div
-          className="absolute inset-0 bg-cover bg-center"
+          className="absolute inset-0 bg-cover bg-center will-change-transform"
           style={{
             backgroundImage: `url(${HERO_BG})`,
-            transform: `translateY(${scrollY * 0.3}px)`,
+            transform: `translateY(${scrollY * 0.3}px) scale(1.1)`,
           }}
         />
         {/* Dark overlay gradient */}
         <div className="absolute inset-0 bg-gradient-to-b from-background/60 via-background/40 to-background" />
+        {/* Ambient glow orbs */}
+        <div className="ambient-glow w-[400px] h-[400px] bg-amber/8 top-1/4 left-1/4 -translate-x-1/2" />
+        <div className="ambient-glow w-[300px] h-[300px] bg-blue-500/5 bottom-1/3 right-1/4" style={{ animationDelay: '3s' }} />
 
         <div className="relative z-10 max-w-4xl mx-auto px-4 text-center pt-24 pb-32">
           <motion.div
@@ -188,7 +191,7 @@ export default function Home() {
             </p>
             <button
               onClick={scrollToOffer}
-              className="cta-pulse inline-flex items-center gap-3 bg-amber text-background font-semibold px-8 py-4 rounded-lg text-lg transition-all duration-300 hover:scale-105 hover:bg-amber-light"
+              className="cta-pulse cta-shimmer inline-flex items-center gap-3 bg-amber text-background font-semibold px-8 py-4 rounded-lg text-lg transition-all duration-300 hover:scale-105 hover:bg-amber-light"
             >
               Yes, I Want to Sleep Tonight
               <ChevronDown className="w-5 h-5 animate-bounce" />
@@ -362,7 +365,7 @@ export default function Home() {
                   <div className="group relative border border-border/50 rounded-xl p-6 sm:p-8 bg-card/30 backdrop-blur-sm hover:bg-card/60 hover:border-amber/20 transition-all duration-500">
                     <div className="flex items-start gap-5 sm:gap-8">
                       {/* Night number */}
-                      <div className="shrink-0 w-14 h-14 rounded-full bg-amber/10 border border-amber/20 flex items-center justify-center group-hover:bg-amber/20 transition-all duration-500">
+                      <div className="shrink-0 w-14 h-14 rounded-full bg-amber/10 border border-amber/20 flex items-center justify-center group-hover:bg-amber/20 group-hover:scale-110 breathe-glow transition-all duration-500">
                         <span className="font-[var(--font-display)] text-amber font-bold text-lg">
                           {night.night}
                         </span>
@@ -586,8 +589,11 @@ export default function Home() {
       </section>
 
       {/* ===== THE OFFER ===== */}
-      <section id="offer" className="py-24 lg:py-32 relative">
+      <section id="offer" className="py-24 lg:py-32 relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-b from-background via-navy-light/40 to-background" />
+        {/* Ambient glow orbs */}
+        <div className="ambient-glow w-[350px] h-[350px] bg-amber/6 top-1/3 left-0 -translate-x-1/2" />
+        <div className="ambient-glow w-[250px] h-[250px] bg-blue-400/4 bottom-1/4 right-0 translate-x-1/3" style={{ animationDelay: '2s' }} />
         <div className="relative max-w-3xl mx-auto px-4 text-center">
           <FadeInSection>
             <p className="text-amber/70 text-sm uppercase tracking-[0.2em] mb-4 font-medium">
@@ -600,7 +606,7 @@ export default function Home() {
             {/* Price */}
             <div className="my-10">
               <span className="text-foreground/30 line-through text-2xl mr-4">$47</span>
-              <span className="font-[var(--font-display)] text-6xl sm:text-7xl font-bold text-amber text-glow">
+              <span className="font-[var(--font-display)] text-6xl sm:text-7xl font-bold gradient-text-animated">
                 $5
               </span>
             </div>
@@ -649,7 +655,7 @@ export default function Home() {
           <FadeInSection delay={0.4}>
             <button
               onClick={() => openCheckout("frontEnd")}
-              className="cta-pulse w-full sm:w-auto inline-flex items-center justify-center gap-3 bg-amber hover:bg-amber-light text-background font-bold px-10 py-5 rounded-xl text-xl transition-all duration-300 hover:scale-105"
+              className="cta-pulse cta-shimmer w-full sm:w-auto inline-flex items-center justify-center gap-3 bg-amber hover:bg-amber-light text-background font-bold px-10 py-5 rounded-xl text-xl transition-all duration-300 hover:scale-105"
             >
               YES, I WANT TO SLEEP TONIGHT! GIVE ME THE $5 RESET NOW
             </button>
@@ -670,7 +676,7 @@ export default function Home() {
                 <img
                   src={SHIELD_IMG}
                   alt="30-Day Money Back Guarantee"
-                  className="w-32 h-32 md:w-40 md:h-40 object-contain"
+                  className="w-32 h-32 md:w-40 md:h-40 object-contain float-gentle"
                   loading="lazy"
                 />
               </div>
@@ -765,7 +771,7 @@ export default function Home() {
 
             <button
               onClick={() => openCheckout("frontEnd")}
-              className="cta-pulse w-full sm:w-auto inline-flex items-center justify-center gap-3 bg-amber hover:bg-amber-light text-background font-bold px-10 py-5 rounded-xl text-xl transition-all duration-300 hover:scale-105"
+              className="cta-pulse cta-shimmer w-full sm:w-auto inline-flex items-center justify-center gap-3 bg-amber hover:bg-amber-light text-background font-bold px-10 py-5 rounded-xl text-xl transition-all duration-300 hover:scale-105"
             >
               CLICK HERE TO GET INSTANT ACCESS FOR JUST $5
             </button>
@@ -792,6 +798,7 @@ export default function Home() {
             <div className="flex items-center gap-6 text-foreground/30 text-sm">
               <Link href="/privacy" className="hover:text-foreground/60 transition-colors">Privacy Policy</Link>
               <Link href="/terms" className="hover:text-foreground/60 transition-colors">Terms of Service</Link>
+              <Link href="/affiliates" className="hover:text-foreground/60 transition-colors">Affiliates</Link>
               <a href="mailto:support@deepsleepreset.com" className="hover:text-foreground/60 transition-colors">Contact</a>
             </div>
             <p className="text-foreground/30 text-xs">

@@ -4,6 +4,7 @@ import MetaPixel from "@/components/MetaPixel";
 import ExitIntentPopup from "@/components/ExitIntentPopup";
 import StickyMobileCTA from "@/components/StickyMobileCTA";
 import SocialProofToast from "@/components/SocialProofToast";
+import StarField from "@/components/StarField";
 import NotFound from "@/pages/NotFound";
 import { Route, Switch } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
@@ -14,6 +15,7 @@ import Upsell2 from "./pages/Upsell2";
 import ThankYou from "./pages/ThankYou";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import Terms from "./pages/Terms";
+import Affiliates from "./pages/Affiliates";
 
 function Router() {
   return (
@@ -24,6 +26,7 @@ function Router() {
       <Route path={"/thank-you"} component={ThankYou} />
       <Route path={"/privacy"} component={PrivacyPolicy} />
       <Route path={"/terms"} component={Terms} />
+      <Route path={"/affiliates"} component={Affiliates} />
       <Route path={"/404"} component={NotFound} />
       <Route component={NotFound} />
     </Switch>
@@ -35,6 +38,7 @@ function App() {
     <ErrorBoundary>
       <ThemeProvider defaultTheme="dark">
         <TooltipProvider>
+          <StarField count={50} />
           <MetaPixel />
           <ExitIntentPopup />
           <StickyMobileCTA />
