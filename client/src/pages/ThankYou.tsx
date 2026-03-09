@@ -7,6 +7,7 @@
 
 import { useEffect, useRef } from "react";
 import { motion } from "framer-motion";
+import { Link } from "wouter";
 import {
   Moon,
   CheckCircle,
@@ -218,9 +219,9 @@ export default function ThankYou() {
               <span className="text-foreground/40 text-sm">Deep Sleep Reset</span>
             </div>
             <div className="flex items-center gap-6 text-foreground/30 text-sm">
-              <span>Privacy Policy</span>
-              <span>Terms of Service</span>
-              <span>Contact</span>
+              <Link href="/privacy" className="hover:text-foreground/60 transition-colors">Privacy Policy</Link>
+              <Link href="/terms" className="hover:text-foreground/60 transition-colors">Terms of Service</Link>
+              <a href="mailto:support@deepsleepreset.com" className="hover:text-foreground/60 transition-colors">Contact</a>
             </div>
             <p className="text-foreground/30 text-xs">
               &copy; {new Date().getFullYear()} Deep Sleep Reset. All rights reserved.

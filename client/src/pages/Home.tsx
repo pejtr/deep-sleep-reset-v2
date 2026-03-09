@@ -5,9 +5,11 @@
  * Philosophy: The page itself feels like nighttime — calming, immersive, cinematic
  */
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { motion, useInView } from "framer-motion";
 import { openCheckout } from "@/lib/checkout";
+import { getHeadline } from "@/lib/ab-test";
+import { Link } from "wouter";
 import {
   Moon,
   Brain,
@@ -115,6 +117,7 @@ function FAQItem({ question, answer }: { question: string; answer: string }) {
 }
 
 export default function Home() {
+  const headline = useMemo(() => getHeadline(), []);
   const [scrollY, setScrollY] = useState(0);
 
   useEffect(() => {
@@ -176,14 +179,12 @@ export default function Home() {
               The 7-Night Protocol
             </p>
             <h1 className="font-[var(--font-display)] text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold leading-tight mb-6 text-glow">
-              Still Lying Awake at{" "}
-              <span className="text-amber italic">3:17 AM</span>,{" "}
-              <br className="hidden sm:block" />
-              Staring at the Ceiling?
+              {headline.main}
+              <span className="text-amber italic">{headline.highlight}</span>
+              {headline.continuation}
             </h1>
             <p className="text-lg sm:text-xl text-foreground/70 max-w-2xl mx-auto leading-relaxed mb-10 font-light">
-              Discover the 7-Night Protocol That Resets Your Body's Natural Sleep Switch...
-              Without Melatonin, Sleeping Pills, or "Counting Sheep."
+              {headline.sub}
             </p>
             <button
               onClick={scrollToOffer}
@@ -647,9 +648,9 @@ export default function Home() {
               <span className="text-foreground/40 text-sm">Deep Sleep Reset</span>
             </div>
             <div className="flex items-center gap-6 text-foreground/30 text-sm">
-              <span>Privacy Policy</span>
-              <span>Terms of Service</span>
-              <span>Contact</span>
+              <Link href="/privacy" className="hover:text-foreground/60 transition-colors">Privacy Policy</Link>
+              <Link href="/terms" className="hover:text-foreground/60 transition-colors">Terms of Service</Link>
+              <a href="mailto:support@deepsleepreset.com" className="hover:text-foreground/60 transition-colors">Contact</a>
             </div>
             <p className="text-foreground/30 text-xs">
               &copy; {new Date().getFullYear()} Deep Sleep Reset. All rights reserved.
