@@ -4,25 +4,22 @@
  * Personality: Inspired by Leila Hormozi — confident, direct, value-focused, genuinely caring
  * Trigger: Shows after 45s on page OR 50% scroll
  * Hidden by default, admin-controllable
+ * i18n: Strings from useLanguage()
  */
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { MessageCircle, X, Send, Moon } from "lucide-react";
 import { trpc } from "@/lib/trpc";
 import { Streamdown } from "streamdown";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface ChatMessage {
   role: "user" | "assistant";
   content: string;
 }
 
-const PROACTIVE_MESSAGES = [
-  "Hey there! Can't sleep? You're not alone — I've helped thousands of people fix their sleep. Want to chat about what's keeping you up? 💤",
-  "I noticed you're still here... is insomnia keeping you up tonight too? I might be able to help.",
-  "Still browsing? I get it — when you can't sleep, you end up scrolling. Want me to share a quick tip that actually works?",
-];
-
 export default function SalesChatbot() {
+  const { t, locale } = useLanguage();
   const [isOpen, setIsOpen] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -76,13 +73,14 @@ export default function SalesChatbot() {
     setIsVisible(true);
     setShowPulse(true);
 
-    // Pick a random proactive message
-    const proactiveMsg = PROACTIVE_MESSAGES[Math.floor(Math.random() * PROACTIVE_MESSAGES.length)];
+    // Pick a random proactive message from translations
+    const proactiveMessages = t.chatbot.proactiveMessages;
+    const proactiveMsg = proactiveMessages[Math.floor(Math.random() * proactiveMessages.length)];
     setMessages([{ role: "assistant", content: proactiveMsg }]);
 
     // Stop pulse after 10s
     setTimeout(() => setShowPulse(false), 10000);
-  }, [hasBeenTriggered]);
+  }, [hasBeenTriggered, t.chatbot.proactiveMessages]);
 
   const sendMessage = async () => {
     const trimmed = input.trim();
@@ -97,13 +95,14 @@ export default function SalesChatbot() {
       const result = await chatMutation.mutateAsync({
         messages: newMessages,
         scrollPercent: Math.round((window.scrollY / (document.documentElement.scrollHeight - window.innerHeight)) * 100),
+
       });
 
       setMessages(prev => [...prev, { role: "assistant", content: result.reply }]);
     } catch (err) {
       setMessages(prev => [
         ...prev,
-        { role: "assistant", content: "Sorry, I had a little hiccup. Could you try again? 😊" },
+        { role: "assistant", content: t.chatbot.errorMessage },
       ]);
     } finally {
       setIsTyping(false);
@@ -139,8 +138,8 @@ export default function SalesChatbot() {
               <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-400 rounded-full border-2 border-[#0d1220]" />
             </div>
             <div className="flex-1">
-              <p className="font-semibold text-foreground/90 text-sm">Lucie</p>
-              <p className="text-foreground/40 text-xs">Sleep Expert • Online</p>
+              <p className="font-semibold text-foreground/90 text-sm">{t.chatbot.name}</p>
+              <p className="text-foreground/40 text-xs">{t.chatbot.title} • {t.chatbot.status}</p>
             </div>
             <button
               onClick={() => setIsOpen(false)}
@@ -193,7 +192,7 @@ export default function SalesChatbot() {
                 value={input}
                 onChange={e => setInput(e.target.value)}
                 onKeyDown={handleKeyDown}
-                placeholder="Type your message..."
+                placeholder={t.chatbot.placeholder}
                 className="flex-1 bg-transparent text-foreground/90 text-sm placeholder:text-foreground/30 outline-none"
                 disabled={isTyping}
               />

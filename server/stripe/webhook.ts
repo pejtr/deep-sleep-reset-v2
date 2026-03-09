@@ -8,6 +8,8 @@ import { getStripe } from "./stripe";
 import { getDb } from "../db";
 import { orders } from "../../drizzle/schema";
 import type { ProductKey } from "./products";
+import { notifyOwner } from "../_core/notification";
+import { sendPurchaseEmail } from "../email";
 
 export async function handleStripeWebhook(req: Request, res: Response) {
   const stripe = getStripe();
@@ -62,20 +64,48 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
   }
 
   const productKey = (session.metadata?.productKey || "frontEnd") as ProductKey;
+  const customerEmail = session.customer_email || session.customer_details?.email || null;
+  const customerName = session.customer_details?.name || null;
+  const amountCents = session.amount_total || 0;
+  const currency = session.currency || "usd";
 
+  // 1. Record order in DB
   await db.insert(orders).values({
     stripeSessionId: session.id,
     stripePaymentIntentId: typeof session.payment_intent === "string"
       ? session.payment_intent
       : session.payment_intent?.id || null,
-    customerEmail: session.customer_email || session.customer_details?.email || null,
+    customerEmail,
     productKey,
-    amountCents: session.amount_total || 0,
-    currency: session.currency || "usd",
+    amountCents,
+    currency,
     status: "completed",
   });
 
   console.log(
-    `[Webhook] Order recorded: ${productKey} — $${((session.amount_total || 0) / 100).toFixed(2)} — ${session.customer_email || "no email"}`
+    `[Webhook] Order recorded: ${productKey} — $${(amountCents / 100).toFixed(2)} — ${customerEmail || "no email"}`
   );
+
+  // 2. Notify owner about the sale
+  const productLabels: Record<ProductKey, string> = {
+    frontEnd: "7-Night Deep Sleep Reset ($5)",
+    exitDiscount: "7-Night Deep Sleep Reset — Exit Discount ($4)",
+    upsell1: "Anxiety Dissolve Audio Pack ($10)",
+    upsell2: "Sleep Optimizer Toolkit ($10)",
+  };
+
+  await notifyOwner({
+    title: `💰 New Sale: ${productLabels[productKey]}`,
+    content: `Customer: ${customerName || "Unknown"}\nEmail: ${customerEmail || "N/A"}\nProduct: ${productLabels[productKey]}\nAmount: $${(amountCents / 100).toFixed(2)} ${currency.toUpperCase()}\nSession: ${session.id}`,
+  }).catch(err => console.warn("[Webhook] Owner notification failed:", err));
+
+  // 3. Send welcome email to customer (if email available)
+  if (customerEmail) {
+    await sendPurchaseEmail({
+      to: customerEmail,
+      name: customerName || undefined,
+      productKey,
+      amountCents,
+    }).catch(err => console.warn("[Webhook] Customer email failed:", err));
+  }
 }

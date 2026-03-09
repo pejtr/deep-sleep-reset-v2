@@ -3,7 +3,7 @@ import { z } from "zod";
 import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
 import { publicProcedure, protectedProcedure, router } from "./_core/trpc";
-import { createCheckoutSession, PRODUCTS, type ProductKey } from "./stripe";
+import { createCheckoutSession, createBundleCheckoutSession, PRODUCTS, type ProductKey } from "./stripe";
 import { invokeLLM } from "./_core/llm";
 
 const productKeySchema = z.enum(["frontEnd", "exitDiscount", "upsell1", "upsell2"]);
@@ -29,6 +29,22 @@ export const appRouter = router({
       .mutation(async ({ input, ctx }) => {
         const result = await createCheckoutSession({
           productKey: input.productKey,
+          origin: input.origin,
+          customerEmail: ctx.user?.email || undefined,
+          metadata: ctx.user ? { userId: String(ctx.user.id) } : undefined,
+        });
+        return result;
+      }),
+
+    // Order bump: create a checkout with multiple products (base + optional bumps)
+    createBundleSession: publicProcedure
+      .input(z.object({
+        productKeys: z.array(productKeySchema).min(1),
+        origin: z.string().url(),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        const result = await createBundleCheckoutSession({
+          productKeys: input.productKeys,
           origin: input.origin,
           customerEmail: ctx.user?.email || undefined,
           metadata: ctx.user ? { userId: String(ctx.user.id) } : undefined,

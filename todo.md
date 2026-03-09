@@ -27,6 +27,9 @@
 - [x] Sales-focused personality: Lucie (inspired by Leila Hormozi)
 - [x] Chatbot appears after trigger, not visible by default
 
+## Phase 3b: UI Fixes
+- [x] Replace video placeholder with featured testimonial block
+
 ## Phase 4: Spanish Translation (South America)
 - [ ] Create i18n context and translation system
 - [ ] Translate all sales page copy to Spanish
@@ -35,10 +38,10 @@
 - [ ] Language detection or switcher
 
 ## Phase 5: Email Automation
-- [ ] Integrate Brevo/Sendinblue API
-- [ ] Set up welcome email after purchase
-- [ ] Set up upsell email sequence
-- [ ] Test email delivery
+- [x] Integrate Brevo/Sendinblue API
+- [x] Set up welcome email after purchase
+- [x] Set up upsell email sequence
+- [x] Test email delivery (Brevo IP authorized, all 4 email tests passing)
 
 ## Phase 6: E2E Testing
 - [x] Test Stripe checkout session creation (vitest)
@@ -46,5 +49,19 @@
 - [ ] Test Stripe test mode purchase flow (manual)
 - [ ] Test upsell redirect chain (manual)
 - [ ] Test thank-you page Purchase event (manual)
-- [ ] Test email delivery after purchase
+- [x] Test email delivery (Brevo IP authorized, all 4 email tests passing) after purchase
 - [ ] Test Spanish version end-to-end
+
+## Phase 7: Order Bump + Funnel Flow
+- [x] Create /order page with order bump modules (add-ons before checkout)
+- [x] Add 2-3 bump modules: Audio Pack (+$10), Toolkit (+$10)
+- [x] Wire Home CTA buttons to /order page instead of direct Stripe checkout
+- [x] Create Stripe bundle product for order bump (createBundleCheckoutSession)
+- [x] Fix chatbot name: Lucy (EN) / Lucie (ES)
+- [x] Verify full funnel: Home → /order → Stripe → Upsell1 → Upsell2 → ThankYou
+
+## Phase 8: AI Audio Pack
+- [x] Write guided meditation scripts for all 5 Anxiety Dissolve sessions
+- [x] Generate AI TTS audio files using Gemini TTS API
+- [x] Upload audio files to CDN
+- [ ] Wire audio player to actual CDN URLs in Upsell1 / member area

@@ -3,13 +3,14 @@
  * Palette: Deep navy (#0a0e1a), amber/gold (#d4a853), lavender (#b8a9c9), warm white (#f0ece4)
  * Fonts: Playfair Display (display), Source Sans 3 (body)
  * Philosophy: The page itself feels like nighttime — calming, immersive, cinematic
+ * i18n: All user-facing strings pulled from useLanguage() context
  */
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { motion, useInView } from "framer-motion";
-import { openCheckout } from "@/lib/checkout";
-import { getHeadline } from "@/lib/ab-test";
-import { Link } from "wouter";
+import { getVariant } from "@/lib/ab-test";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { Link, useLocation } from "wouter";
 import {
   Moon,
   Brain,
@@ -20,7 +21,6 @@ import {
   Zap,
   CheckCircle,
   Shield,
-  Star,
   ChevronDown,
   Clock,
   HelpCircle,
@@ -32,6 +32,8 @@ const INSOMNIA_IMG = "https://d2xsxph8kpxj0f.cloudfront.net/310419663032296198/R
 const SLEEP_IMG = "https://d2xsxph8kpxj0f.cloudfront.net/310419663032296198/RrG9k2uFQkqVyNWK8WEbxj/sleep-person-BL46EAbNpQfoPr4JMovZ7j.webp";
 const BRAIN_WAVES_IMG = "https://d2xsxph8kpxj0f.cloudfront.net/310419663032296198/RrG9k2uFQkqVyNWK8WEbxj/brain-waves-8ZVUojjHYvEHHkkXTHQxyT.webp";
 const SHIELD_IMG = "https://d2xsxph8kpxj0f.cloudfront.net/310419663032296198/RrG9k2uFQkqVyNWK8WEbxj/guarantee-shield-msUD6VxYQaJNdGFuczbUNx.webp";
+
+const nightIcons = [Moon, Brain, Zap, Wind, Sun, Bed, Lock];
 
 // Animated section wrapper
 function FadeInSection({ children, className = "", delay = 0 }: { children: React.ReactNode; className?: string; delay?: number }) {
@@ -51,12 +53,12 @@ function FadeInSection({ children, className = "", delay = 0 }: { children: Reac
 }
 
 // Empathy heading with word-by-word reveal animation
-function EmpathyHeading() {
+function EmpathyHeading({ title1, title2 }: { title1: string; title2: string }) {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: "-80px" });
 
-  const line1Words = ["You", "Are", "Not", "Alone."];
-  const line2Words = ["And", "This", "Is", "Not", "Your", "Fault."];
+  const line1Words = title1.split(" ");
+  const line2Words = title2.split(" ");
 
   return (
     <div ref={ref} className="text-center mb-12">
@@ -120,34 +122,6 @@ function EmpathyHeading() {
   );
 }
 
-// Night module data
-const nights = [
-  { night: 1, title: "The Sleep Pressure Reset", desc: "Learn the counterintuitive method to build powerful, natural sleep drive, making your body crave sleep.", icon: Moon },
-  { night: 2, title: "The Racing Mind Shutdown", desc: "A 10-minute \"cognitive offload\" technique to dump your anxieties and stop the mental chatter.", icon: Brain },
-  { night: 3, title: "The Body Scan Meltdown", desc: "A guided audio that systematically melts tension from your body, making it physically impossible to hold onto stress.", icon: Zap },
-  { night: 4, title: "The Breath Pattern Switch", desc: "Master the 4-7-8 breathing technique used by Navy SEALs to instantly calm the nervous system.", icon: Wind },
-  { night: 5, title: "The Light & Dark Protocol", desc: "Learn how to use light to reset your internal clock so you feel sleepy at the right time.", icon: Sun },
-  { night: 6, title: "The Stimulus Control Method", desc: "A powerful psychological technique to re-train your brain to associate your bed with deep, restful sleep.", icon: Bed },
-  { night: 7, title: "The Sleep Confidence Lock-In", desc: "Combine everything into a simple, personalized nightly ritual that makes deep sleep automatic.", icon: Lock },
-];
-
-const painPoints = [
-  "Melatonin gummies that leave you groggy and give you weird dreams.",
-  "Expensive sleeping pills that you know aren't a long-term solution.",
-  "\"Sleepytime\" tea that does absolutely nothing.",
-  "Endless YouTube videos of rain sounds that just make you need to pee.",
-  "The classic, useless advice: \"Just relax,\" \"Clear your mind,\" \"Don't look at your phone.\"",
-];
-
-const forYouIf = [
-  "You can't fall asleep, no matter how tired you are.",
-  "You wake up multiple times a night and can't get back to sleep.",
-  "You wake up feeling like you haven't slept at all.",
-  "You rely on caffeine to get through the day.",
-  "You're sick of feeling tired, anxious, and irritable.",
-  "You want a real, lasting solution, not another quick fix.",
-];
-
 // FAQ Accordion Item
 function FAQItem({ question, answer }: { question: string; answer: string }) {
   const [isOpen, setIsOpen] = useState(false);
@@ -187,14 +161,21 @@ function FAQItem({ question, answer }: { question: string; answer: string }) {
 }
 
 export default function Home() {
-  const headline = useMemo(() => getHeadline(), []);
+  const { t, localePath } = useLanguage();
+  const variant = useMemo(() => getVariant(), []);
+  const headline = t.hero.variants[variant];
   const [scrollY, setScrollY] = useState(0);
+  const [, navigate] = useLocation();
 
   useEffect(() => {
     const handleScroll = () => setScrollY(window.scrollY);
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+
+  const goToOrder = () => {
+    navigate(`${localePath}/order`);
+  };
 
   const scrollToOffer = () => {
     document.getElementById("offer")?.scrollIntoView({ behavior: "smooth" });
@@ -214,14 +195,14 @@ export default function Home() {
           <div className="flex items-center gap-2">
             <Moon className="w-5 h-5 text-amber" />
             <span className="font-[var(--font-display)] text-lg font-semibold tracking-wide text-amber">
-              Deep Sleep Reset
+              {t.common.brandName}
             </span>
           </div>
           <button
-            onClick={scrollToOffer}
+            onClick={goToOrder}
             className="bg-amber/10 hover:bg-amber/20 text-amber border border-amber/30 px-4 py-2 rounded-md text-sm font-medium transition-all duration-300"
           >
-            Get the Reset — $5
+            {t.header.ctaButton}
           </button>
         </div>
       </header>
@@ -249,7 +230,7 @@ export default function Home() {
             transition={{ duration: 1, delay: 0.3 }}
           >
             <p className="text-amber/80 text-sm uppercase tracking-[0.3em] mb-6 font-medium">
-              The 7-Night Protocol
+              {t.hero.protocol}
             </p>
             <h1 className="font-[var(--font-display)] text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold leading-tight mb-6 text-glow">
               {headline.main}
@@ -260,10 +241,10 @@ export default function Home() {
               {headline.sub}
             </p>
             <button
-              onClick={scrollToOffer}
+              onClick={goToOrder}
               className="cta-pulse cta-shimmer inline-flex items-center gap-3 bg-amber text-background font-semibold px-8 py-4 rounded-lg text-lg transition-all duration-300 hover:scale-105 hover:bg-amber-light"
             >
-              Yes, I Want to Sleep Tonight
+              {t.hero.ctaButton}
               <ChevronDown className="w-5 h-5 animate-bounce" />
             </button>
           </motion.div>
@@ -289,7 +270,7 @@ export default function Home() {
                 <div className="absolute inset-0 bg-gradient-to-t from-background/60 to-transparent" />
                 <div className="absolute bottom-4 left-4 flex items-center gap-2 text-red-400/80 text-sm">
                   <Clock className="w-4 h-4" />
-                  <span className="font-medium">3:17 AM — Another sleepless night</span>
+                  <span className="font-medium">{t.pain.clockLabel}</span>
                 </div>
               </div>
             </FadeInSection>
@@ -298,20 +279,19 @@ export default function Home() {
             <FadeInSection delay={0.2}>
               <div>
                 <p className="text-foreground/80 text-lg leading-relaxed mb-6">
-                  It's the middle of the night. The house is silent. Everyone else is asleep.
+                  {t.pain.intro1}
                 </p>
                 <p className="text-foreground/80 text-lg leading-relaxed mb-6">
-                  But you're not.
+                  {t.pain.intro2}
                 </p>
                 <p className="text-foreground/60 leading-relaxed mb-8">
-                  You're wide awake, your mind racing with a toxic cocktail of tomorrow's to-do list,
-                  yesterday's regrets, and a constant, buzzing anxiety that just won't shut off.
+                  {t.pain.intro3}
                 </p>
                 <p className="text-foreground/50 text-sm uppercase tracking-widest mb-4">
-                  You've tried everything, haven't you?
+                  {t.pain.triedEverything}
                 </p>
                 <ul className="space-y-3">
-                  {painPoints.map((point, i) => (
+                  {t.pain.painPoints.map((point, i) => (
                     <li key={i} className="flex items-start gap-3 text-foreground/60">
                       <span className="text-red-400/60 mt-1 shrink-0">✕</span>
                       <span>{point}</span>
@@ -331,19 +311,18 @@ export default function Home() {
           <FadeInSection>
             <div className="border border-amber/20 rounded-2xl p-8 sm:p-12 bg-card/50 backdrop-blur-sm">
               <p className="font-[var(--font-display)] text-2xl sm:text-3xl md:text-4xl font-bold leading-snug text-foreground/90 mb-6">
-                The brutal truth is, you're not just tired.{" "}
-                <span className="text-amber text-glow">You're being robbed.</span>
+                {t.brutalTruth.main}
+                <span className="text-amber text-glow">{t.brutalTruth.highlight}</span>
               </p>
               <p className="text-foreground/60 text-lg leading-relaxed">
-                Robbed of your energy. Robbed of your focus. Robbed of your health.
-                Robbed of your ability to be present with your family and friends.
+                {t.brutalTruth.body}
               </p>
               <div className="mt-8 w-16 h-px bg-amber/30 mx-auto" />
               <p className="mt-8 text-foreground/70 text-lg leading-relaxed">
-                And the worst part? You start to believe this is just... how it is now.
+                {t.brutalTruth.worst}
               </p>
               <p className="mt-6 font-[var(--font-display)] text-2xl font-semibold text-amber">
-                But what if it wasn't?
+                {t.brutalTruth.whatIf}
               </p>
             </div>
           </FadeInSection>
@@ -372,26 +351,20 @@ export default function Home() {
             <FadeInSection>
               <div>
                 <p className="text-amber/70 text-sm uppercase tracking-[0.2em] mb-4 font-medium">
-                  Introducing
+                  {t.product.introducing}
                 </p>
                 <h2 className="font-[var(--font-display)] text-3xl sm:text-4xl md:text-5xl font-bold leading-tight mb-6">
-                  The 7-Night{" "}
-                  <span className="text-amber text-glow">Deep Sleep Reset</span>
+                  {t.product.title}
+                  <span className="text-amber text-glow">{t.product.titleHighlight}</span>
                 </h2>
                 <p className="text-foreground/70 text-lg leading-relaxed mb-6">
-                  The science-backed, step-by-step protocol designed to fix your broken sleep cycle
-                  and give you back your nights — <strong className="text-foreground/90">for good.</strong>
+                  {t.product.desc1}<strong className="text-foreground/90">{t.product.desc1Bold}</strong>
                 </p>
                 <p className="text-foreground/60 leading-relaxed mb-6">
-                  This isn't another flimsy PDF ebook filled with generic advice. This is a structured,
-                  interactive 7-day program that gives you <strong className="text-foreground/80">one simple,
-                  powerful action to take each night.</strong>
+                  {t.product.desc2}<strong className="text-foreground/80">{t.product.desc2Bold}</strong>
                 </p>
                 <p className="text-foreground/60 leading-relaxed">
-                  We've taken the most effective, clinically-proven techniques from Cognitive Behavioral
-                  Therapy for Insomnia (CBT-I) — the method doctors and sleep scientists call the
-                  "gold standard" for treating sleep problems — and distilled them into an easy-to-follow,
-                  night-by-night reset.
+                  {t.product.desc3}
                 </p>
               </div>
             </FadeInSection>
@@ -419,17 +392,17 @@ export default function Home() {
           <FadeInSection>
             <div className="text-center mb-16">
               <p className="text-amber/70 text-sm uppercase tracking-[0.2em] mb-4 font-medium">
-                Your 7-Night Journey
+                {t.modules.sectionLabel}
               </p>
               <h2 className="font-[var(--font-display)] text-3xl sm:text-4xl font-bold">
-                Here's Exactly What You'll Do
+                {t.modules.sectionTitle}
               </h2>
             </div>
           </FadeInSection>
 
           <div className="space-y-4">
-            {nights.map((night, i) => {
-              const Icon = night.icon;
+            {t.modules.nights.map((night, i) => {
+              const Icon = nightIcons[i] || Moon;
               return (
                 <FadeInSection key={i} delay={i * 0.08}>
                   <div className="group relative border border-border/50 rounded-xl p-6 sm:p-8 bg-card/30 backdrop-blur-sm hover:bg-card/60 hover:border-amber/20 transition-all duration-500">
@@ -437,7 +410,7 @@ export default function Home() {
                       {/* Night number */}
                       <div className="shrink-0 w-14 h-14 rounded-full bg-amber/10 border border-amber/20 flex items-center justify-center group-hover:bg-amber/20 group-hover:scale-110 breathe-glow transition-all duration-500">
                         <span className="font-[var(--font-display)] text-amber font-bold text-lg">
-                          {night.night}
+                          {i + 1}
                         </span>
                       </div>
                       {/* Content */}
@@ -461,8 +434,9 @@ export default function Home() {
 
           <FadeInSection delay={0.6}>
             <p className="text-center mt-12 text-foreground/70 text-lg max-w-2xl mx-auto leading-relaxed">
-              By the end of the 7 nights, you won't just have had a good week of sleep.
-              You will have installed a <strong className="text-amber">new operating system for sleep</strong> in your brain.
+              {t.modules.conclusion}
+              <strong className="text-amber">{t.modules.conclusionHighlight}</strong>
+              {t.modules.conclusionEnd}
             </p>
           </FadeInSection>
         </div>
@@ -471,16 +445,12 @@ export default function Home() {
       {/* ===== SOCIAL PROOF / WHO IT'S FOR ===== */}
       <section className="py-24 lg:py-32">
         <div className="max-w-4xl mx-auto px-4">
-          <EmpathyHeading />
+          <EmpathyHeading title1={t.socialProof.title1} title2={t.socialProof.title2} />
 
           {/* Stats */}
           <FadeInSection delay={0.15}>
             <div className="grid sm:grid-cols-3 gap-6 mb-16">
-              {[
-                { stat: "30%+", label: "of adults worldwide suffer from insomnia" },
-                { stat: "$65B+", label: "global market for sleep aids" },
-                { stat: "#1", label: "CBT-I is the gold standard treatment" },
-              ].map((item, i) => (
+              {t.socialProof.stats.map((item, i) => (
                 <div key={i} className="text-center p-6 rounded-xl border border-border/30 bg-card/20">
                   <p className="font-[var(--font-display)] text-3xl sm:text-4xl font-bold text-amber text-glow mb-2">
                     {item.stat}
@@ -494,10 +464,10 @@ export default function Home() {
           <FadeInSection delay={0.3}>
             <div className="border border-amber/10 rounded-2xl p-8 sm:p-10 bg-card/20">
               <h3 className="font-[var(--font-display)] text-xl font-semibold mb-6 text-foreground/80">
-                This program is for you if:
+                {t.socialProof.forYouTitle}
               </h3>
               <div className="grid sm:grid-cols-2 gap-4">
-                {forYouIf.map((item, i) => (
+                {t.socialProof.forYouItems.map((item, i) => (
                   <div key={i} className="flex items-start gap-3">
                     <CheckCircle className="w-5 h-5 text-amber/70 mt-0.5 shrink-0" />
                     <span className="text-foreground/70">{item}</span>
@@ -515,108 +485,77 @@ export default function Home() {
         <div className="relative max-w-5xl mx-auto px-4">
           <FadeInSection>
             <p className="text-amber/80 text-sm uppercase tracking-[0.3em] mb-4 text-center font-medium">
-              Real People. Real Results.
+              {t.testimonials.sectionLabel}
             </p>
             <h2 className="font-[var(--font-display)] text-3xl sm:text-4xl font-bold text-center mb-4">
-              Hear From People Who{" "}
-              <span className="text-amber italic">Finally Sleep</span>
+              {t.testimonials.sectionTitle}
+              <span className="text-amber italic">{t.testimonials.sectionTitleHighlight}</span>
             </h2>
             <p className="text-foreground/50 text-center max-w-2xl mx-auto mb-16">
-              Thousands of people have used the 7-Night Deep Sleep Reset to transform their nights. Here are just a few of their stories.
+              {t.testimonials.sectionDesc}
             </p>
           </FadeInSection>
 
-          {/* Video Testimonial — Replace VIDEO_ID with your YouTube video ID */}
+          {/* Featured Testimonial — replaces video placeholder */}
           <FadeInSection delay={0.1}>
             <div className="max-w-3xl mx-auto mb-16">
-              <div className="relative aspect-video rounded-2xl overflow-hidden border border-amber/10 shadow-2xl shadow-amber/5 group">
-                {/* Gradient overlay for depth */}
-                <div className="absolute inset-0 bg-gradient-to-br from-navy-light/60 via-[#0d1220] to-navy-light/40" />
-                
-                {/* Animated background particles */}
-                <div className="absolute inset-0 overflow-hidden">
-                  <div className="absolute top-1/4 left-1/4 w-32 h-32 bg-amber/5 rounded-full blur-3xl animate-pulse" />
-                  <div className="absolute bottom-1/3 right-1/4 w-24 h-24 bg-blue-500/5 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
-                </div>
+              <div className="relative rounded-2xl border border-amber/20 bg-card/40 backdrop-blur-sm overflow-hidden shadow-2xl shadow-amber/5">
+                {/* Ambient glow */}
+                <div className="absolute top-0 right-0 w-64 h-64 bg-amber/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none" />
+                <div className="absolute bottom-0 left-0 w-48 h-48 bg-lavender/5 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2 pointer-events-none" />
 
-                {/* Play button and text */}
-                <div className="absolute inset-0 flex flex-col items-center justify-center gap-5 z-10">
-                  <div className="relative">
-                    {/* Pulse ring */}
-                    <div className="absolute inset-0 w-24 h-24 rounded-full bg-amber/20 animate-ping" style={{ animationDuration: '2s' }} />
-                    <div className="relative w-24 h-24 rounded-full bg-amber/20 border-2 border-amber/30 flex items-center justify-center group-hover:bg-amber/30 group-hover:border-amber/50 transition-all duration-500 group-hover:scale-110">
-                      <div className="w-0 h-0 border-l-[22px] border-l-amber border-t-[14px] border-t-transparent border-b-[14px] border-b-transparent ml-2" />
+                <div className="relative p-8 sm:p-10">
+                  {/* Stars */}
+                  <div className="flex gap-1 mb-6">
+                    {Array.from({ length: 5 }).map((_, j) => (
+                      <svg key={j} className="w-5 h-5 text-amber" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                      </svg>
+                    ))}
+                  </div>
+
+                  {/* Pull quote */}
+                  <blockquote className="font-[var(--font-display)] text-xl sm:text-2xl md:text-3xl font-semibold leading-snug text-foreground/90 mb-6">
+                    &ldquo;I tried <span className="text-amber">everything</span> for 10 years.
+                    By Night 4, I was falling asleep in 15 minutes.
+                    I actually <span className="text-lavender italic">cried</span> the first morning I woke up feeling rested.&rdquo;
+                  </blockquote>
+
+                  {/* Author */}
+                  <div className="flex items-center gap-4 pt-6 border-t border-border/20">
+                    <div className="w-14 h-14 rounded-full bg-amber/15 border border-amber/20 flex items-center justify-center shrink-0">
+                      <span className="font-[var(--font-display)] text-amber font-bold text-xl">S</span>
+                    </div>
+                    <div>
+                      <p className="text-foreground/90 font-semibold">Sarah M.</p>
+                      <p className="text-foreground/45 text-sm">Austin, TX &mdash; struggled with insomnia for 10 years</p>
+                    </div>
+                    <div className="ml-auto hidden sm:flex flex-col items-end">
+                      <p className="text-amber/70 text-xs uppercase tracking-widest font-medium">Result</p>
+                      <p className="text-foreground/80 font-semibold text-sm">Asleep in 15 min by Night 4</p>
                     </div>
                   </div>
-                  <div className="text-center">
-                    <p className="text-foreground/70 font-medium text-base">Watch Sarah's Story</p>
-                    <p className="text-foreground/35 text-sm mt-1">How she fixed 10 years of insomnia in just 7 nights</p>
-                  </div>
-                  <div className="flex items-center gap-2 text-foreground/25 text-xs">
-                    <div className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />
-                    <span>2:47</span>
-                  </div>
                 </div>
-
-                {/* 
-                  TO EMBED YOUR VIDEO:
-                  1. Remove everything inside this container div (from gradient overlay to play button)
-                  2. Uncomment the iframe below
-                  3. Replace YOUR_VIDEO_ID with your actual YouTube video ID
-                  
-                  <iframe
-                    src="https://www.youtube.com/embed/YOUR_VIDEO_ID?rel=0&modestbranding=1"
-                    className="absolute inset-0 w-full h-full"
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                    allowFullScreen
-                    title="Customer Testimonial Video"
-                  />
-                */}
               </div>
-              <p className="text-center text-foreground/25 text-xs mt-3">* Results may vary. Individual experiences differ.</p>
+              <p className="text-center text-foreground/25 text-xs mt-3">{t.testimonials.resultsDisclaimer}</p>
             </div>
           </FadeInSection>
 
           {/* Written Testimonials Grid */}
           <div className="grid md:grid-cols-3 gap-6">
-            {[
-              {
-                name: "Sarah M.",
-                location: "Austin, TX",
-                stars: 5,
-                text: "I've struggled with insomnia for over 10 years. By Night 4, I was falling asleep within 15 minutes. I actually cried the first morning I woke up feeling rested. This program changed my life.",
-                highlight: "falling asleep within 15 minutes",
-              },
-              {
-                name: "James K.",
-                location: "London, UK",
-                stars: 5,
-                text: "I was skeptical — $5 for something that actually works? But the breathing technique on Night 4 was a game-changer. I've stopped taking melatonin completely. My wife noticed the difference before I did.",
-                highlight: "stopped taking melatonin completely",
-              },
-              {
-                name: "Maria L.",
-                location: "Toronto, CA",
-                stars: 5,
-                text: "As a nurse working night shifts, my sleep was destroyed. The Light & Dark Protocol on Night 5 helped me reset my circadian rhythm. I now sleep 7+ hours even after a night shift. Incredible.",
-                highlight: "sleep 7+ hours even after a night shift",
-              },
-            ].map((testimonial, i) => (
+            {t.testimonials.reviews.map((testimonial, i) => (
               <FadeInSection key={i} delay={0.15 * (i + 1)}>
                 <div className="bg-navy-light/30 border border-border/20 rounded-xl p-6 h-full flex flex-col hover:border-amber/20 transition-colors duration-500">
-                  {/* Stars */}
                   <div className="flex gap-1 mb-4">
-                    {Array.from({ length: testimonial.stars }).map((_, j) => (
+                    {Array.from({ length: 5 }).map((_, j) => (
                       <svg key={j} className="w-4 h-4 text-amber" fill="currentColor" viewBox="0 0 20 20">
                         <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                       </svg>
                     ))}
                   </div>
-                  {/* Quote */}
                   <p className="text-foreground/60 leading-relaxed flex-1 mb-4 text-sm">
                     "{testimonial.text}"
                   </p>
-                  {/* Author */}
                   <div className="flex items-center gap-3 pt-4 border-t border-border/15">
                     <div className="w-10 h-10 rounded-full bg-amber/15 flex items-center justify-center">
                       <span className="text-amber font-semibold text-sm">{testimonial.name.charAt(0)}</span>
@@ -636,15 +575,15 @@ export default function Home() {
             <div className="mt-12 flex flex-wrap items-center justify-center gap-8 text-foreground/30 text-sm">
               <div className="flex items-center gap-2">
                 <Shield className="w-4 h-4 text-amber/50" />
-                <span>10,000+ Happy Sleepers</span>
+                <span>{t.testimonials.trustBar.happySleepers}</span>
               </div>
               <div className="flex items-center gap-2">
                 <CheckCircle className="w-4 h-4 text-amber/50" />
-                <span>4.9/5 Average Rating</span>
+                <span>{t.testimonials.trustBar.avgRating}</span>
               </div>
               <div className="flex items-center gap-2">
                 <Lock className="w-4 h-4 text-amber/50" />
-                <span>30-Day Money-Back Guarantee</span>
+                <span>{t.testimonials.trustBar.guarantee}</span>
               </div>
             </div>
           </FadeInSection>
@@ -654,30 +593,27 @@ export default function Home() {
       {/* ===== THE OFFER ===== */}
       <section id="offer" className="py-24 lg:py-32 relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-b from-background via-navy-light/40 to-background" />
-        {/* Ambient glow orbs */}
         <div className="ambient-glow w-[350px] h-[350px] bg-amber/6 top-1/3 left-0 -translate-x-1/2" />
         <div className="ambient-glow w-[250px] h-[250px] bg-blue-400/4 bottom-1/4 right-0 translate-x-1/3" style={{ animationDelay: '2s' }} />
         <div className="relative max-w-3xl mx-auto px-4 text-center">
           <FadeInSection>
             <p className="text-amber/70 text-sm uppercase tracking-[0.2em] mb-4 font-medium">
-              Limited Time Offer
+              {t.offer.label}
             </p>
             <h2 className="font-[var(--font-display)] text-3xl sm:text-4xl font-bold mb-4">
-              Get The Entire 7-Night Deep Sleep Reset Today For Just...
+              {t.offer.title}
             </h2>
 
             {/* Price */}
             <div className="my-10">
-              <span className="text-foreground/30 line-through text-2xl mr-4">$47</span>
+              <span className="text-foreground/30 line-through text-2xl mr-4">{t.offer.originalPrice}</span>
               <span className="font-[var(--font-display)] text-6xl sm:text-7xl font-bold gradient-text-animated">
-                $5
+                {t.offer.salePrice}
               </span>
             </div>
 
             <p className="text-foreground/60 text-lg mb-10 max-w-xl mx-auto">
-              Why so low? Because I know you're skeptical. You've been burned before.
-              I want to remove any and all risk for you to try this. For the price of a single cup of coffee,
-              you can get the tools to reclaim your nights, your energy, and your life.
+              {t.offer.desc}
             </p>
           </FadeInSection>
 
@@ -685,15 +621,10 @@ export default function Home() {
           <FadeInSection delay={0.2}>
             <div className="border border-amber/20 rounded-2xl p-8 sm:p-10 bg-card/40 backdrop-blur-sm mb-10 text-left">
               <h3 className="font-[var(--font-display)] text-xl font-semibold mb-6 text-center text-foreground/90">
-                Here's Everything You Get:
+                {t.offer.whatYouGet}
               </h3>
               <div className="space-y-4">
-                {[
-                  { item: "The Full 7-Night Deep Sleep Reset Program", value: "$47" },
-                  { item: "Interactive Web-Based Modules (access anywhere, anytime)", value: "$27" },
-                  { item: "Daily Guided Audio Sessions (for relaxation and techniques)", value: "$19" },
-                  { item: "BONUS: The Printable Sleep Journal Template", value: "$17" },
-                ].map((pkg, i) => (
+                {t.offer.items.map((pkg, i) => (
                   <div key={i} className="flex items-center justify-between gap-4 py-3 border-b border-border/20 last:border-0">
                     <div className="flex items-center gap-3">
                       <CheckCircle className="w-5 h-5 text-amber/70 shrink-0" />
@@ -704,12 +635,12 @@ export default function Home() {
                 ))}
               </div>
               <div className="mt-6 pt-4 border-t border-amber/20 flex items-center justify-between">
-                <span className="text-foreground/50">Total Value:</span>
+                <span className="text-foreground/50">{t.offer.totalValue}</span>
                 <span className="text-foreground/40 line-through">$110</span>
               </div>
               <div className="flex items-center justify-between mt-2">
-                <span className="font-[var(--font-display)] text-xl font-bold text-foreground/90">Your Price Today:</span>
-                <span className="font-[var(--font-display)] text-3xl font-bold text-amber text-glow">Just $5</span>
+                <span className="font-[var(--font-display)] text-xl font-bold text-foreground/90">{t.offer.yourPrice}</span>
+                <span className="font-[var(--font-display)] text-3xl font-bold text-amber text-glow">{t.offer.justPrice}</span>
               </div>
             </div>
           </FadeInSection>
@@ -717,14 +648,14 @@ export default function Home() {
           {/* CTA Button */}
           <FadeInSection delay={0.4}>
             <button
-              onClick={() => openCheckout("frontEnd")}
+              onClick={goToOrder}
               className="cta-pulse cta-shimmer w-full sm:w-auto inline-flex items-center justify-center gap-3 bg-amber hover:bg-amber-light text-background font-bold px-10 py-5 rounded-xl text-xl transition-all duration-300 hover:scale-105"
             >
-              YES, I WANT TO SLEEP TONIGHT! GIVE ME THE $5 RESET NOW
+              {t.offer.ctaButton}
             </button>
             <p className="mt-4 text-foreground/40 text-sm flex items-center justify-center gap-2">
               <Lock className="w-3.5 h-3.5" />
-              Secure checkout. Instant digital access.
+              {t.common.secureCheckout}
             </p>
           </FadeInSection>
         </div>
@@ -745,17 +676,14 @@ export default function Home() {
               </div>
               <div>
                 <h2 className="font-[var(--font-display)] text-2xl sm:text-3xl font-bold mb-4">
-                  The "Sleep Soundly or It's Free"{" "}
-                  <span className="text-amber">Guarantee</span>
+                  {t.guarantee.title}
+                  <span className="text-amber">{t.guarantee.titleHighlight}</span>
                 </h2>
                 <p className="text-foreground/70 text-lg leading-relaxed mb-4">
-                  Try the entire 7-Night Deep Sleep Reset. If you don't experience a dramatic
-                  improvement in your sleep within 30 days, just send us an email and we'll
-                  refund your $5. No questions asked.
+                  {t.guarantee.desc1}
                 </p>
                 <p className="text-foreground/50 leading-relaxed">
-                  That's how confident we are in this program. You either get the results
-                  you're looking for, or you pay nothing.
+                  {t.guarantee.desc2}
                 </p>
               </div>
             </div>
@@ -772,42 +700,13 @@ export default function Home() {
                 <HelpCircle className="w-5 h-5 text-amber/60" />
               </div>
               <h2 className="font-[var(--font-display)] text-3xl sm:text-4xl font-bold">
-                Frequently Asked Questions
+                {t.faq.title}
               </h2>
             </div>
           </FadeInSection>
 
           <div className="space-y-3">
-            {[
-              {
-                q: "Is this just another ebook with generic sleep tips?",
-                a: "No. This is a structured, interactive 7-night program based on Cognitive Behavioral Therapy for Insomnia (CBT-I) — the clinically-proven \"gold standard\" treatment recommended by doctors and sleep scientists. Each night gives you one specific, powerful action to take.",
-              },
-              {
-                q: "How is this different from melatonin or sleeping pills?",
-                a: "Melatonin and sleeping pills mask the symptoms without fixing the root cause. The Deep Sleep Reset retrains your brain's natural sleep mechanisms so you can fall asleep and stay asleep without any external aids. The results are permanent, not temporary.",
-              },
-              {
-                q: "What if I've tried everything and nothing works?",
-                a: "That's exactly who this program is designed for. CBT-I has been shown to be effective even for people with chronic insomnia who have tried multiple other treatments. The techniques work with your body's biology, not against it.",
-              },
-              {
-                q: "How quickly will I see results?",
-                a: "Many people report noticeable improvements by Night 3 or 4. By the end of the 7-night protocol, most users experience significantly deeper, more restful sleep. The full benefits compound over the following weeks.",
-              },
-              {
-                q: "Do I need any special equipment or apps?",
-                a: "No. Everything you need is included in the program. All you need is a quiet space, a bed, and 15-20 minutes before bedtime each night. The guided audio sessions can be played on any device.",
-              },
-              {
-                q: "What if it doesn't work for me?",
-                a: "You're covered by our 30-day \"Sleep Soundly or It's Free\" guarantee. If you don't experience a dramatic improvement in your sleep, just email us and we'll refund every penny. No questions asked.",
-              },
-              {
-                q: "Is my payment secure?",
-                a: "Absolutely. We use industry-standard 256-bit SSL encryption for all transactions. Your payment information is never stored on our servers.",
-              },
-            ].map((faq, i) => (
+            {t.faq.items.map((faq, i) => (
               <FadeInSection key={i} delay={i * 0.05}>
                 <FAQItem question={faq.q} answer={faq.a} />
               </FadeInSection>
@@ -822,28 +721,28 @@ export default function Home() {
         <div className="relative max-w-3xl mx-auto px-4 text-center">
           <FadeInSection>
             <h2 className="font-[var(--font-display)] text-3xl sm:text-4xl font-bold mb-6">
-              What's It Going To Be?
+              {t.finalCta.title}
             </h2>
             <p className="text-foreground/60 text-lg leading-relaxed mb-4">
-              Another night of tossing and turning, staring at the clock, and dreading the morning?
+              {t.finalCta.desc1}
             </p>
             <p className="text-foreground/70 text-lg leading-relaxed mb-10">
-              Or are you ready to try something different? Something that{" "}
-              <strong className="text-amber">works.</strong>
+              {t.finalCta.desc2}
+              <strong className="text-amber">{t.finalCta.desc2Highlight}</strong>
             </p>
 
             <button
-              onClick={() => openCheckout("frontEnd")}
+              onClick={goToOrder}
               className="cta-pulse cta-shimmer w-full sm:w-auto inline-flex items-center justify-center gap-3 bg-amber hover:bg-amber-light text-background font-bold px-10 py-5 rounded-xl text-xl transition-all duration-300 hover:scale-105"
             >
-              CLICK HERE TO GET INSTANT ACCESS FOR JUST $5
+              {t.finalCta.ctaButton}
             </button>
 
             <div className="mt-12 max-w-xl mx-auto border-t border-border/30 pt-8">
               <p className="text-foreground/50 leading-relaxed italic">
-                <strong className="text-foreground/70 not-italic">P.S.</strong> Think about it. You've probably spent more than $5 on a single coffee
-                just to deal with the <em>symptoms</em> of poor sleep. For that same price, you can start
-                treating the <em>cause</em>. Don't you owe it to yourself to at least try?
+                <strong className="text-foreground/70 not-italic">P.S.</strong> {t.finalCta.ps}
+                <em>{t.finalCta.psItalic1}</em>{t.finalCta.psMid}
+                <em>{t.finalCta.psItalic2}</em>{t.finalCta.psEnd}
               </p>
             </div>
           </FadeInSection>
@@ -856,21 +755,20 @@ export default function Home() {
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
             <div className="flex items-center gap-2">
               <Moon className="w-4 h-4 text-amber/50" />
-              <span className="text-foreground/40 text-sm">Deep Sleep Reset</span>
+              <span className="text-foreground/40 text-sm">{t.common.brandName}</span>
             </div>
             <div className="flex items-center gap-6 text-foreground/30 text-sm">
-              <Link href="/privacy" className="hover:text-foreground/60 transition-colors">Privacy Policy</Link>
-              <Link href="/terms" className="hover:text-foreground/60 transition-colors">Terms of Service</Link>
-              <Link href="/affiliates" className="hover:text-foreground/60 transition-colors">Affiliates</Link>
-              <a href="mailto:support@deepsleepreset.com" className="hover:text-foreground/60 transition-colors">Contact</a>
+              <Link href={localePath("/privacy")} className="hover:text-foreground/60 transition-colors">{t.common.privacyPolicy}</Link>
+              <Link href={localePath("/terms")} className="hover:text-foreground/60 transition-colors">{t.common.termsOfService}</Link>
+              <Link href={localePath("/affiliates")} className="hover:text-foreground/60 transition-colors">{t.common.affiliates}</Link>
+              <a href="mailto:support@deepsleepreset.com" className="hover:text-foreground/60 transition-colors">{t.common.contact}</a>
             </div>
             <p className="text-foreground/30 text-xs">
-              &copy; {new Date().getFullYear()} Deep Sleep Reset. All rights reserved.
+              &copy; {new Date().getFullYear()} {t.common.copyright}
             </p>
           </div>
           <p className="text-center text-foreground/20 text-xs mt-6 max-w-2xl mx-auto">
-            Disclaimer: Results may vary. This product is not intended to diagnose, treat, cure, or prevent any disease.
-            Consult your healthcare provider before starting any new health program.
+            {t.common.disclaimer}
           </p>
         </div>
       </footer>

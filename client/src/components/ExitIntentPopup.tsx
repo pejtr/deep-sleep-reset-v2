@@ -4,17 +4,21 @@
  * Strategy: Show $5→$4 discount (20% off) to capture abandoning visitors
  * Triggers when mouse leaves viewport (desktop) or after scroll-up pattern (mobile)
  * Shows only once per session to avoid annoyance
+ * i18n: All strings from useLanguage()
  */
 
 import { useEffect, useState, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, ArrowRight, Clock, Zap, Gift } from "lucide-react";
-import { openCheckout } from "@/lib/checkout";
 import { trackEvent } from "@/components/MetaPixel";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { useLocation } from "wouter";
 
 const SESSION_KEY = "dsr-exit-popup-shown";
 
 export default function ExitIntentPopup() {
+  const { t } = useLanguage();
+  const [, navigate] = useLocation();
   const [isVisible, setIsVisible] = useState(false);
   const [countdown, setCountdown] = useState(10 * 60);
 
@@ -76,7 +80,7 @@ export default function ExitIntentPopup() {
 
   const handleCTA = () => {
     trackEvent("ExitIntentClicked", { discount: true, value: 4 });
-    openCheckout("exitDiscount");
+    navigate("/order?discount=exit");
     setIsVisible(false);
   };
 
@@ -114,7 +118,7 @@ export default function ExitIntentPopup() {
               <div className="absolute top-6 left-6">
                 <div className="flex items-center gap-1.5 bg-red-500/20 border border-red-500/30 text-red-400 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider">
                   <Zap className="w-3 h-3" />
-                  20% OFF
+                  {t.exitPopup.badge}
                 </div>
               </div>
 
@@ -124,20 +128,20 @@ export default function ExitIntentPopup() {
                 </div>
 
                 <h3 className="font-[var(--font-display)] text-2xl sm:text-3xl font-bold mb-2">
-                  Wait — <span className="text-amber italic">Special Offer</span>
+                  {t.exitPopup.title}<span className="text-amber italic">{t.exitPopup.titleHighlight}</span>
                 </h3>
                 <p className="text-foreground/40 text-sm mb-5">
-                  Just for you, because you almost left...
+                  {t.exitPopup.subtitle}
                 </p>
 
                 <div className="flex items-center justify-center gap-4 mb-4">
                   <div className="text-center">
-                    <span className="text-foreground/30 text-sm block">Regular Price</span>
+                    <span className="text-foreground/30 text-sm block">{t.exitPopup.regularPrice}</span>
                     <span className="text-foreground/40 line-through text-2xl font-bold">$5</span>
                   </div>
                   <ArrowRight className="w-5 h-5 text-amber/50" />
                   <div className="text-center">
-                    <span className="text-amber text-sm block font-semibold">Your Price Now</span>
+                    <span className="text-amber text-sm block font-semibold">{t.exitPopup.yourPriceNow}</span>
                     <span className="text-amber text-4xl font-bold font-[var(--font-display)] text-glow">$4</span>
                   </div>
                 </div>
@@ -145,7 +149,7 @@ export default function ExitIntentPopup() {
                 <div className="flex items-center justify-center gap-2 text-sm mb-6">
                   <Clock className="w-4 h-4 text-red-400" />
                   <span className="text-red-400 font-medium">
-                    Offer expires in{" "}
+                    {t.exitPopup.offerExpires}{" "}
                     <span className="font-mono font-bold">
                       {String(minutes).padStart(2, "0")}:{String(seconds).padStart(2, "0")}
                     </span>
@@ -153,12 +157,7 @@ export default function ExitIntentPopup() {
                 </div>
 
                 <div className="text-left max-w-xs mx-auto mb-7 space-y-2.5">
-                  {[
-                    "Full 7-Night Sleep Reset Program",
-                    "Guided Audio Sessions",
-                    "Printable Sleep Journal",
-                    "30-Day Money-Back Guarantee",
-                  ].map((item, i) => (
+                  {t.exitPopup.items.map((item, i) => (
                     <div key={i} className="flex items-center gap-2.5 text-foreground/60 text-sm">
                       <div className="w-4 h-4 rounded-full bg-amber/15 flex items-center justify-center shrink-0">
                         <div className="w-1.5 h-1.5 rounded-full bg-amber" />
@@ -172,19 +171,19 @@ export default function ExitIntentPopup() {
                   onClick={handleCTA}
                   className="cta-shimmer w-full inline-flex items-center justify-center gap-3 bg-amber hover:bg-amber-light text-background font-bold px-8 py-4 rounded-xl text-lg transition-all duration-300 hover:scale-[1.02]"
                 >
-                  Claim My $4 Discount Now
+                  {t.exitPopup.ctaButton}
                   <ArrowRight className="w-5 h-5" />
                 </button>
 
                 <p className="mt-2 text-foreground/30 text-xs">
-                  You save $1 — instant digital access
+                  {t.exitPopup.savings}
                 </p>
 
                 <button
                   onClick={handleClose}
                   className="mt-4 text-foreground/25 hover:text-foreground/40 text-xs transition-colors"
                 >
-                  No thanks, I'd rather pay full price later
+                  {t.exitPopup.decline}
                 </button>
               </div>
             </div>

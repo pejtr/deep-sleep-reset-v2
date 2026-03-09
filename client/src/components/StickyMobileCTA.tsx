@@ -3,14 +3,18 @@
  * Design: Midnight Noir — fixed bottom bar, visible only on mobile/tablet
  * Appears after user scrolls past the hero section (~600px)
  * Hides when user is near the main offer section to avoid overlap
+ * i18n: Strings from useLanguage()
  */
 
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowRight } from "lucide-react";
-import { openCheckout } from "@/lib/checkout";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { useLocation } from "wouter";
 
 export default function StickyMobileCTA() {
+  const { t } = useLanguage();
+  const [, navigate] = useLocation();
   const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
@@ -61,10 +65,10 @@ export default function StickyMobileCTA() {
 
               {/* CTA Button */}
               <button
-                onClick={() => openCheckout("frontEnd")}
+                onClick={() => navigate("/order")}
                 className="shrink-0 inline-flex items-center gap-2 bg-amber hover:bg-amber-light text-background font-bold px-5 py-3 rounded-xl text-sm transition-all duration-300 active:scale-95"
               >
-                Get It Now
+                {t.stickyCta.text}{t.stickyCta.price}
                 <ArrowRight className="w-4 h-4" />
               </button>
             </div>

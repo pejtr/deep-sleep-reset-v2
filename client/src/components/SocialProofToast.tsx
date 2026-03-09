@@ -35,24 +35,50 @@ const PROOF_DATA: ProofItem[] = [
   { name: "Olivia K.", location: "Kuala Lumpur, MY", product: "Deep Sleep Reset", timeAgo: "2 minutes ago" },
 ];
 
+// Spanish-friendly names for /es routes
+const PROOF_DATA_ES: ProofItem[] = [
+  { name: "Carlos M.", location: "Buenos Aires, AR", product: "Deep Sleep Reset", timeAgo: "hace 2 minutos" },
+  { name: "Ana G.", location: "Ciudad de México, MX", product: "Deep Sleep Reset", timeAgo: "hace 5 minutos" },
+  { name: "María L.", location: "Bogotá, CO", product: "Paquete Completo", timeAgo: "hace 3 minutos" },
+  { name: "Diego R.", location: "Lima, PE", product: "Deep Sleep Reset", timeAgo: "hace 8 minutos" },
+  { name: "Sofía W.", location: "Santiago, CL", product: "Audio Anti-Ansiedad", timeAgo: "hace 1 minuto" },
+  { name: "Miguel T.", location: "Madrid, ES", product: "Deep Sleep Reset", timeAgo: "hace 4 minutos" },
+  { name: "Laura P.", location: "Quito, EC", product: "Paquete Completo", timeAgo: "hace 6 minutos" },
+  { name: "Roberto H.", location: "Montevideo, UY", product: "Deep Sleep Reset", timeAgo: "hace 2 minutos" },
+  { name: "Isabella S.", location: "Medellín, CO", product: "Kit Optimizador", timeAgo: "hace 7 minutos" },
+  { name: "Javier B.", location: "Caracas, VE", product: "Deep Sleep Reset", timeAgo: "hace 3 minutos" },
+  { name: "Valentina N.", location: "Córdoba, AR", product: "Paquete Completo", timeAgo: "hace 5 minutos" },
+  { name: "Tomás G.", location: "Barcelona, ES", product: "Deep Sleep Reset", timeAgo: "hace 1 minuto" },
+  { name: "Camila F.", location: "Guadalajara, MX", product: "Audio Anti-Ansiedad", timeAgo: "hace 4 minutos" },
+  { name: "Daniel M.", location: "Asunción, PY", product: "Deep Sleep Reset", timeAgo: "hace 9 minutos" },
+  { name: "Luciana K.", location: "São Paulo, BR", product: "Deep Sleep Reset", timeAgo: "hace 2 minutos" },
+];
+
 const SESSION_KEY = "dsr-proof-index";
 
 export default function SocialProofToast() {
   const [current, setCurrent] = useState<ProofItem | null>(null);
   const [isVisible, setIsVisible] = useState(false);
 
+  const isSpanish = window.location.pathname.startsWith("/es");
+  const data = isSpanish ? PROOF_DATA_ES : PROOF_DATA;
+  const purchasedLabel = isSpanish ? "Compró" : "Purchased";
+
   const showNext = useCallback(() => {
     // Don't show on non-sales pages
-    if (window.location.pathname !== "/") return;
+    const path = window.location.pathname;
+    if (path !== "/" && path !== "/es" && path !== "/es/") return;
 
     // Get next index from session (cycle through all)
     const idx = parseInt(sessionStorage.getItem(SESSION_KEY) || "0", 10);
-    const item = PROOF_DATA[idx % PROOF_DATA.length];
-    sessionStorage.setItem(SESSION_KEY, String((idx + 1) % PROOF_DATA.length));
+    const item = data[idx % data.length];
+    sessionStorage.setItem(SESSION_KEY, String((idx + 1) % data.length));
 
     // Randomize the timeAgo for freshness
     const minutes = Math.floor(Math.random() * 12) + 1;
-    const timeAgo = minutes === 1 ? "1 minute ago" : `${minutes} minutes ago`;
+    const timeAgo = isSpanish
+      ? (minutes === 1 ? "hace 1 minuto" : `hace ${minutes} minutos`)
+      : (minutes === 1 ? "1 minute ago" : `${minutes} minutes ago`);
 
     setCurrent({ ...item, timeAgo });
     setIsVisible(true);
@@ -61,7 +87,7 @@ export default function SocialProofToast() {
     setTimeout(() => {
       setIsVisible(false);
     }, 5000);
-  }, []);
+  }, [data, isSpanish]);
 
   useEffect(() => {
     // Initial delay: 20 seconds after page load
@@ -100,10 +126,10 @@ export default function SocialProofToast() {
             <div className="flex-1 min-w-0">
               <p className="text-foreground/80 text-sm leading-snug">
                 <strong className="text-foreground/95">{current.name}</strong>{" "}
-                from {current.location}
+                {isSpanish ? "de" : "from"} {current.location}
               </p>
               <p className="text-foreground/50 text-xs mt-0.5">
-                Purchased <span className="text-amber/80">{current.product}</span>
+                {purchasedLabel} <span className="text-amber/80">{current.product}</span>
               </p>
               <p className="text-foreground/30 text-[11px] mt-1">{current.timeAgo}</p>
             </div>

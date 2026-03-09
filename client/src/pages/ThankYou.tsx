@@ -3,6 +3,7 @@
  * Design: Midnight Noir — consistent with all pages
  * Fires Meta Pixel "Purchase" event on load
  * Displays access instructions and next steps
+ * i18n: All strings from useLanguage()
  */
 
 import { useEffect, useRef } from "react";
@@ -19,8 +20,13 @@ import {
   Star,
 } from "lucide-react";
 import { trackEvent } from "@/components/MetaPixel";
+import { useLanguage } from "@/contexts/LanguageContext";
+
+const stepIcons = [Mail, Download, Moon];
 
 export default function ThankYou() {
+  const { t, localePath } = useLanguage();
+  const ty = t.thankYou;
   const hasFired = useRef(false);
 
   // Fire Purchase event once on page load
@@ -50,7 +56,7 @@ export default function ThankYou() {
           <div className="flex items-center gap-2">
             <Moon className="w-5 h-5 text-amber" />
             <span className="font-[var(--font-display)] text-lg font-semibold tracking-wide text-amber">
-              Deep Sleep Reset
+              {t.common.brandName}
             </span>
           </div>
         </div>
@@ -69,6 +75,10 @@ export default function ThankYou() {
             <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-green-500/10 border-2 border-green-500/30 mb-6">
               <CheckCircle className="w-10 h-10 text-green-400" />
             </div>
+
+            <div className="inline-flex items-center gap-2 bg-green-500/10 border border-green-500/20 rounded-full px-4 py-1.5 mb-4">
+              <span className="text-green-400 text-sm font-medium uppercase tracking-wider">{ty.badge}</span>
+            </div>
           </motion.div>
 
           <motion.div
@@ -77,11 +87,11 @@ export default function ThankYou() {
             transition={{ duration: 0.7, delay: 0.3 }}
           >
             <h1 className="font-[var(--font-display)] text-3xl sm:text-4xl md:text-5xl font-bold leading-tight mb-4">
-              Welcome to Your{" "}
-              <span className="text-amber text-glow">New Sleep Life</span>
+              {ty.title}
+              <span className="text-amber text-glow">{ty.titleHighlight}</span>
             </h1>
             <p className="text-foreground/60 text-lg max-w-lg mx-auto">
-              Your purchase is confirmed. You're about to experience the best sleep of your life.
+              {ty.desc}
             </p>
           </motion.div>
         </div>
@@ -95,32 +105,9 @@ export default function ThankYou() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, delay: 0.5 }}
           >
-            <h2 className="font-[var(--font-display)] text-2xl font-bold mb-8 text-center">
-              What Happens Next?
-            </h2>
-
             <div className="space-y-4">
-              {[
-                {
-                  icon: Mail,
-                  step: "1",
-                  title: "Check Your Email",
-                  desc: "We've sent your login details and access link to the email you used at checkout. Check your inbox (and spam folder, just in case).",
-                },
-                {
-                  icon: Download,
-                  step: "2",
-                  title: "Access Your Program",
-                  desc: "Click the link in your email to access the full 7-Night Deep Sleep Reset program. You can start Night 1 tonight.",
-                },
-                {
-                  icon: Moon,
-                  step: "3",
-                  title: "Start Tonight",
-                  desc: "Follow the Night 1 protocol before bed tonight. Each night builds on the last, creating a powerful compounding effect.",
-                },
-              ].map((item, i) => {
-                const Icon = item.icon;
+              {ty.steps.map((item, i) => {
+                const Icon = stepIcons[i] ?? Moon;
                 return (
                   <div
                     key={i}
@@ -132,7 +119,7 @@ export default function ThankYou() {
                     <div>
                       <div className="flex items-center gap-2 mb-1">
                         <span className="text-amber/50 text-xs font-medium uppercase tracking-wider">
-                          Step {item.step}
+                          {i + 1}
                         </span>
                       </div>
                       <h3 className="font-[var(--font-display)] text-lg font-semibold text-foreground/90 mb-1">
@@ -150,7 +137,7 @@ export default function ThankYou() {
         </div>
       </section>
 
-      {/* ===== PRO TIPS ===== */}
+      {/* ===== REMINDER BOX ===== */}
       <section className="py-12">
         <div className="max-w-2xl mx-auto px-4">
           <motion.div
@@ -159,24 +146,25 @@ export default function ThankYou() {
             transition={{ duration: 0.7, delay: 0.7 }}
           >
             <div className="border border-amber/15 rounded-2xl p-8 bg-card/20">
-              <div className="flex items-center gap-3 mb-6">
+              <div className="flex items-center gap-3 mb-4">
                 <Sparkles className="w-5 h-5 text-amber" />
                 <h3 className="font-[var(--font-display)] text-xl font-semibold">
-                  Pro Tips for Maximum Results
+                  {ty.reminderTitle}
                 </h3>
               </div>
-              <div className="space-y-4">
-                {[
-                  "Complete each night's protocol in order — they build on each other.",
-                  "Do the exercises at least 30 minutes before your intended bedtime.",
-                  "Keep a glass of water by your bed and your phone in another room.",
-                  "Be patient with yourself — lasting change takes 7 nights, not 1.",
-                ].map((tip, i) => (
-                  <div key={i} className="flex items-start gap-3">
-                    <Star className="w-4 h-4 text-amber/50 mt-0.5 shrink-0" />
-                    <p className="text-foreground/60 text-sm leading-relaxed">{tip}</p>
-                  </div>
-                ))}
+              <p className="text-foreground/60 leading-relaxed">{ty.reminderText}</p>
+
+              <div className="mt-6 pt-6 border-t border-border/20">
+                <div className="flex items-center gap-3 mb-3">
+                  <Star className="w-4 h-4 text-amber/50" />
+                  <h4 className="font-semibold text-foreground/80 text-sm">{ty.supportTitle}</h4>
+                </div>
+                <p className="text-foreground/50 text-sm">
+                  {ty.supportText}
+                  <a href="mailto:support@deepsleepreset.com" className="text-amber/70 hover:text-amber transition-colors">
+                    support@deepsleepreset.com
+                  </a>
+                </p>
               </div>
             </div>
           </motion.div>
@@ -192,20 +180,16 @@ export default function ThankYou() {
             transition={{ duration: 0.7, delay: 0.9 }}
           >
             <Heart className="w-8 h-8 text-amber/40 mx-auto mb-4" />
-            <p className="text-foreground/70 text-lg leading-relaxed mb-6">
-              Thank you for trusting us with something as important as your sleep.
-              We're genuinely excited for you to experience the transformation.
-            </p>
             <p className="font-[var(--font-display)] text-xl font-semibold text-amber mb-8">
               Tonight, you sleep.
             </p>
-            <a
-              href="#"
+            <Link
+              href={localePath("/")}
               className="inline-flex items-center gap-2 bg-amber/10 hover:bg-amber/20 text-amber border border-amber/30 px-6 py-3 rounded-lg text-sm font-medium transition-all duration-300"
             >
-              Access Your Program Now
+              {ty.backHome}
               <ArrowRight className="w-4 h-4" />
-            </a>
+            </Link>
           </motion.div>
         </div>
       </section>
@@ -216,15 +200,15 @@ export default function ThankYou() {
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
             <div className="flex items-center gap-2">
               <Moon className="w-4 h-4 text-amber/50" />
-              <span className="text-foreground/40 text-sm">Deep Sleep Reset</span>
+              <span className="text-foreground/40 text-sm">{t.common.brandName}</span>
             </div>
             <div className="flex items-center gap-6 text-foreground/30 text-sm">
-              <Link href="/privacy" className="hover:text-foreground/60 transition-colors">Privacy Policy</Link>
-              <Link href="/terms" className="hover:text-foreground/60 transition-colors">Terms of Service</Link>
-              <a href="mailto:support@deepsleepreset.com" className="hover:text-foreground/60 transition-colors">Contact</a>
+              <Link href={localePath("/privacy")} className="hover:text-foreground/60 transition-colors">{t.common.privacyPolicy}</Link>
+              <Link href={localePath("/terms")} className="hover:text-foreground/60 transition-colors">{t.common.termsOfService}</Link>
+              <a href="mailto:support@deepsleepreset.com" className="hover:text-foreground/60 transition-colors">{t.common.contact}</a>
             </div>
             <p className="text-foreground/30 text-xs">
-              &copy; {new Date().getFullYear()} Deep Sleep Reset. All rights reserved.
+              &copy; {new Date().getFullYear()} {t.common.copyright}
             </p>
           </div>
         </div>

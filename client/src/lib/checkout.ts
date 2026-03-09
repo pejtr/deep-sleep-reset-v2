@@ -16,6 +16,49 @@
 
 export type ProductKey = "frontEnd" | "exitDiscount" | "upsell1" | "upsell2";
 
+/**
+ * Open Stripe Checkout for multiple products (order bump).
+ * The first product in the array is the primary product (determines redirect).
+ */
+export async function openBundleCheckout(products: ProductKey[]) {
+  const totalValue = products.reduce((sum, p) => sum + (PRICES[p] || 0), 0);
+  const w = window as unknown as { fbq?: (...args: unknown[]) => void };
+  if (w.fbq) {
+    w.fbq("track", "InitiateCheckout", {
+      value: totalValue,
+      currency: "USD",
+      content_name: products.join("+"),
+    });
+  }
+
+  try {
+    const response = await fetch("/api/trpc/checkout.createBundleSession", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify({
+        json: {
+          productKeys: products,
+          origin: window.location.origin,
+        },
+      }),
+    });
+
+    const data = await response.json();
+    const url = data?.result?.data?.json?.url;
+
+    if (url) {
+      window.location.href = url;
+    } else {
+      console.error("[BundleCheckout] No URL returned:", data);
+      alert("Something went wrong creating your checkout. Please try again.");
+    }
+  } catch (err) {
+    console.error("[BundleCheckout] Error:", err);
+    alert("Something went wrong. Please try again.");
+  }
+}
+
 export const PRICES: Record<ProductKey, number> = {
   frontEnd: 5,
   exitDiscount: 4,
