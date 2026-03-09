@@ -1,23 +1,15 @@
 /*
  * Meta Pixel Integration Component
+ * Pixel ID: 2291810691310549
  * 
- * HOW TO USE:
- * 1. Replace 'YOUR_PIXEL_ID' below with your actual Meta Pixel ID
- * 2. The component is already integrated into App.tsx and loads on every page
- * 3. Standard events (PageView) fire automatically on each route change
- * 4. Use trackEvent() helper to fire custom events (Purchase, AddToCart, etc.)
- * 
- * To get your Pixel ID:
- * - Go to Meta Events Manager: https://business.facebook.com/events_manager
- * - Click "Connect Data Sources" → "Web" → "Meta Pixel"
- * - Copy your Pixel ID (a 15-16 digit number)
+ * Fires PageView on every route change.
+ * Use trackEvent() helper to fire custom events (Purchase, AddToCart, etc.)
  */
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useLocation } from "wouter";
 
-// ⚠️ REPLACE THIS WITH YOUR ACTUAL META PIXEL ID
-const META_PIXEL_ID = "YOUR_PIXEL_ID";
+const META_PIXEL_ID = "2291810691310549";
 
 // Helper to safely call fbq
 function callFbq(...args: unknown[]) {
@@ -45,19 +37,15 @@ export function trackEvent(eventName: string, params?: Record<string, unknown>) 
 
 export default function MetaPixel() {
   const [location] = useLocation();
+  const initialized = useRef(false);
 
   // Initialize the pixel on mount
   useEffect(() => {
-    if (META_PIXEL_ID === "YOUR_PIXEL_ID") {
-      console.log(
-        "%c[Meta Pixel] Pixel ID not configured. Replace 'YOUR_PIXEL_ID' in MetaPixel.tsx with your actual Pixel ID.",
-        "color: #d4a853; font-weight: bold;"
-      );
-      return;
-    }
+    if (initialized.current) return;
+    initialized.current = true;
 
     const w = window as unknown as Record<string, unknown>;
-    if (w.fbq) return; // Already initialized
+    if (w.fbq) return; // Already initialized externally
 
     // Inject Meta Pixel script
     const script = document.createElement("script");
@@ -66,28 +54,28 @@ export default function MetaPixel() {
     document.head.appendChild(script);
 
     // Initialize fbq queue before script loads
-    const queue: unknown[][] = [];
     const fbq = function (...args: unknown[]) {
-      queue.push(args);
+      (fbq as unknown as { queue: unknown[][] }).queue.push(args);
     };
+    (fbq as unknown as { queue: unknown[][] }).queue = [];
+    (fbq as unknown as { loaded: boolean }).loaded = true;
+    (fbq as unknown as { version: string }).version = "2.0";
     w.fbq = fbq;
     w._fbq = fbq;
 
-    script.onload = () => {
-      // After script loads, fbq is replaced by the real function
-      // Replay queued calls
-      callFbq("init", META_PIXEL_ID);
-      callFbq("track", "PageView");
-    };
+    callFbq("init", META_PIXEL_ID);
+    callFbq("track", "PageView");
   }, []);
 
-  // Track page views on route changes
+  // Track page views on route changes (skip first render, handled by init)
+  const isFirstRender = useRef(true);
   useEffect(() => {
-    if (META_PIXEL_ID === "YOUR_PIXEL_ID") return;
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      return;
+    }
     callFbq("track", "PageView");
   }, [location]);
-
-  if (META_PIXEL_ID === "YOUR_PIXEL_ID") return null;
 
   return (
     <noscript>
