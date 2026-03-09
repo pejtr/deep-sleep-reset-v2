@@ -81,6 +81,7 @@ const es: Translations = {
     desc1Bold: "para siempre.",
     desc2: "Esto no es otro PDF flojo lleno de consejos genéricos. Este es un programa estructurado e interactivo de 7 días que te da ",
     desc2Bold: "una acción simple y poderosa para hacer cada noche.",
+    desc2End: " — cada una apuntando a una causa raíz diferente de tu sueño roto.",
     desc3: "Hemos tomado las técnicas más efectivas y clínicamente probadas de la Terapia Cognitivo-Conductual para el Insomnio (TCC-I) — el método que médicos y científicos del sueño llaman el \"estándar de oro\" para tratar problemas de sueño — y las destilamos en un reset fácil de seguir, noche por noche.",
   },
 
@@ -254,8 +255,10 @@ const es: Translations = {
 
   // Sticky Mobile CTA
   stickyCta: {
-    text: "Obtener el Reset — ",
+    button: "Arreglar Mi Sueño",
+    text: "Arreglar Mi Sueño — ",
     price: "$5",
+    subtext: "Garantía 30 Días · Acceso Instantáneo",
   },
 
   // Upsell 1
@@ -360,6 +363,19 @@ const es: Translations = {
       "¿Sigues navegando? Lo entiendo — cuando no puedes dormir, terminas scrolleando. ¿Quieres que comparta un consejo rápido que realmente funciona?",
     ],
     errorMessage: "Lo siento, tuve un pequeño problema. ¿Podrías intentar de nuevo?",
+  },
+
+  // FOMO Notification
+  fomo: {
+    messages: [
+      "Alguien de Buenos Aires acaba de iniciar el programa",
+      "Sarah de México completó la Noche 7 — está durmiendo 8 horas",
+      "47 personas iniciaron el reset en las últimas 24 horas",
+      "Alguien de Bogotá acaba de agregar el Pack de Audio",
+      "James de Madrid acaba de dejar una reseña de 5 estrellas",
+      "Una enfermera de Lima acaba de arreglar su horario de sueño nocturno",
+      "Alguien de Santiago acaba de obtener su reembolso... espera, no — enviaron un email diciendo que funcionó",
+    ],
   },
 } as const;
 

@@ -76,3 +76,11 @@
 - [x] Přidat pulzující scroll šipku do spodní části hero sekce
 - [x] Označit audio soubory jako neaktivní (Coming Soon) v Audio Pack sekci
 - [x] Opravit SEO: title (30-60 znaků), meta description (50-160 znaků), keywords
+
+## Phase 10: Meta Ads Launch Preparation
+- [ ] Vytvořit branded Open Graph obrázek (1200x630px) s názvem produktu a cenou
+- [ ] Aktualizovat OG meta tag v index.html s novým obrázkem
+- [ ] Vytvořit SEO blog obsah (2-3 posty z keyword CSV dat)
+- [ ] Přidat /blog route a blog stránky do App.tsx
+- [ ] Ověřit Stripe live mode readiness (live klíče)
+- [ ] Finální audit funnelu před Meta ads spuštěním
