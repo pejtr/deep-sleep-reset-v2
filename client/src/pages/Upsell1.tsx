@@ -6,11 +6,12 @@
  * i18n: All strings from useLanguage()
  */
 
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
 import { motion, useInView } from "framer-motion";
 import CountdownTimer from "@/components/CountdownTimer";
 import { openCheckout } from "@/lib/checkout";
 import { Link } from "wouter";
+import { trackEvent } from "@/components/MetaPixel";
 import {
   Moon,
   AlertTriangle,
@@ -46,6 +47,24 @@ const sessionColors = ["text-red-400", "text-amber", "text-amber-light", "text-l
 export default function Upsell1() {
   const { t, localePath } = useLanguage();
   const u = t.upsell1;
+  const hasFiredPurchase = useRef(false);
+
+  // Fire Purchase event for the $5 front-end product
+  // This page is reached only after a successful payment
+  useEffect(() => {
+    if (hasFiredPurchase.current) return;
+    hasFiredPurchase.current = true;
+    const params = new URLSearchParams(window.location.search);
+    const value = parseFloat(params.get("value") || "5");
+    const currency = params.get("currency") || "USD";
+    trackEvent("Purchase", {
+      value,
+      currency,
+      content_name: "7-Night Deep Sleep Reset",
+      content_type: "product",
+      content_ids: ["frontEnd"],
+    });
+  }, []);
 
   return (
     <div className="min-h-screen bg-background text-foreground overflow-x-hidden">

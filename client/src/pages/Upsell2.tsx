@@ -5,11 +5,12 @@
  * i18n: All strings from useLanguage()
  */
 
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
 import { motion, useInView } from "framer-motion";
 import CountdownTimer from "@/components/CountdownTimer";
 import { openCheckout } from "@/lib/checkout";
 import { Link } from "wouter";
+import { trackEvent } from "@/components/MetaPixel";
 import {
   Moon,
   BarChart3,
@@ -45,6 +46,25 @@ const toolkitColors = ["text-amber", "text-lavender", "text-green-400", "text-bl
 export default function Upsell2() {
   const { t, localePath } = useLanguage();
   const u = t.upsell2;
+  const hasFiredPurchase = useRef(false);
+
+  // Fire Purchase event for upsell1 ($10 Anxiety Dissolve Audio Pack)
+  // This page is reached after accepting upsell1 — check URL param
+  useEffect(() => {
+    if (hasFiredPurchase.current) return;
+    hasFiredPurchase.current = true;
+    const params = new URLSearchParams(window.location.search);
+    const purchased = params.get("purchased");
+    if (purchased === "upsell1") {
+      trackEvent("Purchase", {
+        value: 10,
+        currency: "USD",
+        content_name: "Anxiety Dissolve Audio Pack",
+        content_type: "product",
+        content_ids: ["upsell1"],
+      });
+    }
+  }, []);
 
   return (
     <div className="min-h-screen bg-background text-foreground overflow-x-hidden">

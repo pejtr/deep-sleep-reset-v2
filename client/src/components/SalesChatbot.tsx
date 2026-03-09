@@ -27,8 +27,23 @@ export default function SalesChatbot() {
   const [isTyping, setIsTyping] = useState(false);
   const [hasBeenTriggered, setHasBeenTriggered] = useState(false);
   const [showPulse, setShowPulse] = useState(false);
+  const [stickyCtaVisible, setStickyCtaVisible] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  // Track sticky CTA visibility to avoid overlap on mobile
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollY = window.scrollY;
+      const viewportHeight = window.innerHeight;
+      const docHeight = document.documentElement.scrollHeight;
+      const pastHero = scrollY > 600;
+      const nearBottom = scrollY + viewportHeight > docHeight * 0.8;
+      setStickyCtaVisible(pastHero && !nearBottom);
+    };
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   const chatMutation = trpc.chat.send.useMutation();
 
@@ -119,7 +134,10 @@ export default function SalesChatbot() {
   if (!isVisible) return null;
 
   return (
-    <div className="fixed bottom-4 right-4 z-[60] flex flex-col items-end gap-3">
+    <div
+      className="fixed right-4 z-[60] flex flex-col items-end gap-3 transition-all duration-300"
+      style={{ bottom: stickyCtaVisible ? '5.5rem' : '1rem' }}
+    >
       {/* Chat Window */}
       {isOpen && (
         <div

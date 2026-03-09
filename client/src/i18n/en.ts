@@ -279,9 +279,9 @@ const en = {
     subtext: "30-Day Guarantee · Instant Access",
   },
 
-  // Sales Chatbot (Lucie)
+  // Sales Chatbot (Lucy)
   chatbot: {
-    name: "Lucie",
+    name: "Lucy",
     title: "Sleep Expert",
     status: "Online",
     placeholder: "Type your message...",

@@ -24,7 +24,7 @@ export const PRODUCTS: Record<ProductKey, ProductConfig> = {
     name: "The 7-Night Deep Sleep Reset",
     description: "The science-backed, step-by-step protocol to fix your broken sleep cycle in 7 nights.",
     priceInCents: 500, // $5.00
-    successPath: "/upsell-1",
+    successPath: "/upsell-1?value=5&currency=USD",
     cancelPath: "/",
   },
   exitDiscount: {
@@ -32,7 +32,7 @@ export const PRODUCTS: Record<ProductKey, ProductConfig> = {
     name: "The 7-Night Deep Sleep Reset (Special Offer)",
     description: "The science-backed, step-by-step protocol to fix your broken sleep cycle — 20% off special.",
     priceInCents: 400, // $4.00
-    successPath: "/upsell-1",
+    successPath: "/upsell-1?value=4&currency=USD",
     cancelPath: "/",
   },
   upsell1: {
@@ -40,7 +40,7 @@ export const PRODUCTS: Record<ProductKey, ProductConfig> = {
     name: "Anxiety Dissolve Audio Pack",
     description: "5 powerful guided audio sessions to melt away stress and anxiety on demand.",
     priceInCents: 1000, // $10.00
-    successPath: "/upsell-2",
+    successPath: "/upsell-2?purchased=upsell1",
     cancelPath: "/upsell-2",
   },
   upsell2: {
