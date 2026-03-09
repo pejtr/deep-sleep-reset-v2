@@ -156,21 +156,24 @@ export default function Upsell1() {
               const Icon = sessionIcons[i] ?? Moon;
               return (
                 <FadeIn key={i} delay={i * 0.08}>
-                  <div className="group border border-border/40 rounded-xl p-5 sm:p-6 bg-card/30 backdrop-blur-sm hover:border-amber/20 hover:bg-card/50 transition-all duration-400">
+                  <div className="group border border-border/40 rounded-xl p-5 sm:p-6 bg-card/20 backdrop-blur-sm opacity-70">
                     <div className="flex items-start gap-4 sm:gap-5">
-                      <div className="shrink-0 w-11 h-11 rounded-lg bg-card/60 border border-border/30 flex items-center justify-center">
-                        <Icon className={`w-5 h-5 ${sessionColors[i] ?? "text-amber"}`} />
+                      <div className="shrink-0 w-11 h-11 rounded-lg bg-card/40 border border-border/20 flex items-center justify-center">
+                        <Icon className={`w-5 h-5 ${sessionColors[i] ?? "text-amber"} opacity-50`} />
                       </div>
                       <div className="flex-1">
                         <div className="flex items-center gap-3 mb-1.5">
-                          <h3 className="font-[var(--font-display)] text-lg font-semibold text-foreground/90">
+                          <h3 className="font-[var(--font-display)] text-lg font-semibold text-foreground/60">
                             {session.title}
                           </h3>
                           <span className="text-xs text-foreground/30 bg-foreground/5 px-2 py-0.5 rounded-full">
                             {session.duration}
                           </span>
+                          <span className="text-xs text-amber/70 bg-amber/10 border border-amber/20 px-2 py-0.5 rounded-full font-medium">
+                            Coming Soon
+                          </span>
                         </div>
-                        <p className="text-foreground/55 leading-relaxed text-sm sm:text-base">
+                        <p className="text-foreground/35 leading-relaxed text-sm sm:text-base">
                           {session.desc}
                         </p>
                       </div>

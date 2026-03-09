@@ -208,9 +208,12 @@ export default function OrderBump() {
                       <span className="text-amber text-[10px] font-bold">{i + 1}</span>
                     </div>
                     <div>
-                      <span className="text-foreground/80 text-sm font-medium">{session.title}</span>
-                      <span className="text-foreground/40 text-xs ml-2">({session.duration})</span>
-                      <p className="text-foreground/50 text-xs">{session.desc}</p>
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="text-foreground/70 text-sm font-medium">{session.title}</span>
+                        <span className="text-foreground/40 text-xs">({session.duration})</span>
+                        <span className="text-xs text-amber/70 bg-amber/10 border border-amber/20 px-1.5 py-0.5 rounded-full font-medium">Coming Soon</span>
+                      </div>
+                      <p className="text-foreground/40 text-xs">{session.desc}</p>
                     </div>
                   </div>
                 ))}

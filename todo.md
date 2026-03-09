@@ -74,3 +74,5 @@
 - [x] ViewContent event na sales page (Home.tsx)
 - [x] InitiateCheckout event na /order stránce (OrderBump.tsx)
 - [x] Přidat pulzující scroll šipku do spodní části hero sekce
+- [x] Označit audio soubory jako neaktivní (Coming Soon) v Audio Pack sekci
+- [x] Opravit SEO: title (30-60 znaků), meta description (50-160 znaků), keywords

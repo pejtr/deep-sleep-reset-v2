@@ -174,6 +174,19 @@ export default function Home() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  // Set document title and meta description for SEO
+  useEffect(() => {
+    document.title = "Deep Sleep Reset: Fix Insomnia in 7 Nights";
+    const metaDesc = document.querySelector('meta[name="description"]');
+    if (metaDesc) {
+      metaDesc.setAttribute('content', 'Science-backed 7-night CBT-I protocol to fix insomnia and fall asleep faster. No pills, no apps. Trusted by 10,000+ people. Just $5.');
+    }
+    const metaKeywords = document.querySelector('meta[name="keywords"]');
+    if (metaKeywords) {
+      metaKeywords.setAttribute('content', 'deep sleep, how to get deep sleep, fix insomnia, sleep better, CBT-I, sleep reset, sleep anxiety, insomnia cure, natural sleep remedies, fall asleep fast');
+    }
+  }, []);
+
   // Fire ViewContent event once on page load
   const viewContentFired = useRef(false);
   useEffect(() => {
