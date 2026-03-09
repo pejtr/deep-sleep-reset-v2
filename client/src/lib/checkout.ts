@@ -1,55 +1,33 @@
 /*
- * Checkout URL Configuration
+ * Checkout — Stripe Integration
  * 
- * PRICING STRATEGY (Direct Stripe — no ClickBank):
- *   - Regular price: $5 (shown on sales page)
- *   - Exit-intent discount: $4 (shown in exit popup — 20% off)
+ * PRICING:
+ *   - Regular price: $5 (front-end)
+ *   - Exit-intent discount: $4 (20% off)
  *   - Upsell 1: $10 (Anxiety Dissolve Audio Pack)
  *   - Upsell 2: $10 (Sleep Optimizer Toolkit)
- * 
- * Stripe fees: 2.9% + $0.30 per transaction
- * Net per customer (max): $23.37 / $25.00
- * 
- * STRIPE SETUP:
- *   After full-stack upgrade, checkout sessions are created server-side.
- *   These URLs will be replaced by API calls to /api/checkout/create-session.
- *   For now they serve as placeholder config.
  * 
  * FUNNEL FLOW:
  *   Front-end ($5) → /upsell-1
  *   Exit discount ($4) → /upsell-1
  *   Upsell 1 ($10) → /upsell-2
- *   Upsell 2 ($10) → /thank-you?value=25&product=Complete+Bundle
- *   "No thanks" → skip to next step
+ *   Upsell 2 ($10) → /thank-you
  */
 
-export const CHECKOUT_URLS = {
-  /** $5 Front-end: The 7-Night Deep Sleep Reset */
-  frontEnd: "#checkout-frontend",
+export type ProductKey = "frontEnd" | "exitDiscount" | "upsell1" | "upsell2";
 
-  /** $4 Exit-intent discount: The 7-Night Deep Sleep Reset (special) */
-  exitDiscount: "#checkout-exit-discount",
-
-  /** $10 Upsell 1: The Anxiety Dissolve Audio Pack */
-  upsell1: "#checkout-upsell1",
-
-  /** $10 Upsell 2: The Sleep Optimizer Toolkit */
-  upsell2: "#checkout-upsell2",
-} as const;
-
-export const PRICES = {
+export const PRICES: Record<ProductKey, number> = {
   frontEnd: 5,
   exitDiscount: 4,
   upsell1: 10,
   upsell2: 10,
-} as const;
+};
 
 /**
- * Open checkout — will be replaced by Stripe Checkout Session after upgrade
+ * Open Stripe Checkout for a product.
+ * Creates a checkout session via tRPC, then redirects.
  */
-export function openCheckout(product: keyof typeof CHECKOUT_URLS) {
-  const url = CHECKOUT_URLS[product];
-
+export async function openCheckout(product: ProductKey) {
   // Fire Meta Pixel event
   const w = window as unknown as { fbq?: (...args: unknown[]) => void };
   if (w.fbq) {
@@ -60,17 +38,32 @@ export function openCheckout(product: keyof typeof CHECKOUT_URLS) {
     });
   }
 
-  // If Stripe is integrated, call the API
-  if (url.startsWith("#checkout")) {
-    // Will be replaced by fetch("/api/checkout/create-session", ...)
-    console.warn(
-      `[Checkout] Stripe not yet configured for "${product}". Upgrade to full-stack and set up Stripe.`
-    );
-    alert(
-      `Checkout for "${product}" ($${PRICES[product]}) will be handled by Stripe after full-stack upgrade.\n\nThis is a placeholder — Stripe Checkout Sessions will replace this.`
-    );
-    return;
-  }
+  try {
+    // Call the tRPC endpoint via fetch (avoiding circular import with trpc client)
+    const response = await fetch("/api/trpc/checkout.createSession", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify({
+        json: {
+          productKey: product,
+          origin: window.location.origin,
+        },
+      }),
+    });
 
-  window.open(url, "_blank");
+    const data = await response.json();
+    const url = data?.result?.data?.json?.url;
+
+    if (url) {
+      // Redirect to Stripe Checkout
+      window.location.href = url;
+    } else {
+      console.error("[Checkout] No URL returned:", data);
+      alert("Something went wrong creating your checkout. Please try again.");
+    }
+  } catch (err) {
+    console.error("[Checkout] Error:", err);
+    alert("Something went wrong. Please try again.");
+  }
 }

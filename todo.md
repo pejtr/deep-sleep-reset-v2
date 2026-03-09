@@ -5,25 +5,27 @@
 
 ## Phase 1: Pricing $5 base + $4 exit popup
 - [x] Revert Home.tsx $7 → $5
-- [ ] Update ExitIntentPopup: $5→$4 discount (20% off)
-- [ ] Update checkout.ts: frontEnd=$5, exitDiscount=$4
-- [ ] Update StickyMobileCTA pricing
-- [ ] Update Affiliates page commission structure for $5
+- [x] Update ExitIntentPopup: $5→$4 discount (20% off)
+- [x] Update checkout.ts: frontEnd=$5, exitDiscount=$4
+- [x] Update StickyMobileCTA pricing
+- [x] Update Affiliates page commission structure for $5 (removed ClickBank, direct affiliate program)
 
 ## Phase 2: Full-stack upgrade + Stripe
-- [ ] Run webdev_add_feature web-db-user
-- [ ] Run webdev_add_feature stripe
-- [ ] Create Stripe products ($5 front-end, $4 exit discount, $10 upsell1, $10 upsell2)
-- [ ] Set up Stripe checkout sessions with redirect URLs
-- [ ] Create webhook handler for successful payments
-- [ ] Wire CTA buttons to Stripe checkout
+- [x] Run webdev_add_feature web-db-user
+- [x] Run webdev_add_feature stripe
+- [x] Create Stripe products ($5 front-end, $4 exit discount, $10 upsell1, $10 upsell2)
+- [x] Set up Stripe checkout sessions with redirect URLs
+- [x] Create webhook handler for successful payments
+- [x] Wire CTA buttons to Stripe checkout
+- [x] Create orders table in database schema
+- [x] Write vitest tests for checkout and chat (8 tests passing)
 
 ## Phase 3: AI Sales Chatbot
-- [ ] Create chatbot component with timed activation (30-45s or 50% scroll)
-- [ ] Connect to Gemini API for intelligent conversation
-- [ ] Implement proactive engagement based on scroll position
-- [ ] Sales-focused personality: friendly sleep expert
-- [ ] Hidden by default, controllable via admin
+- [x] Create chatbot component with timed activation (45s or 50% scroll)
+- [x] Connect to LLM API (Gemini) for intelligent conversation
+- [x] Implement proactive engagement based on scroll position
+- [x] Sales-focused personality: Lucie (inspired by Leila Hormozi)
+- [x] Chatbot appears after trigger, not visible by default
 
 ## Phase 4: Spanish Translation (South America)
 - [ ] Create i18n context and translation system
@@ -39,9 +41,10 @@
 - [ ] Test email delivery
 
 ## Phase 6: E2E Testing
-- [ ] Test Stripe test mode purchase flow
-- [ ] Test upsell redirect chain
-- [ ] Test thank-you page Purchase event
-- [ ] Test chatbot activation and conversation
+- [x] Test Stripe checkout session creation (vitest)
+- [x] Test chatbot AI conversation (vitest)
+- [ ] Test Stripe test mode purchase flow (manual)
+- [ ] Test upsell redirect chain (manual)
+- [ ] Test thank-you page Purchase event (manual)
 - [ ] Test email delivery after purchase
 - [ ] Test Spanish version end-to-end

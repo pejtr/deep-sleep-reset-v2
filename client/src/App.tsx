@@ -5,6 +5,7 @@ import ExitIntentPopup from "@/components/ExitIntentPopup";
 import StickyMobileCTA from "@/components/StickyMobileCTA";
 import SocialProofToast from "@/components/SocialProofToast";
 import StarField from "@/components/StarField";
+import SalesChatbot from "@/components/SalesChatbot";
 import NotFound from "@/pages/NotFound";
 import { Route, Switch } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
@@ -16,6 +17,7 @@ import ThankYou from "./pages/ThankYou";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import Terms from "./pages/Terms";
 import Affiliates from "./pages/Affiliates";
+
 function Router() {
   // make sure to consider if you need authentication for certain routes
   return (
@@ -43,6 +45,7 @@ function App() {
           <ExitIntentPopup />
           <StickyMobileCTA />
           <SocialProofToast />
+          <SalesChatbot />
           <Toaster />
           <Router />
         </TooltipProvider>
