@@ -266,6 +266,17 @@ export default function Home() {
 
         {/* Bottom gradient fade */}
         <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-background to-transparent" />
+
+        {/* Scroll down indicator */}
+        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-20 flex flex-col items-center gap-1 cursor-pointer" onClick={scrollToOffer}>
+          <span className="text-foreground/40 text-xs uppercase tracking-widest">scroll</span>
+          <motion.div
+            animate={{ y: [0, 8, 0] }}
+            transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+          >
+            <ChevronDown className="w-6 h-6 text-amber/60" />
+          </motion.div>
+        </div>
       </section>
 
       {/* ===== PROBLEM / PAIN SECTION ===== */}

@@ -73,3 +73,4 @@
 - [x] Nastavit logo jako favicon (moon icon, CDN URL v index.html)
 - [x] ViewContent event na sales page (Home.tsx)
 - [x] InitiateCheckout event na /order stránce (OrderBump.tsx)
+- [x] Přidat pulzující scroll šipku do spodní části hero sekce
