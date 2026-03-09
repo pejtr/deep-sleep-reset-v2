@@ -50,6 +50,76 @@ function FadeInSection({ children, className = "", delay = 0 }: { children: Reac
   );
 }
 
+// Empathy heading with word-by-word reveal animation
+function EmpathyHeading() {
+  const ref = useRef(null);
+  const isInView = useInView(ref, { once: true, margin: "-80px" });
+
+  const line1Words = ["You", "Are", "Not", "Alone."];
+  const line2Words = ["And", "This", "Is", "Not", "Your", "Fault."];
+
+  return (
+    <div ref={ref} className="text-center mb-12">
+      <h2 className="font-[var(--font-display)] text-3xl sm:text-4xl font-bold mb-6 empathy-heading-glow">
+        {line1Words.map((word, i) => (
+          <motion.span
+            key={`l1-${i}`}
+            initial={{ opacity: 0, y: 18, filter: "blur(6px)" }}
+            animate={
+              isInView
+                ? { opacity: 1, y: 0, filter: "blur(0px)" }
+                : { opacity: 0, y: 18, filter: "blur(6px)" }
+            }
+            transition={{
+              duration: 0.55,
+              delay: i * 0.15,
+              ease: [0.25, 0.46, 0.45, 0.94],
+            }}
+            className="inline-block mr-[0.3em]"
+          >
+            {word}
+          </motion.span>
+        ))}
+        <br className="hidden sm:block" />
+        {line2Words.map((word, i) => (
+          <motion.span
+            key={`l2-${i}`}
+            initial={{ opacity: 0, y: 18, filter: "blur(6px)" }}
+            animate={
+              isInView
+                ? { opacity: 1, y: 0, filter: "blur(0px)" }
+                : { opacity: 0, y: 18, filter: "blur(6px)" }
+            }
+            transition={{
+              duration: 0.55,
+              delay: line1Words.length * 0.15 + 0.2 + i * 0.15,
+              ease: [0.25, 0.46, 0.45, 0.94],
+            }}
+            className="inline-block mr-[0.3em] text-lavender"
+          >
+            {word}
+          </motion.span>
+        ))}
+      </h2>
+      {/* Animated underline that draws in after words appear */}
+      <motion.div
+        initial={{ scaleX: 0, opacity: 0 }}
+        animate={
+          isInView
+            ? { scaleX: 1, opacity: 1 }
+            : { scaleX: 0, opacity: 0 }
+        }
+        transition={{
+          duration: 0.8,
+          delay: (line1Words.length + line2Words.length) * 0.15 + 0.4,
+          ease: [0.25, 0.46, 0.45, 0.94],
+        }}
+        className="mx-auto w-24 h-px bg-gradient-to-r from-transparent via-lavender/60 to-transparent origin-center"
+      />
+    </div>
+  );
+}
+
 // Night module data
 const nights = [
   { night: 1, title: "The Sleep Pressure Reset", desc: "Learn the counterintuitive method to build powerful, natural sleep drive, making your body crave sleep.", icon: Moon },
@@ -401,14 +471,7 @@ export default function Home() {
       {/* ===== SOCIAL PROOF / WHO IT'S FOR ===== */}
       <section className="py-24 lg:py-32">
         <div className="max-w-4xl mx-auto px-4">
-          <FadeInSection>
-            <div className="text-center mb-12">
-              <h2 className="font-[var(--font-display)] text-3xl sm:text-4xl font-bold mb-6">
-                You Are Not Alone.{" "}
-                <span className="text-lavender">And This Is Not Your Fault.</span>
-              </h2>
-            </div>
-          </FadeInSection>
+          <EmpathyHeading />
 
           {/* Stats */}
           <FadeInSection delay={0.15}>

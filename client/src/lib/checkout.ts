@@ -1,51 +1,51 @@
 /*
  * Checkout URL Configuration
  * 
- * All CTA buttons across the funnel reference these URLs.
- * Replace the placeholder URLs below with your actual payment links.
+ * PRICING STRATEGY (Direct Stripe — no ClickBank):
+ *   - Regular price: $5 (shown on sales page)
+ *   - Exit-intent discount: $4 (shown in exit popup — 20% off)
+ *   - Upsell 1: $10 (Anxiety Dissolve Audio Pack)
+ *   - Upsell 2: $10 (Sleep Optimizer Toolkit)
  * 
- * GUMROAD SETUP (Recommended for beginners):
+ * Stripe fees: 2.9% + $0.30 per transaction
+ * Net per customer (max): $23.37 / $25.00
  * 
- *   1. Create a free account at https://gumroad.com
- *   2. Create 3 products:
- *      - "The 7-Night Deep Sleep Reset" → $5
- *      - "The Anxiety Dissolve Audio Pack" → $10
- *      - "The Sleep Optimizer Toolkit" → $10
- *   3. For each product, go to Settings → After Purchase → Redirect URL:
- *      - Front-end:  https://YOUR-DOMAIN/upsell-1
- *      - Upsell 1:   https://YOUR-DOMAIN/upsell-2
- *      - Upsell 2:   https://YOUR-DOMAIN/thank-you?value=25&product=Complete+Bundle
- *   4. Copy each product's checkout URL and paste below
- *   5. Gumroad URLs look like: https://YOURNAME.gumroad.com/l/PRODUCT_ID
+ * STRIPE SETUP:
+ *   After full-stack upgrade, checkout sessions are created server-side.
+ *   These URLs will be replaced by API calls to /api/checkout/create-session.
+ *   For now they serve as placeholder config.
  * 
- * STRIPE PAYMENT LINKS (Alternative):
- * 
- *   1. Go to https://dashboard.stripe.com/payment-links
- *   2. Create 3 Payment Links with the same prices
- *   3. Set "After payment" → Redirect to your upsell/thank-you URLs
- *   4. Copy the Payment Link URLs and paste below
- *   5. Stripe URLs look like: https://buy.stripe.com/XXXXX
- * 
- * IMPORTANT: Set redirect URLs so the funnel flows correctly:
- *   Front-end purchase → redirects to /upsell-1
- *   Upsell 1 purchase  → redirects to /upsell-2
- *   Upsell 2 purchase  → redirects to /thank-you?value=25&product=Complete+Bundle
- *   "No thanks" links   → already handled in the code (skip to next step)
+ * FUNNEL FLOW:
+ *   Front-end ($5) → /upsell-1
+ *   Exit discount ($4) → /upsell-1
+ *   Upsell 1 ($10) → /upsell-2
+ *   Upsell 2 ($10) → /thank-you?value=25&product=Complete+Bundle
+ *   "No thanks" → skip to next step
  */
 
 export const CHECKOUT_URLS = {
   /** $5 Front-end: The 7-Night Deep Sleep Reset */
-  frontEnd: "https://YOUR-STORE.gumroad.com/l/deep-sleep-reset",
+  frontEnd: "#checkout-frontend",
+
+  /** $4 Exit-intent discount: The 7-Night Deep Sleep Reset (special) */
+  exitDiscount: "#checkout-exit-discount",
 
   /** $10 Upsell 1: The Anxiety Dissolve Audio Pack */
-  upsell1: "https://YOUR-STORE.gumroad.com/l/anxiety-dissolve-audio",
+  upsell1: "#checkout-upsell1",
 
   /** $10 Upsell 2: The Sleep Optimizer Toolkit */
-  upsell2: "https://YOUR-STORE.gumroad.com/l/sleep-optimizer-toolkit",
+  upsell2: "#checkout-upsell2",
+} as const;
+
+export const PRICES = {
+  frontEnd: 5,
+  exitDiscount: 4,
+  upsell1: 10,
+  upsell2: 10,
 } as const;
 
 /**
- * Open checkout in a new tab and fire Meta Pixel InitiateCheckout event
+ * Open checkout — will be replaced by Stripe Checkout Session after upgrade
  */
 export function openCheckout(product: keyof typeof CHECKOUT_URLS) {
   const url = CHECKOUT_URLS[product];
@@ -53,25 +53,21 @@ export function openCheckout(product: keyof typeof CHECKOUT_URLS) {
   // Fire Meta Pixel event
   const w = window as unknown as { fbq?: (...args: unknown[]) => void };
   if (w.fbq) {
-    const values: Record<string, number> = {
-      frontEnd: 5,
-      upsell1: 10,
-      upsell2: 10,
-    };
     w.fbq("track", "InitiateCheckout", {
-      value: values[product] || 0,
+      value: PRICES[product] || 0,
       currency: "USD",
       content_name: product,
     });
   }
 
-  // Check if it's still a placeholder
-  if (url.includes("YOUR-STORE")) {
+  // If Stripe is integrated, call the API
+  if (url.startsWith("#checkout")) {
+    // Will be replaced by fetch("/api/checkout/create-session", ...)
     console.warn(
-      `[Checkout] Placeholder URL detected for "${product}". Update CHECKOUT_URLS in src/lib/checkout.ts with your real Gumroad/Stripe link.`
+      `[Checkout] Stripe not yet configured for "${product}". Upgrade to full-stack and set up Stripe.`
     );
     alert(
-      "Checkout is not configured yet.\n\nTo set up payments, edit the file:\nsrc/lib/checkout.ts\n\nReplace the placeholder URLs with your Gumroad or Stripe payment links."
+      `Checkout for "${product}" ($${PRICES[product]}) will be handled by Stripe after full-stack upgrade.\n\nThis is a placeholder — Stripe Checkout Sessions will replace this.`
     );
     return;
   }
