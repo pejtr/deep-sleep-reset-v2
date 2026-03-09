@@ -88,13 +88,21 @@ export async function createBundleCheckoutSession(params: CreateBundleCheckoutPa
     0
   );
 
+  // Build success URL with total value for Meta Pixel dynamic tracking
+  const totalDollars = (totalCents / 100).toFixed(2);
+  const primarySuccessBase = primaryProduct.successPath.split('?')[0];
+  const primarySuccessParams = new URLSearchParams(primaryProduct.successPath.split('?')[1] || '');
+  primarySuccessParams.set('value', totalDollars);
+  primarySuccessParams.set('currency', 'USD');
+  const bundleSuccessPath = `${primarySuccessBase}?${primarySuccessParams.toString()}`;
+
   const session = await stripe.checkout.sessions.create({
     mode: "payment",
     payment_method_types: ["card"],
     line_items: lineItems,
     customer_email: params.customerEmail || undefined,
     allow_promotion_codes: true,
-    success_url: `${params.origin}${primaryProduct.successPath}`,
+    success_url: `${params.origin}${bundleSuccessPath}`,
     cancel_url: `${params.origin}${primaryProduct.cancelPath}`,
     metadata: {
       productKeys: params.productKeys.join(","),

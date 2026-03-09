@@ -94,6 +94,10 @@
 - [x] Satisfaction survey at end of chatbot conversation (1-5 stars + comment)
 - [x] One-click purchase for returning customers (detect prior purchase, skip order bump)
 
+## Phase 9b: Meta Pixel Bundle Fix
+- [x] Fix bundle checkout success_url to pass total value dynamically to Meta Pixel
+- [x] Verify all funnel pages fire correct Purchase/InitiateCheckout events with dynamic value
+
 ## Phase 13: Meta Conversions API (Server-Side)
 - [ ] Get Meta Pixel Access Token from Events Manager
 - [ ] Add META_PIXEL_ID and META_CAPI_TOKEN to secrets
