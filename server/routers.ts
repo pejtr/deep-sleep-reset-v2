@@ -3,7 +3,7 @@ import { z } from "zod";
 import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
 import { publicProcedure, protectedProcedure, router } from "./_core/trpc";
-import { createCheckoutSession, createBundleCheckoutSession, PRODUCTS, type ProductKey } from "./stripe";
+import { createCheckoutSession, createBundleCheckoutSession, PRODUCTS, type ProductKey } from "./stripe/index";
 import { invokeLLM } from "./_core/llm";
 
 const productKeySchema = z.enum(["frontEnd", "exitDiscount", "upsell1", "upsell2"]);
