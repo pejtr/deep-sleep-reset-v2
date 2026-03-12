@@ -371,3 +371,58 @@ export const igWebhookConfig = mysqlTable("ig_webhook_config", {
 
 export type IgWebhookConfig = typeof igWebhookConfig.$inferSelect;
 export type InsertIgWebhookConfig = typeof igWebhookConfig.$inferInsert;
+
+/**
+ * Email sequence enrollments — tracks which customers are enrolled in the
+ * 7-day post-purchase nurture sequence and their current progress.
+ */
+export const emailSequenceEnrollments = mysqlTable("email_sequence_enrollments", {
+  id: int("id").autoincrement().primaryKey(),
+  /** Customer email address */
+  email: varchar("email", { length: 320 }).notNull(),
+  /** Customer name for personalization */
+  name: varchar("name", { length: 255 }),
+  /** Order ID that triggered enrollment */
+  orderId: int("orderId"),
+  /** Stripe session ID for reference */
+  stripeSessionId: varchar("stripeSessionId", { length: 255 }),
+  /** Which day email to send next (1-6, 0 = all done) */
+  nextDayToSend: int("nextDayToSend").default(1).notNull(),
+  /** When to send the next email (UTC timestamp) */
+  nextSendAt: timestamp("nextSendAt").notNull(),
+  /** Status of the enrollment */
+  status: mysqlEnum("status", ["active", "completed", "unsubscribed", "paused"]).default("active").notNull(),
+  /** Whether customer purchased the upsell (audio pack) */
+  purchasedUpsell: int("purchasedUpsell").default(0).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type EmailSequenceEnrollment = typeof emailSequenceEnrollments.$inferSelect;
+export type InsertEmailSequenceEnrollment = typeof emailSequenceEnrollments.$inferInsert;
+
+/**
+ * Email send log — record of every email sent in the nurture sequence.
+ * Tracks delivery status, open tracking, and click tracking.
+ */
+export const emailSendLog = mysqlTable("email_send_log", {
+  id: int("id").autoincrement().primaryKey(),
+  /** Enrollment this email belongs to */
+  enrollmentId: int("enrollmentId").notNull(),
+  /** Customer email */
+  email: varchar("email", { length: 320 }).notNull(),
+  /** Day number in the sequence (1-6) */
+  dayNumber: int("dayNumber").notNull(),
+  /** Email subject line */
+  subject: varchar("subject", { length: 500 }).notNull(),
+  /** Whether the email was sent successfully */
+  success: int("success").default(0).notNull(),
+  /** Error message if failed */
+  errorMessage: text("errorMessage"),
+  /** Brevo message ID for tracking */
+  messageId: varchar("messageId", { length: 255 }),
+  sentAt: timestamp("sentAt").defaultNow().notNull(),
+});
+
+export type EmailSendLog = typeof emailSendLog.$inferSelect;
+export type InsertEmailSendLog = typeof emailSendLog.$inferInsert;

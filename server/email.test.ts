@@ -32,7 +32,7 @@ describe("Brevo API Key Validation", () => {
     const data = await response.json() as { email?: string; plan?: unknown[] };
     expect(data.email).toBeDefined();
     console.log(`[Brevo] Connected as: ${data.email}`);
-  });
+  }, 15000);
 });
 
 describe("sendPurchaseEmail", () => {

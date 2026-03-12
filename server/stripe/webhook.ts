@@ -10,6 +10,8 @@ import { orders } from "../../drizzle/schema";
 import type { ProductKey } from "./products";
 import { notifyOwner } from "../_core/notification";
 import { sendPurchaseEmail } from "../email";
+import { enrollInSequence } from "../routers/emailSequence";
+import { eq } from "drizzle-orm";
 
 export async function handleStripeWebhook(req: Request, res: Response) {
   const stripe = getStripe();
@@ -107,5 +109,21 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
       productKey,
       amountCents,
     }).catch(err => console.warn("[Webhook] Customer email failed:", err));
+  }
+
+  // 4. Enroll in 7-day nurture sequence (only for core product purchases)
+  const coreProducts: ProductKey[] = ["frontEnd", "exitDiscount"];
+  if (customerEmail && coreProducts.includes(productKey)) {
+    const recentOrder = await db
+      .select({ id: orders.id })
+      .from(orders)
+      .where(eq(orders.stripeSessionId, session.id))
+      .limit(1);
+    await enrollInSequence({
+      email: customerEmail,
+      name: customerName || undefined,
+      orderId: recentOrder[0]?.id,
+      stripeSessionId: session.id,
+    }).catch(err => console.warn("[Webhook] Sequence enrollment failed:", err));
   }
 }

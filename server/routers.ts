@@ -8,6 +8,7 @@ import { invokeLLM } from "./_core/llm";
 import { saveLead, saveChatInsight, saveChatSurvey, getOrdersByEmail, getAdminStats, getFunnelStats, getRecentOrders, getRecentLeads, getRecentChatInsights, getRecentChatSurveys, getDailyRevenue } from "./db";
 import { igAutopilotRouter } from "./routers/igAutopilot";
 import { igDmAutoResponderRouter } from "./routers/igDmAutoResponder";
+import { emailSequenceRouter } from "./routers/emailSequence";
 
 const productKeySchema = z.enum(["frontEnd", "exitDiscount", "upsell1", "upsell2"]);
 
@@ -15,6 +16,7 @@ export const appRouter = router({
   system: systemRouter,
   igAutopilot: igAutopilotRouter,
   igDmAutoResponder: igDmAutoResponderRouter,
+  emailSequence: emailSequenceRouter,
   auth: router({
     me: publicProcedure.query(opts => opts.ctx.user),
     logout: publicProcedure.mutation(({ ctx }) => {

@@ -232,6 +232,13 @@ export default function Admin() {
               <Instagram className="w-3.5 h-3.5" />
               Instagram Autopilot
             </Link>
+            <Link
+              href="/admin/email-sequence"
+              className="flex items-center gap-1.5 text-xs bg-gradient-to-r from-amber-600 to-orange-600 text-white px-3 py-1.5 rounded-md hover:from-amber-500 hover:to-orange-500 transition-all"
+            >
+              <Mail className="w-3.5 h-3.5" />
+              Email Sequence
+            </Link>
             <span className="text-xs text-foreground/30">
               {user.name ?? user.openId}
             </span>
