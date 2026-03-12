@@ -29,6 +29,13 @@
       "when": 1773089618613,
       "tag": "0003_huge_mantis",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "5",
+      "when": 1773340474210,
+      "tag": "0004_deep_talon",
+      "breakpoints": true
     }
   ]
 }

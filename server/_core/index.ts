@@ -8,6 +8,7 @@ import { appRouter } from "../routers";
 import { createContext } from "./context";
 import { serveStatic, setupVite } from "./vite";
 import { handleStripeWebhook } from "../stripe/webhook";
+import { igCronTick } from "../igCronJob";
 
 function isPortAvailable(port: number): Promise<boolean> {
   return new Promise(resolve => {
@@ -72,3 +73,13 @@ async function startServer() {
 }
 
 startServer().catch(console.error);
+
+// Instagram Autopilot cron — runs every 5 minutes
+setInterval(() => {
+  igCronTick().catch(e => console.error("[IG Cron] Uncaught error:", e));
+}, 5 * 60 * 1000);
+
+// Also run once on startup after a short delay
+setTimeout(() => {
+  igCronTick().catch(e => console.error("[IG Cron] Startup error:", e));
+}, 30 * 1000);

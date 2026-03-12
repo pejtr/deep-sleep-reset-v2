@@ -20,6 +20,7 @@ import Terms from "./pages/Terms";
 import Affiliates from "./pages/Affiliates";
 import OrderBump from "./pages/OrderBump";
 import Admin from "./pages/Admin";
+import AdminInstagram from "./pages/AdminInstagram";
 
 function Router() {
   // make sure to consider if you need authentication for certain routes
@@ -47,6 +48,7 @@ function Router() {
       <Route path={"/es/affiliates"} component={Affiliates} />
 
       <Route path={"/admin"} component={Admin} />
+      <Route path={"/admin/instagram"} component={AdminInstagram} />
       <Route path={"/404"} component={NotFound} />
       <Route component={NotFound} />
     </Switch>

@@ -116,3 +116,10 @@
 - [x] Real-time refresh (auto-poll every 30s)
 - [x] Admin route guard (owner-only access)
 - [x] Admin navigation entry in header/sidebar
+
+## Phase 15: Stripe Live Mode Switch
+- [ ] Update STRIPE_SECRET_KEY to live key (sk_live_...)
+- [ ] Update VITE_STRIPE_PUBLISHABLE_KEY to live key (pk_live_...)
+- [ ] Update STRIPE_WEBHOOK_SECRET to live webhook signing secret
+- [ ] Register live webhook endpoint in Stripe Dashboard
+- [ ] Verify live mode checkout works end-to-end

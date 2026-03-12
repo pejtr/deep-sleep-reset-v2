@@ -14,6 +14,7 @@ import {
   Bar,
   Cell,
 } from "recharts";
+import { Link } from "wouter";
 import {
   DollarSign,
   ShoppingCart,
@@ -29,6 +30,7 @@ import {
   ChevronUp,
   RefreshCw,
   AlertTriangle,
+  Instagram,
 } from "lucide-react";
 
 // ─── helpers ──────────────────────────────────────────────────────────────────
@@ -223,6 +225,13 @@ export default function Admin() {
               <RefreshCw className="w-3.5 h-3.5" />
               Obnovit
             </button>
+            <Link
+              href="/admin/instagram"
+              className="flex items-center gap-1.5 text-xs bg-gradient-to-r from-purple-600 to-pink-600 text-white px-3 py-1.5 rounded-md hover:from-purple-500 hover:to-pink-500 transition-all"
+            >
+              <Instagram className="w-3.5 h-3.5" />
+              Instagram Autopilot
+            </Link>
             <span className="text-xs text-foreground/30">
               {user.name ?? user.openId}
             </span>

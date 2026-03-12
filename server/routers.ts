@@ -6,11 +6,13 @@ import { publicProcedure, protectedProcedure, router } from "./_core/trpc";
 import { createCheckoutSession, createBundleCheckoutSession, PRODUCTS, type ProductKey } from "./stripe/index";
 import { invokeLLM } from "./_core/llm";
 import { saveLead, saveChatInsight, saveChatSurvey, getOrdersByEmail, getAdminStats, getFunnelStats, getRecentOrders, getRecentLeads, getRecentChatInsights, getRecentChatSurveys, getDailyRevenue } from "./db";
+import { igAutopilotRouter } from "./routers/igAutopilot";
 
 const productKeySchema = z.enum(["frontEnd", "exitDiscount", "upsell1", "upsell2"]);
 
 export const appRouter = router({
   system: systemRouter,
+  igAutopilot: igAutopilotRouter,
   auth: router({
     me: publicProcedure.query(opts => opts.ctx.user),
     logout: publicProcedure.mutation(({ ctx }) => {
