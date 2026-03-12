@@ -5,7 +5,8 @@ import { useLocation } from "wouter";
 import {
   Instagram, Calendar, BarChart2, Settings, Play, RefreshCw,
   CheckCircle, XCircle, Clock, Zap, TrendingUp, Eye, Heart,
-  MessageCircle, Bookmark, ChevronDown, ChevronUp, Loader2, Plus
+  MessageCircle, Bookmark, ChevronDown, ChevronUp, Loader2, Plus,
+  FlaskConical, Hash, Repeat2, Trophy, ArrowUpRight
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -35,7 +36,7 @@ function formatDate(d: Date | string) {
 export default function AdminInstagram() {
   const { user, loading } = useAuth();
   const [, navigate] = useLocation();
-  const [activeTab, setActiveTab] = useState<"calendar" | "analytics" | "settings">("calendar");
+  const [activeTab, setActiveTab] = useState<"calendar" | "analytics" | "abtests" | "hashtags" | "reposts" | "settings">("calendar");
   const [expandedPost, setExpandedPost] = useState<number | null>(null);
   const [generating, setGenerating] = useState(false);
   const [newPostType, setNewPostType] = useState<"post" | "story">("post");
@@ -48,6 +49,10 @@ export default function AdminInstagram() {
   const { data: analytics } = trpc.igAutopilot.getAnalytics.useQuery({ limit: 20 });
   const { data: topTopics } = trpc.igAutopilot.getTopTopics.useQuery();
   const { data: topics } = trpc.igAutopilot.getTopics.useQuery();
+  const { data: abTests } = trpc.igAutopilot.getAbTests.useQuery();
+  const { data: hashtagStats } = trpc.igAutopilot.getHashtagStats.useQuery();
+  const { data: repostQueue } = trpc.igAutopilot.getRepostQueue.useQuery();
+  const { data: optimizedHashtags } = trpc.igAutopilot.getOptimizedHashtags.useQuery({ count: 20 });
 
   // Mutations
   const updateSettings = trpc.igAutopilot.updateSettings.useMutation({
@@ -89,6 +94,36 @@ export default function AdminInstagram() {
 
   const cancelPost = trpc.igAutopilot.cancelPost.useMutation({
     onSuccess: () => utils.igAutopilot.getScheduledPosts.invalidate(),
+  });
+
+  const createAbTest = trpc.igAutopilot.createAbTest.useMutation({
+    onSuccess: (data) => {
+      utils.igAutopilot.getAbTests.invalidate();
+      utils.igAutopilot.getScheduledPosts.invalidate();
+      toast.success(`A/B test created for topic: ${data.topic}`);
+    },
+    onError: (e) => toast.error(e.message),
+  });
+
+  const evaluateAbTests = trpc.igAutopilot.evaluateAbTests.useMutation({
+    onSuccess: (data) => {
+      utils.igAutopilot.getAbTests.invalidate();
+      toast.success(`Evaluated ${data.evaluated} A/B test(s)`);
+    },
+  });
+
+  const scanForReposts = trpc.igAutopilot.scanForReposts.useMutation({
+    onSuccess: (data) => {
+      utils.igAutopilot.getRepostQueue.invalidate();
+      toast.success(`Queued ${data.queued} post(s) for reposting`);
+    },
+  });
+
+  const publishDueReposts = trpc.igAutopilot.publishDueReposts.useMutation({
+    onSuccess: (data) => {
+      utils.igAutopilot.getRepostQueue.invalidate();
+      toast.success(`Republished ${data.published} post(s)`);
+    },
   });
 
   if (loading) return <div className="min-h-screen bg-background flex items-center justify-center"><Loader2 className="animate-spin text-amber-400 w-8 h-8" /></div>;
@@ -228,8 +263,8 @@ export default function AdminInstagram() {
         </div>
 
         {/* Tabs */}
-        <div className="flex gap-1 mb-6 bg-white/5 rounded-lg p-1 w-fit">
-          {(["calendar", "analytics", "settings"] as const).map(tab => (
+        <div className="flex flex-wrap gap-1 mb-6 bg-white/5 rounded-lg p-1 w-fit">
+          {(["calendar", "analytics", "abtests", "hashtags", "reposts", "settings"] as const).map(tab => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
@@ -241,8 +276,11 @@ export default function AdminInstagram() {
             >
               {tab === "calendar" && <Calendar className="w-3.5 h-3.5 inline mr-1.5" />}
               {tab === "analytics" && <BarChart2 className="w-3.5 h-3.5 inline mr-1.5" />}
+              {tab === "abtests" && <FlaskConical className="w-3.5 h-3.5 inline mr-1.5" />}
+              {tab === "hashtags" && <Hash className="w-3.5 h-3.5 inline mr-1.5" />}
+              {tab === "reposts" && <Repeat2 className="w-3.5 h-3.5 inline mr-1.5" />}
               {tab === "settings" && <Settings className="w-3.5 h-3.5 inline mr-1.5" />}
-              {tab}
+              {tab === "abtests" ? "A/B Tests" : tab === "hashtags" ? "Hashtags" : tab === "reposts" ? "Reposts" : tab}
             </button>
           ))}
         </div>
@@ -404,6 +442,239 @@ export default function AdminInstagram() {
                 )}
               </CardContent>
             </Card>
+          </div>
+        )}
+
+        {/* A/B Tests Tab */}
+        {activeTab === "abtests" && (
+          <div className="space-y-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-white font-semibold">A/B Caption Testing</h2>
+                <p className="text-white/40 text-sm">Generate 2 caption variants for the same post — AI picks the winner after 48h</p>
+              </div>
+              <div className="flex gap-2">
+                <Button
+                  onClick={() => evaluateAbTests.mutate()}
+                  disabled={evaluateAbTests.isPending}
+                  variant="outline"
+                  className="border-white/20 text-white/60 hover:text-white"
+                >
+                  <Trophy className="w-4 h-4 mr-2" />
+                  Evaluate Tests
+                </Button>
+                <Button
+                  onClick={() => {
+                    const scheduledAt = new Date();
+                    scheduledAt.setDate(scheduledAt.getDate() + 1);
+                    scheduledAt.setUTCHours(9, 0, 0, 0);
+                    createAbTest.mutate({ scheduledAt: scheduledAt.toISOString(), offsetMinutes: 60 });
+                  }}
+                  disabled={createAbTest.isPending}
+                  className="bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-500 hover:to-purple-500 text-white"
+                >
+                  {createAbTest.isPending
+                    ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Creating...</>
+                    : <><FlaskConical className="w-4 h-4 mr-2" />New A/B Test</>}
+                </Button>
+              </div>
+            </div>
+
+            {!abTests || abTests.length === 0 ? (
+              <div className="text-center py-16 text-white/30">
+                <FlaskConical className="w-12 h-12 mx-auto mb-3 opacity-30" />
+                <p className="text-lg">No A/B tests yet</p>
+                <p className="text-sm mt-1">Create a test to compare two caption variants and find what resonates most</p>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {abTests.map(test => (
+                  <Card key={test.id} className="bg-white/5 border-white/10">
+                    <CardContent className="p-4">
+                      <div className="flex items-center justify-between mb-3">
+                        <div>
+                          <p className="text-sm font-medium text-white">{test.topic}</p>
+                          <p className="text-xs text-white/40">Evaluate: {formatDate(test.evaluateAt)}</p>
+                        </div>
+                        <span className={`text-xs px-2 py-1 rounded-full border ${
+                          test.status === "running" ? "bg-blue-500/20 text-blue-400 border-blue-500/30" :
+                          test.status === "completed" ? "bg-green-500/20 text-green-400 border-green-500/30" :
+                          "bg-gray-500/20 text-gray-400 border-gray-500/30"
+                        }`}>{test.status}</span>
+                      </div>
+                      {test.status === "completed" && (
+                        <div className="grid grid-cols-2 gap-3">
+                          <div className={`p-3 rounded-lg border ${
+                            test.winner === "a" ? "border-green-500/40 bg-green-500/10" : "border-white/10 bg-white/5"
+                          }`}>
+                            <div className="flex items-center justify-between mb-1">
+                              <span className="text-xs text-white/50">Variant A</span>
+                              {test.winner === "a" && <Trophy className="w-3.5 h-3.5 text-amber-400" />}
+                            </div>
+                            <p className="text-lg font-bold text-white">{test.engagementA ?? 0}%</p>
+                            <p className="text-xs text-white/30">engagement rate</p>
+                          </div>
+                          <div className={`p-3 rounded-lg border ${
+                            test.winner === "b" ? "border-green-500/40 bg-green-500/10" : "border-white/10 bg-white/5"
+                          }`}>
+                            <div className="flex items-center justify-between mb-1">
+                              <span className="text-xs text-white/50">Variant B</span>
+                              {test.winner === "b" && <Trophy className="w-3.5 h-3.5 text-amber-400" />}
+                            </div>
+                            <p className="text-lg font-bold text-white">{test.engagementB ?? 0}%</p>
+                            <p className="text-xs text-white/30">engagement rate</p>
+                          </div>
+                        </div>
+                      )}
+                      {test.status === "running" && (
+                        <div className="grid grid-cols-2 gap-3">
+                          {["Variant A", "Variant B"].map(v => (
+                            <div key={v} className="p-3 rounded-lg border border-white/10 bg-white/5">
+                              <p className="text-xs text-white/50 mb-1">{v}</p>
+                              <p className="text-sm text-white/40">Waiting for data...</p>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Hashtag Optimizer Tab */}
+        {activeTab === "hashtags" && (
+          <div className="space-y-6">
+            <div>
+              <h2 className="text-white font-semibold">Hashtag Optimizer</h2>
+              <p className="text-white/40 text-sm">AI tracks which hashtags drive the most reach and auto-selects the best ones</p>
+            </div>
+
+            {/* AI Recommended Set */}
+            <Card className="bg-white/5 border-white/10">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-white text-sm flex items-center gap-2">
+                  <Zap className="w-4 h-4 text-amber-400" />
+                  AI-Optimized Hashtag Set (Next Post)
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {!optimizedHashtags ? (
+                  <div className="flex items-center gap-2 text-white/30 text-sm">
+                    <Loader2 className="w-4 h-4 animate-spin" /> Generating optimal hashtags...
+                  </div>
+                ) : (
+                  <div>
+                    <div className="flex flex-wrap gap-2 mb-3">
+                      {optimizedHashtags.hashtags.map(tag => (
+                        <span key={tag} className="text-xs px-2 py-1 rounded-full bg-amber-500/10 text-amber-300 border border-amber-500/20">
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+                    <p className="text-xs text-white/30">These hashtags are automatically appended to AI-generated captions</p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Hashtag Performance Table */}
+            <Card className="bg-white/5 border-white/10">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-white text-sm flex items-center gap-2">
+                  <BarChart2 className="w-4 h-4 text-blue-400" />
+                  Hashtag Performance Database
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {!hashtagStats || hashtagStats.length === 0 ? (
+                  <p className="text-white/30 text-sm text-center py-4">No hashtag data yet. Publish posts and sync analytics to start tracking.</p>
+                ) : (
+                  <div className="space-y-2">
+                    <div className="grid grid-cols-4 gap-2 text-xs text-white/30 uppercase tracking-wider pb-2 border-b border-white/10">
+                      <span>Hashtag</span>
+                      <span className="text-right">Used</span>
+                      <span className="text-right">Avg Reach</span>
+                      <span className="text-right">Avg Eng.</span>
+                    </div>
+                    {hashtagStats.map(h => (
+                      <div key={h.id} className="grid grid-cols-4 gap-2 text-sm py-1.5 border-b border-white/5 last:border-0">
+                        <span className="text-amber-300 truncate">{h.hashtag}</span>
+                        <span className="text-right text-white/50">{h.timesUsed}x</span>
+                        <span className="text-right text-white/70">{h.avgReach.toLocaleString()}</span>
+                        <span className="text-right text-amber-400 font-medium">{h.avgEngagementRate}%</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </div>
+        )}
+
+        {/* Reposts Tab */}
+        {activeTab === "reposts" && (
+          <div className="space-y-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-white font-semibold">Auto-Repost Top Performers</h2>
+                <p className="text-white/40 text-sm">Posts with 10%+ engagement are automatically queued for reposting every 30 days</p>
+              </div>
+              <div className="flex gap-2">
+                <Button
+                  onClick={() => publishDueReposts.mutate()}
+                  disabled={publishDueReposts.isPending}
+                  className="bg-green-600 hover:bg-green-500 text-white"
+                >
+                  {publishDueReposts.isPending
+                    ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Publishing...</>
+                    : <><Play className="w-4 h-4 mr-2" />Publish Due Reposts</>}
+                </Button>
+                <Button
+                  onClick={() => scanForReposts.mutate()}
+                  disabled={scanForReposts.isPending}
+                  variant="outline"
+                  className="border-white/20 text-white/60 hover:text-white"
+                >
+                  {scanForReposts.isPending
+                    ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Scanning...</>
+                    : <><RefreshCw className="w-4 h-4 mr-2" />Scan for Top Performers</>}
+                </Button>
+              </div>
+            </div>
+
+            {!repostQueue || repostQueue.length === 0 ? (
+              <div className="text-center py-16 text-white/30">
+                <Repeat2 className="w-12 h-12 mx-auto mb-3 opacity-30" />
+                <p className="text-lg">No reposts queued</p>
+                <p className="text-sm mt-1">Click "Scan for Top Performers" to find posts worth reposting (requires published posts with 10%+ engagement)</p>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {repostQueue.map(item => (
+                  <Card key={item.id} className="bg-white/5 border-white/10">
+                    <CardContent className="p-4 flex items-center justify-between">
+                      <div>
+                        <div className="flex items-center gap-2 mb-1">
+                          <ArrowUpRight className="w-4 h-4 text-green-400" />
+                          <span className="text-sm text-white">Post #{item.originalPostId} repost</span>
+                          <span className={`text-xs px-2 py-0.5 rounded-full border ${
+                            item.status === "pending" ? STATUS_COLORS.pending :
+                            item.status === "published" ? STATUS_COLORS.published :
+                            STATUS_COLORS.cancelled
+                          }`}>{item.status}</span>
+                        </div>
+                        <p className="text-xs text-white/40">
+                          Qualified at {item.qualifyingEngagementRate}% engagement · Scheduled: {formatDate(item.scheduledAt)}
+                        </p>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            )}
           </div>
         )}
 

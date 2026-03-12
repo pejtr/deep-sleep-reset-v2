@@ -8,6 +8,9 @@ import {
   igScheduledPosts,
   igPostAnalytics,
   igAutopilotSettings,
+  igAbTests,
+  igHashtagStats,
+  igRepostQueue,
 } from "../../drizzle/schema";
 import { eq, desc, and, lte, sql } from "drizzle-orm";
 import { execMcpTool } from "../_core/mcp";
@@ -449,4 +452,269 @@ export const igAutopilotRouter = router({
 
   // Get available topics list
   getTopics: adminProcedure.query(() => SLEEP_TOPICS),
+
+  // ─── A/B CAPTION TESTING ─────────────────────────────────────────────────────
+
+  // Create an A/B test: generate 2 caption variants for the same topic and schedule both
+  createAbTest: adminProcedure
+    .input(z.object({
+      topicId: z.string().optional(),
+      scheduledAt: z.string(), // when to post variant A
+      offsetMinutes: z.number().default(60), // how many minutes later to post variant B
+    }))
+    .mutation(async ({ input }) => {
+      const db = await requireDb();
+      const recentAnalytics = await db.select().from(igPostAnalytics).orderBy(desc(igPostAnalytics.fetchedAt)).limit(50);
+      const topicId = input.topicId || await pickBestTopic(recentAnalytics);
+      const topic = SLEEP_TOPICS.find(t => t.id === topicId) || SLEEP_TOPICS[0]!;
+
+      // Generate two different captions for the same topic
+      const [contentA, contentB] = await Promise.all([
+        generateContentForTopic(topicId, "post"),
+        generateContentForTopic(topicId, "post"),
+      ]);
+
+      // Generate one shared image (same visual, different captions)
+      const imageUrl = await generatePostImage(contentA.imagePrompt);
+
+      const scheduledAtA = new Date(input.scheduledAt);
+      const scheduledAtB = new Date(scheduledAtA.getTime() + input.offsetMinutes * 60 * 1000);
+
+      // Insert both posts
+      const [insertA] = await db.insert(igScheduledPosts).values({
+        type: "post", topic: topic.label, caption: contentA.caption,
+        imagePrompt: contentA.imagePrompt, imageUrl, scheduledAt: scheduledAtA, status: "pending",
+      });
+      const postAId = (insertA as any).insertId as number;
+
+      const [insertB] = await db.insert(igScheduledPosts).values({
+        type: "post", topic: `${topic.label} (B)`, caption: contentB.caption,
+        imagePrompt: contentB.imagePrompt, imageUrl, scheduledAt: scheduledAtB, status: "pending",
+      });
+      const postBId = (insertB as any).insertId as number;
+
+      // Evaluate 48h after the second post
+      const evaluateAt = new Date(scheduledAtB.getTime() + 48 * 60 * 60 * 1000);
+
+      await db.insert(igAbTests).values({
+        postAId, postBId, topic: topic.label, status: "running", evaluateAt,
+      });
+
+      return { success: true, topic: topic.label, postAId, postBId };
+    }),
+
+  // Get all A/B tests
+  getAbTests: adminProcedure.query(async () => {
+    const db = await requireDb();
+    return db.select().from(igAbTests).orderBy(desc(igAbTests.createdAt)).limit(20);
+  }),
+
+  // Evaluate completed A/B tests (check analytics and pick winner)
+  evaluateAbTests: adminProcedure.mutation(async () => {
+    const db = await requireDb();
+    const now = new Date();
+    const runningTests = await db.select().from(igAbTests)
+      .where(and(eq(igAbTests.status, "running"), lte(igAbTests.evaluateAt, now)))
+      .limit(10);
+
+    let evaluated = 0;
+    for (const test of runningTests) {
+      const [analyticsA] = await db.select().from(igPostAnalytics)
+        .where(eq(igPostAnalytics.scheduledPostId, test.postAId)).limit(1);
+      const [analyticsB] = await db.select().from(igPostAnalytics)
+        .where(eq(igPostAnalytics.scheduledPostId, test.postBId)).limit(1);
+
+      if (!analyticsA || !analyticsB) continue; // Not published yet
+
+      const engA = analyticsA.engagementRate;
+      const engB = analyticsB.engagementRate;
+      const diff = Math.abs(engA - engB);
+      const winner = diff < 2 ? "tie" : engA > engB ? "a" : "b";
+
+      await db.update(igAbTests)
+        .set({ status: "completed", winner, engagementA: engA, engagementB: engB })
+        .where(eq(igAbTests.id, test.id));
+
+      evaluated++;
+    }
+    return { evaluated };
+  }),
+
+  // ─── HASHTAG OPTIMIZER ───────────────────────────────────────────────────────
+
+  // Get hashtag performance stats
+  getHashtagStats: adminProcedure.query(async () => {
+    const db = await requireDb();
+    return db.select().from(igHashtagStats)
+      .orderBy(desc(igHashtagStats.avgEngagementRate))
+      .limit(50);
+  }),
+
+  // Get AI-optimized hashtag set for a new post
+  getOptimizedHashtags: adminProcedure
+    .input(z.object({ topicId: z.string().optional(), count: z.number().default(20) }))
+    .query(async ({ input }) => {
+      const db = await requireDb();
+      const topic = SLEEP_TOPICS.find(t => t.id === input.topicId) || SLEEP_TOPICS[0]!;
+
+      // Get top performing hashtags from DB
+      const topHashtags = await db.select().from(igHashtagStats)
+        .orderBy(desc(igHashtagStats.avgEngagementRate))
+        .limit(30);
+
+      // Ask AI to select and supplement with new ones
+      const existingList = topHashtags.map(h => `${h.hashtag} (avg reach: ${h.avgReach}, engagement: ${h.avgEngagementRate}%)`).join(", ");
+
+      const result = await invokeLLM({
+        messages: [
+          { role: "system", content: "You are an Instagram hashtag strategist for a sleep wellness brand." },
+          {
+            role: "user",
+            content: `Topic: "${topic.label}". Best performing hashtags so far: ${existingList || "none yet"}.
+
+Generate exactly ${input.count} hashtags for this post. Mix: 5 high-volume (#insomnia, #sleep), 10 mid-volume (#sleepbetter, #cbti), 5 niche (#deepsleepreset, #sleepscience). Return JSON array of strings only.`,
+          },
+        ],
+        response_format: {
+          type: "json_schema",
+          json_schema: {
+            name: "hashtags",
+            strict: true,
+            schema: { type: "object", properties: { hashtags: { type: "array", items: { type: "string" } } }, required: ["hashtags"], additionalProperties: false },
+          },
+        },
+      });
+
+      try {
+        const parsed = JSON.parse(result.choices[0]?.message?.content as string);
+        return { hashtags: (parsed.hashtags as string[]).slice(0, input.count) };
+      } catch {
+        return { hashtags: ["#insomnia", "#sleepbetter", "#deepsleepreset", "#cbti", "#sleepscience"] };
+      }
+    }),
+
+  // Update hashtag stats after a post's analytics are synced
+  updateHashtagStats: adminProcedure
+    .input(z.object({
+      hashtags: z.array(z.string()),
+      reach: z.number(),
+      engagementRate: z.number(),
+    }))
+    .mutation(async ({ input }) => {
+      const db = await requireDb();
+      for (const tag of input.hashtags) {
+        const existing = await db.select().from(igHashtagStats)
+          .where(eq(igHashtagStats.hashtag, tag)).limit(1);
+
+        if (existing.length === 0) {
+          await db.insert(igHashtagStats).values({
+            hashtag: tag,
+            timesUsed: 1,
+            avgReach: input.reach,
+            avgEngagementRate: input.engagementRate,
+            totalReach: input.reach,
+            lastUsedAt: new Date(),
+          });
+        } else {
+          const h = existing[0]!;
+          const newTimesUsed = h.timesUsed + 1;
+          const newTotalReach = h.totalReach + input.reach;
+          const newAvgReach = Math.round(newTotalReach / newTimesUsed);
+          const newAvgEngagement = Math.round((h.avgEngagementRate * h.timesUsed + input.engagementRate) / newTimesUsed);
+          await db.update(igHashtagStats)
+            .set({ timesUsed: newTimesUsed, totalReach: newTotalReach, avgReach: newAvgReach, avgEngagementRate: newAvgEngagement, lastUsedAt: new Date() })
+            .where(eq(igHashtagStats.id, h.id));
+        }
+      }
+      return { updated: input.hashtags.length };
+    }),
+
+  // ─── AUTO-REPOST TOP PERFORMERS ──────────────────────────────────────────────
+
+  // Get repost queue
+  getRepostQueue: adminProcedure.query(async () => {
+    const db = await requireDb();
+    return db.select().from(igRepostQueue).orderBy(desc(igRepostQueue.scheduledAt)).limit(20);
+  }),
+
+  // Scan published posts and queue top performers for reposting (>10% engagement, >30 days old)
+  scanForReposts: adminProcedure.mutation(async () => {
+    const db = await requireDb();
+    const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+
+    // Get posts with high engagement that are older than 30 days
+    const topPosts = await db.select()
+      .from(igPostAnalytics)
+      .where(sql`${igPostAnalytics.engagementRate} >= 10 AND ${igPostAnalytics.fetchedAt} <= ${thirtyDaysAgo}`)
+      .orderBy(desc(igPostAnalytics.engagementRate))
+      .limit(10);
+
+    let queued = 0;
+    for (const analytics of topPosts) {
+      // Check if already queued
+      const existing = await db.select().from(igRepostQueue)
+        .where(eq(igRepostQueue.originalPostId, analytics.scheduledPostId)).limit(1);
+      if (existing.length > 0) continue;
+
+      // Schedule repost 30 days from now
+      const repostDate = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+
+      await db.insert(igRepostQueue).values({
+        originalPostId: analytics.scheduledPostId,
+        qualifyingEngagementRate: analytics.engagementRate,
+        scheduledAt: repostDate,
+        status: "pending",
+      });
+      queued++;
+    }
+
+    return { queued };
+  }),
+
+  // Execute due reposts
+  publishDueReposts: adminProcedure.mutation(async () => {
+    const db = await requireDb();
+    const now = new Date();
+    const dueReposts = await db.select().from(igRepostQueue)
+      .where(and(eq(igRepostQueue.status, "pending"), lte(igRepostQueue.scheduledAt, now)))
+      .limit(5);
+
+    let published = 0;
+    for (const repost of dueReposts) {
+      const [originalPost] = await db.select().from(igScheduledPosts)
+        .where(eq(igScheduledPosts.id, repost.originalPostId)).limit(1);
+      if (!originalPost) continue;
+
+      try {
+        // Create a new scheduled post entry for the repost
+        const [insertResult] = await db.insert(igScheduledPosts).values({
+          type: originalPost.type,
+          topic: originalPost.topic,
+          caption: originalPost.caption,
+          imagePrompt: originalPost.imagePrompt,
+          imageUrl: originalPost.imageUrl,
+          scheduledAt: now,
+          status: "pending",
+        });
+        const newPostId = (insertResult as any).insertId as number;
+
+        // Publish it
+        const { igPostId, igPermalink } = await publishToInstagram({ ...originalPost, id: newPostId });
+        await db.update(igScheduledPosts)
+          .set({ status: "published", igPostId, igPermalink })
+          .where(eq(igScheduledPosts.id, newPostId));
+
+        await db.update(igRepostQueue)
+          .set({ status: "published", repostId: newPostId })
+          .where(eq(igRepostQueue.id, repost.id));
+
+        published++;
+      } catch {
+        await db.update(igRepostQueue)
+          .set({ status: "cancelled" })
+          .where(eq(igRepostQueue.id, repost.id));
+      }
+    }
+    return { published };
+  }),
 });

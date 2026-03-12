@@ -36,6 +36,13 @@
       "when": 1773340474210,
       "tag": "0004_deep_talon",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "5",
+      "when": 1773341537282,
+      "tag": "0005_material_the_anarchist",
+      "breakpoints": true
     }
   ]
 }

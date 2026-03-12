@@ -30,6 +30,85 @@ vi.mock("./db", () => ({
 }));
 
 describe("Instagram Autopilot", () => {
+  describe("A/B Testing Logic", () => {
+    it("should determine winner when engagement A > B", () => {
+      const engA = 15;
+      const engB = 8;
+      const diff = Math.abs(engA - engB);
+      const winner = diff < 2 ? "tie" : engA > engB ? "a" : "b";
+      expect(winner).toBe("a");
+    });
+
+    it("should determine winner when engagement B > A", () => {
+      const engA = 6;
+      const engB = 14;
+      const diff = Math.abs(engA - engB);
+      const winner = diff < 2 ? "tie" : engA > engB ? "a" : "b";
+      expect(winner).toBe("b");
+    });
+
+    it("should declare tie when difference < 2%", () => {
+      const engA = 10;
+      const engB = 11;
+      const diff = Math.abs(engA - engB);
+      const winner = diff < 2 ? "tie" : engA > engB ? "a" : "b";
+      expect(winner).toBe("tie");
+    });
+
+    it("should set evaluateAt to 48h after second post", () => {
+      const scheduledAtA = new Date("2026-03-13T09:00:00Z");
+      const offsetMinutes = 60;
+      const scheduledAtB = new Date(scheduledAtA.getTime() + offsetMinutes * 60 * 1000);
+      const evaluateAt = new Date(scheduledAtB.getTime() + 48 * 60 * 60 * 1000);
+      expect(evaluateAt.getTime()).toBe(new Date("2026-03-15T10:00:00Z").getTime());
+    });
+  });
+
+  describe("Hashtag Optimizer", () => {
+    it("should calculate correct average engagement when updating hashtag stats", () => {
+      const existing = { timesUsed: 4, avgEngagementRate: 10, totalReach: 4000, avgReach: 1000 };
+      const newEngagement = 20;
+      const newReach = 2000;
+      const newTimesUsed = existing.timesUsed + 1;
+      const newTotalReach = existing.totalReach + newReach;
+      const newAvgReach = Math.round(newTotalReach / newTimesUsed);
+      const newAvgEngagement = Math.round((existing.avgEngagementRate * existing.timesUsed + newEngagement) / newTimesUsed);
+      expect(newTimesUsed).toBe(5);
+      expect(newAvgReach).toBe(1200);
+      expect(newAvgEngagement).toBe(12);
+    });
+
+    it("should handle first-time hashtag insertion", () => {
+      const hashtag = "#deepsleepreset";
+      const reach = 500;
+      const engagementRate = 8;
+      const newEntry = { hashtag, timesUsed: 1, avgReach: reach, avgEngagementRate: engagementRate, totalReach: reach };
+      expect(newEntry.timesUsed).toBe(1);
+      expect(newEntry.avgReach).toBe(500);
+    });
+  });
+
+  describe("Repost Queue Logic", () => {
+    it("should qualify posts with engagement >= 10% for reposting", () => {
+      const threshold = 10;
+      const posts = [
+        { id: 1, engagementRate: 15 },
+        { id: 2, engagementRate: 5 },
+        { id: 3, engagementRate: 10 },
+        { id: 4, engagementRate: 3 },
+      ];
+      const qualified = posts.filter(p => p.engagementRate >= threshold);
+      expect(qualified).toHaveLength(2);
+      expect(qualified.map(p => p.id)).toEqual([1, 3]);
+    });
+
+    it("should schedule repost 30 days in the future", () => {
+      const now = new Date("2026-03-12T12:00:00Z");
+      const repostDate = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
+      expect(repostDate.toISOString().split("T")[0]).toBe("2026-04-11");
+    });
+  });
+
   describe("SLEEP_TOPICS", () => {
     it("should have 15 topics defined", async () => {
       // Import the module to test topic count

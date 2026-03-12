@@ -190,3 +190,76 @@ export const igAutopilotSettings = mysqlTable("ig_autopilot_settings", {
 
 export type IgAutopilotSettings = typeof igAutopilotSettings.$inferSelect;
 export type InsertIgAutopilotSettings = typeof igAutopilotSettings.$inferInsert;
+
+/**
+ * Instagram A/B caption tests — two caption variants for the same post.
+ * After 48h, the winner (higher engagement) is identified and used for future content.
+ */
+export const igAbTests = mysqlTable("ig_ab_tests", {
+  id: int("id").autoincrement().primaryKey(),
+  /** The original scheduled post ID (variant A) */
+  postAId: int("postAId").notNull(),
+  /** The variant B scheduled post ID */
+  postBId: int("postBId").notNull(),
+  /** Topic shared by both variants */
+  topic: varchar("topic", { length: 255 }).notNull(),
+  /** Status: running, completed, cancelled */
+  status: mysqlEnum("status", ["running", "completed", "cancelled"]).default("running").notNull(),
+  /** Winner: a, b, or null if tie/not yet determined */
+  winner: mysqlEnum("winner", ["a", "b", "tie"]),
+  /** Engagement rate of variant A */
+  engagementA: int("engagementA"),
+  /** Engagement rate of variant B */
+  engagementB: int("engagementB"),
+  /** When to evaluate the test (48h after posting) */
+  evaluateAt: timestamp("evaluateAt").notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type IgAbTest = typeof igAbTests.$inferSelect;
+export type InsertIgAbTest = typeof igAbTests.$inferInsert;
+
+/**
+ * Instagram hashtag performance — tracks which hashtags drive the most reach.
+ * Used by the optimizer to auto-select best hashtags for future posts.
+ */
+export const igHashtagStats = mysqlTable("ig_hashtag_stats", {
+  id: int("id").autoincrement().primaryKey(),
+  hashtag: varchar("hashtag", { length: 128 }).notNull().unique(),
+  /** Total times used */
+  timesUsed: int("timesUsed").default(0).notNull(),
+  /** Average reach when this hashtag was included */
+  avgReach: int("avgReach").default(0).notNull(),
+  /** Average engagement rate when this hashtag was included */
+  avgEngagementRate: int("avgEngagementRate").default(0).notNull(),
+  /** Total reach accumulated */
+  totalReach: bigint("totalReach", { mode: "number" }).default(0).notNull(),
+  /** Last time this hashtag was used */
+  lastUsedAt: timestamp("lastUsedAt"),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type IgHashtagStats = typeof igHashtagStats.$inferSelect;
+export type InsertIgHashtagStats = typeof igHashtagStats.$inferInsert;
+
+/**
+ * Instagram repost queue — top-performing posts scheduled for reposting every 30 days.
+ */
+export const igRepostQueue = mysqlTable("ig_repost_queue", {
+  id: int("id").autoincrement().primaryKey(),
+  /** Original post ID that performed well */
+  originalPostId: int("originalPostId").notNull(),
+  /** New scheduled post ID (the repost) */
+  repostId: int("repostId"),
+  /** Engagement rate that qualified it for repost */
+  qualifyingEngagementRate: int("qualifyingEngagementRate").notNull(),
+  /** When to repost */
+  scheduledAt: timestamp("scheduledAt").notNull(),
+  /** Status */
+  status: mysqlEnum("status", ["pending", "published", "cancelled"]).default("pending").notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type IgRepostQueue = typeof igRepostQueue.$inferSelect;
+export type InsertIgRepostQueue = typeof igRepostQueue.$inferInsert;
