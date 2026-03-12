@@ -263,3 +263,111 @@ export const igRepostQueue = mysqlTable("ig_repost_queue", {
 
 export type IgRepostQueue = typeof igRepostQueue.$inferSelect;
 export type InsertIgRepostQueue = typeof igRepostQueue.$inferInsert;
+
+/**
+ * Instagram DM keyword rules — when a comment contains a keyword, auto-send a DM.
+ * Example: keyword "SLEEP" → DM with checkout link.
+ */
+export const igDmRules = mysqlTable("ig_dm_rules", {
+  id: int("id").autoincrement().primaryKey(),
+  /** Keyword to match in comments (case-insensitive) */
+  keyword: varchar("keyword", { length: 128 }).notNull(),
+  /** Whether this rule is active */
+  enabled: int("enabled").default(1).notNull(),
+  /** DM message template. Supports {name} placeholder. */
+  dmTemplate: text("dmTemplate").notNull(),
+  /** Optional: only trigger on specific post IDs (JSON array). Null = all posts. */
+  postFilter: text("postFilter"),
+  /** Match mode: exact (full word match) or contains (substring) */
+  matchMode: mysqlEnum("matchMode", ["exact", "contains"]).default("contains").notNull(),
+  /** Total times this rule has been triggered */
+  triggerCount: int("triggerCount").default(0).notNull(),
+  /** Total DMs sent from this rule */
+  dmsSent: int("dmsSent").default(0).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type IgDmRule = typeof igDmRules.$inferSelect;
+export type InsertIgDmRule = typeof igDmRules.$inferInsert;
+
+/**
+ * Instagram comment events — log of all comments scanned by the auto-responder.
+ * Prevents duplicate DMs by tracking which comments were already processed.
+ */
+export const igCommentEvents = mysqlTable("ig_comment_events", {
+  id: int("id").autoincrement().primaryKey(),
+  /** Instagram comment ID (unique per comment) */
+  igCommentId: varchar("igCommentId", { length: 128 }).notNull().unique(),
+  /** Instagram post ID the comment was on */
+  igPostId: varchar("igPostId", { length: 128 }).notNull(),
+  /** Instagram user ID who commented */
+  igUserId: varchar("igUserId", { length: 128 }).notNull(),
+  /** Instagram username who commented */
+  igUsername: varchar("igUsername", { length: 128 }),
+  /** The comment text */
+  commentText: text("commentText").notNull(),
+  /** Whether a keyword was matched */
+  keywordMatched: varchar("keywordMatched", { length: 128 }),
+  /** Rule ID that was triggered (if any) */
+  ruleId: int("ruleId"),
+  /** Processing status */
+  status: mysqlEnum("status", ["scanned", "matched", "dm_sent", "dm_failed", "skipped"]).default("scanned").notNull(),
+  /** Error message if DM failed */
+  errorMessage: text("errorMessage"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type IgCommentEvent = typeof igCommentEvents.$inferSelect;
+export type InsertIgCommentEvent = typeof igCommentEvents.$inferInsert;
+
+/**
+ * Instagram DM log — record of every DM sent by the auto-responder.
+ */
+export const igDmLog = mysqlTable("ig_dm_log", {
+  id: int("id").autoincrement().primaryKey(),
+  /** Rule that triggered this DM */
+  ruleId: int("ruleId").notNull(),
+  /** Comment event that triggered this DM */
+  commentEventId: int("commentEventId").notNull(),
+  /** Instagram user ID who received the DM */
+  igUserId: varchar("igUserId", { length: 128 }).notNull(),
+  /** Instagram username who received the DM */
+  igUsername: varchar("igUsername", { length: 128 }),
+  /** The actual DM message sent */
+  message: text("message").notNull(),
+  /** Whether the DM was successfully sent */
+  success: int("success").default(0).notNull(),
+  /** Error message if failed */
+  errorMessage: text("errorMessage"),
+  sentAt: timestamp("sentAt").defaultNow().notNull(),
+});
+
+export type IgDmLog = typeof igDmLog.$inferSelect;
+export type InsertIgDmLog = typeof igDmLog.$inferInsert;
+
+/**
+ * Instagram webhook config — stores the Meta webhook verification token and app credentials.
+ * Used for receiving real-time comment notifications from Meta.
+ */
+export const igWebhookConfig = mysqlTable("ig_webhook_config", {
+  id: int("id").autoincrement().primaryKey(),
+  /** Meta App ID */
+  metaAppId: varchar("metaAppId", { length: 128 }),
+  /** Meta App Secret (encrypted) */
+  metaAppSecret: text("metaAppSecret"),
+  /** Instagram Page Access Token */
+  pageAccessToken: text("pageAccessToken"),
+  /** Webhook verify token (user-defined string) */
+  verifyToken: varchar("verifyToken", { length: 255 }),
+  /** Whether webhook is active and verified */
+  webhookActive: int("webhookActive").default(0).notNull(),
+  /** Last webhook event received at */
+  lastEventAt: timestamp("lastEventAt"),
+  /** Total events received */
+  totalEventsReceived: int("totalEventsReceived").default(0).notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type IgWebhookConfig = typeof igWebhookConfig.$inferSelect;
+export type InsertIgWebhookConfig = typeof igWebhookConfig.$inferInsert;

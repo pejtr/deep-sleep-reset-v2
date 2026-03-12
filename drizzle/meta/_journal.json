@@ -43,6 +43,13 @@
       "when": 1773341537282,
       "tag": "0005_material_the_anarchist",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "5",
+      "when": 1773351116784,
+      "tag": "0006_next_kate_bishop",
+      "breakpoints": true
     }
   ]
 }

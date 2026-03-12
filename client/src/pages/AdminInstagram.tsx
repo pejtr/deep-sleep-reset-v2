@@ -177,6 +177,9 @@ export default function AdminInstagram() {
                 </span>
               </div>
             )}
+            <Button variant="outline" size="sm" onClick={() => navigate("/admin/dm-autoresponder")} className="border-purple-500/40 text-purple-300 hover:text-white hover:border-purple-400">
+              💬 DM Auto-Responder
+            </Button>
             <Button variant="outline" size="sm" onClick={() => navigate("/admin")} className="border-white/20 text-white/60 hover:text-white">
               ← Admin
             </Button>
