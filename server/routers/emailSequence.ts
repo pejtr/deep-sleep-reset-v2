@@ -13,7 +13,7 @@ import { router, protectedProcedure, publicProcedure } from "../_core/trpc";
 import { getDb } from "../db";
 import { emailSequenceEnrollments, emailSendLog } from "../../drizzle/schema";
 import { eq, and, lte, desc, sql } from "drizzle-orm";
-import { EMAIL_SEQUENCE, SEQUENCE_LENGTH } from "../emailSequenceTemplates";
+import { EMAIL_SEQUENCE, SEQUENCE_LENGTH, SURVEY_EMAIL } from "../emailSequenceTemplates";
 
 const UPSELL_URL = "https://deep-sleep-reset.com/upsell-1";
 const HOURS_BETWEEN_EMAILS = 24; // Send one email per day
@@ -141,6 +141,31 @@ export async function processSequenceQueue(): Promise<{ sent: number; errors: nu
           status: isLastEmail ? "completed" : "active",
         })
         .where(eq(emailSequenceEnrollments.id, enrollment.id));
+
+      // After last email (Day 6), trigger testimonial survey email
+      if (isLastEmail) {
+        try {
+          // Create testimonial request and get token
+          const { createTestimonialRequest } = await import("./testimonials");
+          const token = await createTestimonialRequest({
+            email: enrollment.email,
+            name: enrollment.name ?? undefined,
+            enrollmentId: enrollment.id,
+          });
+          const surveyUrl = `https://deep-sleep-reset.com/testimonial?token=${token}`;
+          const firstName = enrollment.name?.split(" ")[0] || "there";
+          await sendSequenceEmail({
+            to: enrollment.email,
+            name: enrollment.name ?? undefined,
+            subject: SURVEY_EMAIL.subject,
+            htmlContent: SURVEY_EMAIL.buildHtml(firstName, surveyUrl),
+            textContent: SURVEY_EMAIL.buildText(firstName, surveyUrl),
+          });
+          console.log(`[EmailSequence] Survey email sent to ${enrollment.email}`);
+        } catch (err) {
+          console.error(`[EmailSequence] Failed to send survey email to ${enrollment.email}:`, err);
+        }
+      }
     }
   }
 

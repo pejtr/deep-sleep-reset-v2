@@ -538,8 +538,63 @@ Tonight, and every night from here — you sleep.
 — The Deep Sleep Reset Team`,
 };
 
+//// ─── Day 7: Survey / Testimonial Request ────────────────────────────────────
+
+export interface SurveyEmail {
+  subject: string;
+  previewText: string;
+  buildHtml: (firstName: string, surveyUrl: string) => string;
+  buildText: (firstName: string, surveyUrl: string) => string;
+}
+
+export const SURVEY_EMAIL: SurveyEmail = {
+  subject: "You did it. How do you feel? (30-second survey)",
+  previewText: "7 nights complete. We'd love to hear your results — it takes 30 seconds.",
+
+  buildHtml: (firstName, surveyUrl) => emailShell(firstName, `
+    <div class="night-badge">🎉 7 Nights Complete</div>
+    <h1>You made it, ${firstName}.</h1>
+
+    <p>Seven nights ago, you decided to stop accepting broken sleep as your reality. And tonight — you sleep differently than you did a week ago.</p>
+
+    <p>Whether you're sleeping through the night, falling asleep faster, or just waking up feeling more rested — <strong class="highlight">that's real progress.</strong></p>
+
+    <p>We have one small favor to ask.</p>
+
+    <div class="technique-box">
+      <h3>⭐ Share Your Results (30 seconds)</h3>
+      <p>Your experience could help someone else who's lying awake right now, just like you were a week ago.</p>
+      <p>How many nights did it take to notice a difference? What changed? We'd love to know — and with your permission, share your story to help others.</p>
+    </div>
+
+    <div class="cta-section">
+      <a href="${surveyUrl}" class="cta-button">Share My Results →</a>
+      <p style="font-size:13px; color:#5a6580; margin-top:12px;">Takes 30 seconds · Completely optional</p>
+    </div>
+
+    <hr class="divider">
+
+    <p style="font-size:14px; color:#5a6580;">If you didn't see results yet — that's okay. Sleep issues can take a few extra days to fully reset. Keep using the techniques from Night 6 and 7. If you need support, reply to this email and we'll help.</p>
+
+    <p>Thank you for trusting us with your sleep. 🌙</p>
+    <p><strong>— The Deep Sleep Reset Team</strong></p>
+  `),
+
+  buildText: (firstName, surveyUrl) => `You made it, ${firstName}.
+
+Seven nights ago, you decided to stop accepting broken sleep as your reality.
+
+We have one small favor: share your results in 30 seconds.
+${surveyUrl}
+
+Your experience could help someone else who's lying awake right now.
+
+Thank you for trusting us.
+— The Deep Sleep Reset Team
+
+Deep Sleep Reset · https://deep-sleep-reset.com`,
+};
+
 // ─── Export all emails ────────────────────────────────────────────────────────
-
 export const EMAIL_SEQUENCE: SequenceEmail[] = [day1, day2, day3, day4, day5, day6];
-
 export const SEQUENCE_LENGTH = EMAIL_SEQUENCE.length; // 6 emails (Day 1–6), Day 0 handled by purchase email

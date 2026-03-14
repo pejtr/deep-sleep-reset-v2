@@ -9,6 +9,7 @@ import { saveLead, saveChatInsight, saveChatSurvey, getOrdersByEmail, getAdminSt
 import { igAutopilotRouter } from "./routers/igAutopilot";
 import { igDmAutoResponderRouter } from "./routers/igDmAutoResponder";
 import { emailSequenceRouter } from "./routers/emailSequence";
+import { testimonialsRouter } from "./routers/testimonials";
 
 const productKeySchema = z.enum(["frontEnd", "exitDiscount", "upsell1", "upsell2"]);
 
@@ -17,6 +18,7 @@ export const appRouter = router({
   igAutopilot: igAutopilotRouter,
   igDmAutoResponder: igDmAutoResponderRouter,
   emailSequence: emailSequenceRouter,
+  testimonials: testimonialsRouter,
   auth: router({
     me: publicProcedure.query(opts => opts.ctx.user),
     logout: publicProcedure.mutation(({ ctx }) => {

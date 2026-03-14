@@ -31,6 +31,7 @@ import {
   RefreshCw,
   AlertTriangle,
   Instagram,
+  Quote,
 } from "lucide-react";
 
 // ─── helpers ──────────────────────────────────────────────────────────────────
@@ -238,6 +239,13 @@ export default function Admin() {
             >
               <Mail className="w-3.5 h-3.5" />
               Email Sequence
+            </Link>
+            <Link
+              href="/admin/testimonials"
+              className="flex items-center gap-1.5 text-xs bg-gradient-to-r from-green-600 to-teal-600 text-white px-3 py-1.5 rounded-md hover:from-green-500 hover:to-teal-500 transition-all"
+            >
+              <Quote className="w-3.5 h-3.5" />
+              Testimonials
             </Link>
             <span className="text-xs text-foreground/30">
               {user.name ?? user.openId}

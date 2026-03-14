@@ -426,3 +426,40 @@ export const emailSendLog = mysqlTable("email_send_log", {
 
 export type EmailSendLog = typeof emailSendLog.$inferSelect;
 export type InsertEmailSendLog = typeof emailSendLog.$inferInsert;
+
+/**
+ * Testimonials — customer feedback collected via Day 7 email survey.
+ * Admin can approve/reject before displaying on landing page.
+ */
+export const testimonials = mysqlTable("testimonials", {
+  id: int("id").autoincrement().primaryKey(),
+  /** Unique token for the testimonial submission link (sent in Day 7 email) */
+  token: varchar("token", { length: 128 }).notNull().unique(),
+  /** Customer email */
+  email: varchar("email", { length: 320 }).notNull(),
+  /** Customer name (from enrollment) */
+  name: varchar("name", { length: 255 }),
+  /** Enrollment ID that generated this request */
+  enrollmentId: int("enrollmentId"),
+  /** 1-5 star rating */
+  rating: int("rating"),
+  /** Customer's written testimonial */
+  body: text("body"),
+  /** How many nights it took to see results */
+  nightsToResult: int("nightsToResult"),
+  /** Whether customer consents to public display */
+  consentToPublish: int("consentToPublish").default(0).notNull(),
+  /** Admin moderation status */
+  status: mysqlEnum("status", ["pending", "approved", "rejected"]).default("pending").notNull(),
+  /** Whether to feature on landing page (pinned to top) */
+  featured: int("featured").default(0).notNull(),
+  /** Admin notes */
+  adminNote: text("adminNote"),
+  /** When the customer submitted the testimonial */
+  submittedAt: timestamp("submittedAt"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type Testimonial = typeof testimonials.$inferSelect;
+export type InsertTestimonial = typeof testimonials.$inferInsert;

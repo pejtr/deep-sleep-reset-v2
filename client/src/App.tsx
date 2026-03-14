@@ -23,6 +23,8 @@ import Admin from "./pages/Admin";
 import AdminInstagram from "./pages/AdminInstagram";
 import AdminDmAutoResponder from "./pages/AdminDmAutoResponder";
 import AdminEmailSequence from "./pages/AdminEmailSequence";
+import Testimonial from "./pages/Testimonial";
+import AdminTestimonials from "./pages/AdminTestimonials";
 
 function Router() {
   // make sure to consider if you need authentication for certain routes
@@ -53,6 +55,8 @@ function Router() {
       <Route path={"/admin/instagram"} component={AdminInstagram} />
       <Route path={"/admin/dm-autoresponder"} component={AdminDmAutoResponder} />
       <Route path={"/admin/email-sequence"} component={AdminEmailSequence} />
+      <Route path={"/admin/testimonials"} component={AdminTestimonials} />
+      <Route path={"/testimonial"} component={Testimonial} />
       <Route path={"/404"} component={NotFound} />
       <Route component={NotFound} />
     </Switch>

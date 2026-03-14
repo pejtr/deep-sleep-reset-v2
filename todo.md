@@ -123,3 +123,12 @@
 - [ ] Update STRIPE_WEBHOOK_SECRET to live webhook signing secret
 - [ ] Register live webhook endpoint in Stripe Dashboard
 - [ ] Verify live mode checkout works end-to-end
+
+## Phase 16: Testimonial Collection Flow
+- [ ] Add testimonials table to database schema
+- [ ] Build tRPC procedures: submit, approve/reject, list approved
+- [ ] Add Day 7 survey email to email sequence templates
+- [ ] Build public /testimonial page with star rating + text form
+- [ ] Build admin moderation UI in /admin (new Testimonials tab)
+- [ ] Auto-display approved testimonials on landing page
+- [ ] Write tests for testimonial router
