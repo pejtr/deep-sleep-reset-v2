@@ -1,0 +1,162 @@
+{
+  "query": "DESCRIBE blog_posts;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 4VFjuiBDjCy66KV.dcd9224b4f92 --database RrG9k2uFQkqVyNWK8WEbxj --execute DESCRIBE blog_posts;",
+  "rows": [
+    {
+      "Field": "id",
+      "Type": "int",
+      "Null": "NO",
+      "Key": "PRI",
+      "Default": "NULL",
+      "Extra": "auto_increment"
+    },
+    {
+      "Field": "slug",
+      "Type": "varchar(255)",
+      "Null": "NO",
+      "Key": "UNI",
+      "Default": "NULL",
+      "Extra": ""
+    },
+    {
+      "Field": "title",
+      "Type": "varchar(255)",
+      "Null": "NO",
+      "Key": "",
+      "Default": "NULL",
+      "Extra": ""
+    },
+    {
+      "Field": "metaDescription",
+      "Type": "varchar(500)",
+      "Null": "YES",
+      "Key": "",
+      "Default": "NULL",
+      "Extra": ""
+    },
+    {
+      "Field": "focusKeyword",
+      "Type": "varchar(128)",
+      "Null": "YES",
+      "Key": "",
+      "Default": "NULL",
+      "Extra": ""
+    },
+    {
+      "Field": "secondaryKeywords",
+      "Type": "text",
+      "Null": "YES",
+      "Key": "",
+      "Default": "NULL",
+      "Extra": ""
+    },
+    {
+      "Field": "body",
+      "Type": "text",
+      "Null": "NO",
+      "Key": "",
+      "Default": "NULL",
+      "Extra": ""
+    },
+    {
+      "Field": "excerpt",
+      "Type": "text",
+      "Null": "YES",
+      "Key": "",
+      "Default": "NULL",
+      "Extra": ""
+    },
+    {
+      "Field": "heroImageUrl",
+      "Type": "text",
+      "Null": "YES",
+      "Key": "",
+      "Default": "NULL",
+      "Extra": ""
+    },
+    {
+      "Field": "heroImageAlt",
+      "Type": "varchar(255)",
+      "Null": "YES",
+      "Key": "",
+      "Default": "NULL",
+      "Extra": ""
+    },
+    {
+      "Field": "author",
+      "Type": "varchar(128)",
+      "Null": "NO",
+      "Key": "",
+      "Default": "Deep Sleep Reset Team",
+      "Extra": ""
+    },
+    {
+      "Field": "category",
+      "Type": "varchar(64)",
+      "Null": "NO",
+      "Key": "",
+      "Default": "sleep-science",
+      "Extra": ""
+    },
+    {
+      "Field": "readTimeMinutes",
+      "Type": "int",
+      "Null": "NO",
+      "Key": "",
+      "Default": "5",
+      "Extra": ""
+    },
+    {
+      "Field": "status",
+      "Type": "enum('draft','published','archived')",
+      "Null": "NO",
+      "Key": "",
+      "Default": "draft",
+      "Extra": ""
+    },
+    {
+      "Field": "featured",
+      "Type": "int",
+      "Null": "NO",
+      "Key": "",
+      "Default": "0",
+      "Extra": ""
+    },
+    {
+      "Field": "faqSchema",
+      "Type": "text",
+      "Null": "YES",
+      "Key": "",
+      "Default": "NULL",
+      "Extra": ""
+    },
+    {
+      "Field": "publishedAt",
+      "Type": "timestamp",
+      "Null": "YES",
+      "Key": "",
+      "Default": "NULL",
+      "Extra": ""
+    },
+    {
+      "Field": "createdAt",
+      "Type": "timestamp",
+      "Null": "NO",
+      "Key": "",
+      "Default": "CURRENT_TIMESTAMP",
+      "Extra": ""
+    },
+    {
+      "Field": "updatedAt",
+      "Type": "timestamp",
+      "Null": "NO",
+      "Key": "",
+      "Default": "CURRENT_TIMESTAMP",
+      "Extra": "DEFAULT_GENERATED on update CURRENT_TIMESTAMP"
+    }
+  ],
+  "messages": [],
+  "stdout": "Field\tType\tNull\tKey\tDefault\tExtra\nid\tint\tNO\tPRI\tNULL\tauto_increment\nslug\tvarchar(255)\tNO\tUNI\tNULL\t\ntitle\tvarchar(255)\tNO\t\tNULL\t\nmetaDescription\tvarchar(500)\tYES\t\tNULL\t\nfocusKeyword\tvarchar(128)\tYES\t\tNULL\t\nsecondaryKeywords\ttext\tYES\t\tNULL\t\nbody\ttext\tNO\t\tNULL\t\nexcerpt\ttext\tYES\t\tNULL\t\nheroImageUrl\ttext\tYES\t\tNULL\t\nheroImageAlt\tvarchar(255)\tYES\t\tNULL\t\nauthor\tvarchar(128)\tNO\t\tDeep Sleep Reset Team\t\ncategory\tvarchar(64)\tNO\t\tsleep-science\t\nreadTimeMinutes\tint\tNO\t\t5\t\nstatus\tenum('draft','published','archived')\tNO\t\tdraft\t\nfeatured\tint\tNO\t\t0\t\nfaqSchema\ttext\tYES\t\tNULL\t\npublishedAt\ttimestamp\tYES\t\tNULL\t\ncreatedAt\ttimestamp\tNO\t\tCURRENT_TIMESTAMP\t\nupdatedAt\ttimestamp\tNO\t\tCURRENT_TIMESTAMP\tDEFAULT_GENERATED on update CURRENT_TIMESTAMP\n",
+  "stderr": "",
+  "execution_time_ms": 171
+}
