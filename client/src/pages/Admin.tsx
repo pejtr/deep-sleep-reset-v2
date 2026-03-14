@@ -33,6 +33,8 @@ import {
   Instagram,
   Quote,
   FileText,
+  Target,
+  PieChart,
 } from "lucide-react";
 
 // ─── helpers ──────────────────────────────────────────────────────────────────
@@ -117,7 +119,7 @@ function SectionHeader({ title, icon: Icon }: { title: string; icon: React.Eleme
 
 // ─── main component ───────────────────────────────────────────────────────────
 
-type Tab = "overview" | "orders" | "leads" | "chatbot";
+type Tab = "overview" | "orders" | "leads" | "chatbot" | "conversion";
 
 export default function Admin() {
   const { user, loading: authLoading } = useAuth();
@@ -131,6 +133,7 @@ export default function Admin() {
   const insightsQ = trpc.admin.chatInsights.useQuery(undefined, { refetchInterval: 60_000 });
   const surveysQ = trpc.admin.chatSurveys.useQuery(undefined, { refetchInterval: 60_000 });
   const dailyQ = trpc.admin.dailyRevenue.useQuery(undefined, { refetchInterval: 60_000 });
+  const leadSourcesQ = trpc.admin.leadSources.useQuery(undefined, { refetchInterval: 60_000 });
 
   // Auth guard
   if (authLoading) {
@@ -172,6 +175,7 @@ export default function Admin() {
   const insights = insightsQ.data ?? [];
   const surveys = surveysQ.data ?? [];
   const daily = dailyQ.data ?? [];
+  const leadSources = leadSourcesQ.data ?? [];
 
   const convRate =
     stats && stats.totalLeads > 0
@@ -200,6 +204,7 @@ export default function Admin() {
     { id: "orders", label: `Objednávky (${orders.length})`, icon: ShoppingCart },
     { id: "leads", label: `Leady (${leads.length})`, icon: Mail },
     { id: "chatbot", label: `Chatbot (${surveys.length})`, icon: MessageSquare },
+    { id: "conversion", label: "Konverze", icon: Target },
   ];
 
   return (
@@ -703,6 +708,147 @@ export default function Admin() {
                   ))}
                 </div>
               )}
+            </div>
+          </div>
+        )}
+        {/* ── CONVERSION TAB ── */}
+        {tab === "conversion" && (
+          <div className="space-y-8">
+            {/* Lead Source Breakdown */}
+            <div className="border border-border/20 rounded-xl p-6 bg-card/20">
+              <SectionHeader title="Zdroje leadů a konverzní míra" icon={Target} />
+              {leadSources.length === 0 ? (
+                <div className="text-center py-8 text-foreground/30">
+                  <Target className="w-8 h-8 mx-auto mb-2 opacity-30" />
+                  <p>Zatím žádné leady. Data se zobrazí po prvních zachycených emailech.</p>
+                </div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="border-b border-border/20 text-foreground/40 font-normal">
+                        <th className="text-left py-3 pr-4">Zdroj</th>
+                        <th className="text-right py-3 pr-4">Celkem leadů</th>
+                        <th className="text-right py-3 pr-4">Konvertováno</th>
+                        <th className="text-right py-3">Konverzní míra</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {leadSources.map((s) => (
+                        <tr key={s.source} className="border-b border-border/10 hover:bg-card/20">
+                          <td className="py-3 pr-4">
+                            <span className="inline-flex items-center gap-2">
+                              <span className={`w-2 h-2 rounded-full ${
+                                s.source === 'sleep-quiz' ? 'bg-amber' :
+                                s.source === 'chatbot' ? 'bg-blue-400' :
+                                s.source === 'newsletter' ? 'bg-green-400' :
+                                'bg-foreground/30'
+                              }`} />
+                              <span className="text-foreground/70 capitalize">{s.source.replace(/-/g, ' ')}</span>
+                            </span>
+                          </td>
+                          <td className="py-3 pr-4 text-right text-foreground/60">{s.total}</td>
+                          <td className="py-3 pr-4 text-right text-green-400">{s.converted}</td>
+                          <td className="py-3 text-right">
+                            <span className={`font-medium ${
+                              parseFloat(s.convRate) >= 10 ? 'text-green-400' :
+                              parseFloat(s.convRate) >= 5 ? 'text-amber' :
+                              'text-foreground/50'
+                            }`}>
+                              {s.convRate}%
+                            </span>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+
+            {/* Funnel Drop-off Visualization */}
+            <div className="border border-border/20 rounded-xl p-6 bg-card/20">
+              <SectionHeader title="Funnel drop-off analýza" icon={PieChart} />
+              <div className="space-y-3">
+                {[
+                  { label: "Navštívili stránku", value: 100, color: "bg-amber" },
+                  { label: "Scrollovali na nabídku", value: 65, color: "bg-amber/80" },
+                  { label: "Klikli na CTA", value: 28, color: "bg-amber/60" },
+                  { label: "Došli na objednávkový formulář", value: 18, color: "bg-amber/40" },
+                  { label: "Dokončili nákup", value: stats ? Math.min(10, stats.totalOrders) : 0, color: "bg-green-400" },
+                ].map((step, i) => (
+                  <div key={i} className="space-y-1">
+                    <div className="flex justify-between text-sm">
+                      <span className="text-foreground/60">{step.label}</span>
+                      <span className="text-foreground/40">{step.value}%</span>
+                    </div>
+                    <div className="h-2 bg-foreground/10 rounded-full overflow-hidden">
+                      <div
+                        className={`h-full ${step.color} rounded-full transition-all duration-700`}
+                        style={{ width: `${step.value}%` }}
+                      />
+                    </div>
+                  </div>
+                ))}
+                <p className="text-xs text-foreground/30 mt-2">* Funnel drop-off je odhadný model. Skutečná data budou dostupná po integraci Meta Pixel a Google Analytics.</p>
+              </div>
+            </div>
+
+            {/* Quiz Performance */}
+            <div className="border border-border/20 rounded-xl p-6 bg-card/20">
+              <SectionHeader title="Sleep Score Quiz výkon" icon={BarChart2} />
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <KpiCard
+                  icon={Users}
+                  label="Quiz leady"
+                  value={String(leadSources.find(s => s.source === 'sleep-quiz')?.total ?? 0)}
+                  sub="Email zachycen po kvizu"
+                />
+                <KpiCard
+                  icon={Target}
+                  label="Quiz konverze"
+                  value={`${leadSources.find(s => s.source === 'sleep-quiz')?.convRate ?? '0.0'}%`}
+                  sub="Koupili po kvizu"
+                />
+                <KpiCard
+                  icon={Mail}
+                  label="Chatbot leady"
+                  value={String(leadSources.find(s => s.source === 'chatbot')?.total ?? 0)}
+                  sub="Email zachycen v chatu"
+                />
+                <KpiCard
+                  icon={TrendingUp}
+                  label="Celková konverze"
+                  value={`${convRate}%`}
+                  sub={`${stats?.convertedLeads ?? 0} z ${stats?.totalLeads ?? 0} leadů`}
+                  accent
+                />
+              </div>
+            </div>
+
+            {/* Recommendations */}
+            <div className="border border-amber/15 rounded-xl p-6 bg-amber/5">
+              <SectionHeader title="Doporučení pro zvýšení konverzí" icon={TrendingUp} />
+              <div className="space-y-3">
+                {[
+                  { tip: "Sleep Score Quiz je nejlepší zdroj leadů — propagujte ho v Instagram Stories a v bio odkazu.", priority: "high" },
+                  { tip: "Chatbot Lucy má průměrné hodnocení — sledujte konverzní míru a optimalizujte systémový prompt.", priority: "medium" },
+                  { tip: "Email sekvence (7 dní) je klíčová pro upsell $27 audio packů — sledujte open rate v Brevo dashboardu.", priority: "high" },
+                  { tip: "Meta Ads: Použijte quiz jako lead magnet v Lead Ads kampaních pro levnější CPL.", priority: "medium" },
+                  { tip: "Testimonials: Aktivujte automatické schvalování 4-5 hvězdičkových recenzí pro sociální důkaz.", priority: "low" },
+                ].map((rec, i) => (
+                  <div key={i} className="flex items-start gap-3 p-3 rounded-lg bg-background/20">
+                    <span className={`text-xs px-2 py-0.5 rounded-full shrink-0 mt-0.5 ${
+                      rec.priority === 'high' ? 'bg-amber/20 text-amber' :
+                      rec.priority === 'medium' ? 'bg-blue-400/20 text-blue-400' :
+                      'bg-foreground/10 text-foreground/40'
+                    }`}>
+                      {rec.priority === 'high' ? 'Vysoká' : rec.priority === 'medium' ? 'Střední' : 'Nízká'}
+                    </span>
+                    <p className="text-sm text-foreground/70">{rec.tip}</p>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         )}

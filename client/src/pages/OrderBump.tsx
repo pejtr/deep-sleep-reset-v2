@@ -88,9 +88,37 @@ export default function OrderBump() {
         </div>
       </header>
 
-      {/* Progress bar */}
-      <div className="w-full bg-border/20 h-1">
-        <div className="bg-amber h-1 w-2/3 transition-all duration-500" />
+      {/* Progress bar — Step 2 of 3 */}
+      <div className="w-full bg-border/10 py-3 px-4">
+        <div className="max-w-3xl mx-auto">
+          <div className="flex items-center gap-2">
+            {/* Step 1 */}
+            <div className="flex flex-col items-center gap-1">
+              <div className="w-7 h-7 rounded-full bg-amber flex items-center justify-center text-background text-xs font-bold">
+                ✓
+              </div>
+              <span className="text-[10px] text-amber font-medium hidden sm:block">Your Info</span>
+            </div>
+            {/* Connector */}
+            <div className="flex-1 h-0.5 bg-amber" />
+            {/* Step 2 — current */}
+            <div className="flex flex-col items-center gap-1">
+              <div className="w-7 h-7 rounded-full bg-amber flex items-center justify-center text-background text-xs font-bold ring-2 ring-amber ring-offset-2 ring-offset-background">
+                2
+              </div>
+              <span className="text-[10px] text-amber font-medium hidden sm:block">Customize</span>
+            </div>
+            {/* Connector */}
+            <div className="flex-1 h-0.5 bg-border/30" />
+            {/* Step 3 */}
+            <div className="flex flex-col items-center gap-1">
+              <div className="w-7 h-7 rounded-full bg-border/30 flex items-center justify-center text-foreground/40 text-xs font-bold">
+                3
+              </div>
+              <span className="text-[10px] text-foreground/40 hidden sm:block">Payment</span>
+            </div>
+          </div>
+        </div>
       </div>
 
       <div className="max-w-3xl mx-auto px-4 py-10">

@@ -319,6 +319,30 @@ export async function getRecentChatSurveys(limit = 100) {
 }
 
 /**
+ * Get lead source breakdown for conversion analytics.
+ */
+export async function getLeadSourceStats() {
+  const db = await getDb();
+  if (!db) return [];
+
+  const result = await db
+    .select({
+      source: leads.source,
+      total: count(),
+      converted: sql<number>`COALESCE(SUM(converted), 0)`,
+    })
+    .from(leads)
+    .groupBy(leads.source);
+
+  return result.map(r => ({
+    source: r.source,
+    total: Number(r.total),
+    converted: Number(r.converted),
+    convRate: r.total > 0 ? ((Number(r.converted) / Number(r.total)) * 100).toFixed(1) : "0.0",
+  }));
+}
+
+/**
  * Get daily revenue for chart (last 30 days).
  */
 export async function getDailyRevenue() {

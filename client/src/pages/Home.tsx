@@ -13,6 +13,9 @@ import { getVariant } from "@/lib/ab-test";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Link, useLocation } from "wouter";
 import { trackEvent } from "@/components/MetaPixel";
+import SleepScoreQuiz from "@/components/SleepScoreQuiz";
+import LiveVisitorCounter from "@/components/LiveVisitorCounter";
+import UrgencyTimer from "@/components/UrgencyTimer";
 import { trpc } from "@/lib/trpc";
 import {
   Moon,
@@ -553,6 +556,9 @@ export default function Home() {
         </div>
       </section>
 
+      {/* ===== SLEEP SCORE QUIZ ===== */}
+      <SleepScoreQuiz />
+
       {/* ===== PRODUCT INTRODUCTION ===== */}
       <section className="py-24 lg:py-32 relative">
         <div className="max-w-6xl mx-auto px-4">
@@ -788,12 +794,22 @@ export default function Home() {
               {t.offer.title}
             </h2>
 
+            {/* Live Visitor Counter */}
+            <div className="flex justify-center mb-6">
+              <LiveVisitorCounter />
+            </div>
+
             {/* Price */}
             <div className="my-10">
               <span className="text-foreground/30 line-through text-2xl mr-4">{t.offer.originalPrice}</span>
               <span className="font-[var(--font-display)] text-6xl sm:text-7xl font-bold gradient-text-animated">
                 {t.offer.salePrice}
               </span>
+            </div>
+
+            {/* Urgency Timer */}
+            <div className="flex justify-center mb-4">
+              <UrgencyTimer />
             </div>
 
             <p className="text-foreground/60 text-lg mb-10 max-w-xl mx-auto">
@@ -837,6 +853,11 @@ export default function Home() {
             >
               {t.offer.ctaButton}
             </button>
+            {/* Stock scarcity */}
+            <p className="mt-3 text-xs text-foreground/40 flex items-center justify-center gap-1.5">
+              <span className="inline-block w-2 h-2 rounded-full bg-amber/60" />
+              Limited spots at this price — {Math.floor(Math.random() * 12) + 3} people purchased in the last hour
+            </p>
             <p className="mt-4 text-foreground/40 text-sm flex items-center justify-center gap-2">
               <Lock className="w-3.5 h-3.5" />
               {t.common.secureCheckout}

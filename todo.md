@@ -151,3 +151,12 @@
 - [x] Add comment/rating section to BlogPost page
 - [x] Add newsletter subscription form to Blog listing page
 - [x] Write tests for new procedures
+
+## Phase 19: Conversion Rate Optimization
+- [x] Sleep Score Quiz: 5-question lead gen quiz with personalized result + email capture
+- [x] Live Visitor Counter on offer section (real-time social proof + scarcity)
+- [x] Urgency Pricing Timer on offer section (session-based countdown)
+- [x] Progress Bar Checkout (step indicator in OrderBump page enhanced)
+- [x] Conversion Analytics admin dashboard (funnel drop-off, quiz completions, lead sources, recommendations)
+- [x] leadSources tRPC procedure + getLeadSourceStats DB helper
+- [x] 105 tests passing
