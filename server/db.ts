@@ -1,6 +1,6 @@
 import { eq, gte, sql, desc, count, sum } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { abEvents, chatInsights, chatSurveys, InsertAbEvent, InsertChatInsight, InsertChatSurvey, InsertLead, InsertUser, leads, orders, users } from "../drizzle/schema";
+import { abEvents, chatInsights, chatSurveys, InsertAbEvent, InsertChatInsight, InsertChatSurvey, InsertLead, InsertUser, InsertQuizAttempt, InsertTestimonialMedia, leads, orders, quizAttempts, testimonialMedia, users } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
 let _db: ReturnType<typeof drizzle> | null = null;
@@ -387,6 +387,107 @@ export async function getAbStats() {
       ? ((data.conversions / data.impressions) * 100).toFixed(1)
       : "0.0",
   }));
+}
+
+/**
+ * Save a quiz attempt (score + label) for a session.
+ */
+export async function saveQuizAttempt(data: InsertQuizAttempt): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+  try {
+    await db.insert(quizAttempts).values(data);
+  } catch (err) {
+    console.error("[Quiz] Failed to save attempt:", err);
+  }
+}
+
+/**
+ * Get quiz attempt history for a session (last 10 attempts, oldest first).
+ */
+export async function getQuizHistory(sessionId: string) {
+  const db = await getDb();
+  if (!db) return [];
+  try {
+    const rows = await db
+      .select()
+      .from(quizAttempts)
+      .where(eq(quizAttempts.sessionId, sessionId))
+      .orderBy(desc(quizAttempts.createdAt))
+      .limit(10);
+    // Return in chronological order for the chart
+    return rows.reverse().map(r => ({
+      id: r.id,
+      score: r.score,
+      label: r.label,
+      createdAt: r.createdAt,
+    }));
+  } catch {
+    return [];
+  }
+}
+
+/**
+ * Submit a user testimonial with optional media.
+ */
+export async function submitTestimonialMedia(data: InsertTestimonialMedia): Promise<number> {
+  const db = await getDb();
+  if (!db) return 0;
+  try {
+    const result = await db.insert(testimonialMedia).values(data);
+    return (result as unknown as { insertId: number }).insertId ?? 0;
+  } catch (err) {
+    console.error("[Testimonial] Failed to submit:", err);
+    return 0;
+  }
+}
+
+/**
+ * Get approved testimonials with media for the Social Proof Wall.
+ */
+export async function getApprovedTestimonialMedia(limit = 20) {
+  const db = await getDb();
+  if (!db) return [];
+  try {
+    return await db
+      .select()
+      .from(testimonialMedia)
+      .where(eq(testimonialMedia.status, "approved"))
+      .orderBy(desc(testimonialMedia.createdAt))
+      .limit(limit);
+  } catch {
+    return [];
+  }
+}
+
+/**
+ * Get pending testimonials for admin moderation.
+ */
+export async function getPendingTestimonialMedia() {
+  const db = await getDb();
+  if (!db) return [];
+  try {
+    return await db
+      .select()
+      .from(testimonialMedia)
+      .where(eq(testimonialMedia.status, "pending"))
+      .orderBy(desc(testimonialMedia.createdAt));
+  } catch {
+    return [];
+  }
+}
+
+/**
+ * Approve or reject a testimonial media submission.
+ */
+export async function moderateTestimonialMedia(id: number, status: "approved" | "rejected"): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+  try {
+    await db.update(testimonialMedia).set({ status }).where(eq(testimonialMedia.id, id));
+  } catch (err) {
+    console.error("[Testimonial] Failed to moderate:", err);
+  }
 }
 
 /**

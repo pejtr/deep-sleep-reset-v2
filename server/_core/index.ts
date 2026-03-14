@@ -2,6 +2,7 @@ import "dotenv/config";
 import express from "express";
 import { createServer } from "http";
 import net from "net";
+import multer from "multer";
 import { createExpressMiddleware } from "@trpc/server/adapters/express";
 import { registerOAuthRoutes } from "./oauth";
 import { appRouter } from "../routers";
@@ -9,6 +10,7 @@ import { createContext } from "./context";
 import { serveStatic, setupVite } from "./vite";
 import { handleStripeWebhook } from "../stripe/webhook";
 import { igCronTick } from "../igCronJob";
+import { storagePut } from "../storage";
 
 function isPortAvailable(port: number): Promise<boolean> {
   return new Promise(resolve => {
@@ -80,6 +82,24 @@ async function startServer() {
   app.get("/robots.txt", (_req, res) => {
     res.set("Content-Type", "text/plain");
     res.send(`User-agent: *\nAllow: /\nDisallow: /admin\nDisallow: /api/\nSitemap: https://deep-sleep-reset.com/sitemap.xml`);
+  });
+
+  // Testimonial media upload endpoint
+  const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 16 * 1024 * 1024 } });
+  app.post("/api/upload/testimonial", upload.single("file"), async (req: express.Request & { file?: Express.Multer.File }, res) => {
+    try {
+      if (!req.file) {
+        res.status(400).json({ error: "No file provided" });
+        return;
+      }
+      const ext = req.file.originalname.split(".").pop() ?? "bin";
+      const key = `testimonials/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+      const { url } = await storagePut(key, req.file.buffer, req.file.mimetype);
+      res.json({ url });
+    } catch (err) {
+      console.error("[Upload] Testimonial upload failed:", err);
+      res.status(500).json({ error: "Upload failed" });
+    }
   });
 
   // OAuth callback under /api/oauth/callback

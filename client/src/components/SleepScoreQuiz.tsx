@@ -11,12 +11,22 @@
  * Design: Midnight Noir — dark card, amber accents, progress bar
  */
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Moon, Brain, Clock, Zap, ArrowRight, Mail, CheckCircle, AlertTriangle, XCircle, Share2, Copy, Check } from "lucide-react";
+import { Moon, Brain, Clock, Zap, ArrowRight, Mail, CheckCircle, AlertTriangle, XCircle, Share2, Copy, Check, TrendingUp } from "lucide-react";
 import { trackEvent } from "@/components/MetaPixel";
 import { openCheckout } from "@/lib/checkout";
 import { trpc } from "@/lib/trpc";
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  ReferenceLine,
+} from "recharts";
 
 interface Question {
   id: number;
@@ -209,6 +219,69 @@ function SocialShareButtons({ score, label }: { score: number; label: string }) 
   );
 }
 
+// ─── Score Trend Chart ───────────────────────────────────────────────────────
+function ScoreTrendChart({ sessionId, currentScore, currentLabel }: { sessionId: string; currentScore: number; currentLabel: string }) {
+  const historyQ = trpc.quiz.getHistory.useQuery({ sessionId }, { staleTime: 0 });
+  const history = historyQ.data ?? [];
+
+  if (history.length < 2) return null;
+
+  const chartData = history.map((h, i) => ({
+    attempt: `#${i + 1}`,
+    score: h.score,
+    label: h.label,
+    date: new Date(h.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric" }),
+  }));
+
+  const firstScore = history[0].score;
+  const latestScore = history[history.length - 1].score;
+  const delta = latestScore - firstScore;
+  const improving = delta > 0;
+
+  return (
+    <div className="mb-8 bg-background/30 border border-border/20 rounded-xl p-5">
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center gap-2">
+          <TrendingUp className={`w-4 h-4 ${improving ? 'text-green-400' : 'text-foreground/40'}`} />
+          <span className="text-sm font-medium text-foreground/70">Your Sleep Score Trend</span>
+        </div>
+        <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${
+          improving ? 'bg-green-400/10 text-green-400' : delta === 0 ? 'bg-foreground/5 text-foreground/40' : 'bg-red-400/10 text-red-400'
+        }`}>
+          {improving ? `+${delta}` : delta === 0 ? '±0' : `${delta}`} pts
+        </span>
+      </div>
+      <ResponsiveContainer width="100%" height={140}>
+        <LineChart data={chartData} margin={{ top: 5, right: 10, left: -20, bottom: 0 }}>
+          <CartesianGrid strokeDasharray="3 3" stroke="oklch(1 0 0 / 0.06)" />
+          <XAxis dataKey="attempt" tick={{ fontSize: 11, fill: 'oklch(1 0 0 / 0.35)' }} axisLine={false} tickLine={false} />
+          <YAxis domain={[0, 100]} tick={{ fontSize: 11, fill: 'oklch(1 0 0 / 0.35)' }} axisLine={false} tickLine={false} />
+          <Tooltip
+            contentStyle={{ background: 'oklch(0.14 0.02 260)', border: '1px solid oklch(1 0 0 / 0.1)', borderRadius: '8px', fontSize: 12 }}
+            formatter={(value: number, _name: string, entry: { payload?: { label?: string } }) => [
+              <span key="v" style={{ color: 'oklch(0.78 0.13 65)' }}>{value}/100{entry.payload?.label ? ` — ${entry.payload.label}` : ''}</span>,
+              'Score'
+            ]}
+            labelFormatter={(label) => `Attempt ${label}`}
+          />
+          <ReferenceLine y={50} stroke="oklch(1 0 0 / 0.1)" strokeDasharray="4 4" />
+          <Line
+            type="monotone"
+            dataKey="score"
+            stroke="oklch(0.78 0.13 65)"
+            strokeWidth={2}
+            dot={{ fill: 'oklch(0.78 0.13 65)', r: 4, strokeWidth: 0 }}
+            activeDot={{ r: 6, fill: 'oklch(0.78 0.13 65)' }}
+          />
+        </LineChart>
+      </ResponsiveContainer>
+      <p className="text-foreground/30 text-xs mt-2 text-center">
+        {history.length} attempt{history.length !== 1 ? 's' : ''} recorded · {improving ? '🎉 You are improving!' : 'Keep going — the protocol works in 7 nights.'}
+      </p>
+    </div>
+  );
+}
+
 export default function SleepScoreQuiz() {
   const [state, setState] = useState<QuizState>("intro");
   const [currentQ, setCurrentQ] = useState(0);
@@ -217,7 +290,20 @@ export default function SleepScoreQuiz() {
   const [emailError, setEmailError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // Stable session ID for quiz history tracking
+  const sessionId = useMemo(() => {
+    if (typeof window === 'undefined') return 'ssr';
+    const key = 'dsr_quiz_session';
+    let id = localStorage.getItem(key);
+    if (!id) {
+      id = `quiz_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+      localStorage.setItem(key, id);
+    }
+    return id;
+  }, []);
+
   const captureLead = trpc.leads.capture.useMutation();
+  const saveAttempt = trpc.quiz.saveAttempt.useMutation();
 
   const totalScore = answers.reduce((sum, v) => sum + v, 0);
   const result = getScoreResult(totalScore);
@@ -256,9 +342,17 @@ export default function SleepScoreQuiz() {
       // Non-blocking — proceed even if capture fails
     }
 
+    // Save quiz attempt for score trend history
+    try {
+      const label = getScoreResult(totalScore).label;
+      await saveAttempt.mutateAsync({ sessionId, score: totalScore, label, email });
+    } catch (_) {
+      // Non-blocking
+    }
+
     setIsSubmitting(false);
     setState("results");
-  }, [email, totalScore, answers, captureLead]);
+  }, [email, totalScore, answers, captureLead, saveAttempt, sessionId]);
 
   const progress = state === "questions" ? ((currentQ) / QUESTIONS.length) * 100 : 0;
   const question = QUESTIONS[currentQ];
@@ -461,6 +555,9 @@ export default function SleepScoreQuiz() {
                     <p className="text-foreground/70 text-sm leading-relaxed">{result.urgency}</p>
                   </div>
                 </div>
+
+                {/* Score Trend Chart — shows if user has taken the quiz before */}
+                <ScoreTrendChart sessionId={sessionId} currentScore={totalScore} currentLabel={result.label} />
 
                 {/* Social Sharing */}
                 <SocialShareButtons score={totalScore} label={result.label} />

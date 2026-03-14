@@ -5,7 +5,7 @@ import { systemRouter } from "./_core/systemRouter";
 import { publicProcedure, protectedProcedure, router } from "./_core/trpc";
 import { createCheckoutSession, createBundleCheckoutSession, PRODUCTS, type ProductKey } from "./stripe/index";
 import { invokeLLM } from "./_core/llm";
-import { saveLead, saveChatInsight, saveChatSurvey, getOrdersByEmail, getAdminStats, getFunnelStats, getRecentOrders, getRecentLeads, getRecentChatInsights, getRecentChatSurveys, getDailyRevenue, getLeadSourceStats, saveAbEvent, getAbStats } from "./db";
+import { saveLead, saveChatInsight, saveChatSurvey, getOrdersByEmail, getAdminStats, getFunnelStats, getRecentOrders, getRecentLeads, getRecentChatInsights, getRecentChatSurveys, getDailyRevenue, getLeadSourceStats, saveAbEvent, getAbStats, saveQuizAttempt, getQuizHistory, submitTestimonialMedia, getApprovedTestimonialMedia, getPendingTestimonialMedia, moderateTestimonialMedia } from "./db";
 import { igAutopilotRouter } from "./routers/igAutopilot";
 import { igDmAutoResponderRouter } from "./routers/igDmAutoResponder";
 import { emailSequenceRouter } from "./routers/emailSequence";
@@ -291,6 +291,82 @@ Extract:
       })
       .query(async () => {
         return getAbStats();
+      }),
+  }),
+
+  // Quiz score history
+  quiz: router({
+    saveAttempt: publicProcedure
+      .input(z.object({
+        sessionId: z.string().max(64),
+        score: z.number().int().min(0).max(100),
+        label: z.string().max(32),
+        email: z.string().email().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        await saveQuizAttempt({
+          sessionId: input.sessionId,
+          score: input.score,
+          label: input.label,
+          email: input.email,
+        });
+        return { success: true };
+      }),
+
+    getHistory: publicProcedure
+      .input(z.object({ sessionId: z.string().max(64) }))
+      .query(async ({ input }) => {
+        return getQuizHistory(input.sessionId);
+      }),
+  }),
+
+  // Testimonial media (user-submitted photos/videos for Social Proof Wall)
+  testimonialMedia: router({
+    submit: publicProcedure
+      .input(z.object({
+        name: z.string().min(2).max(128),
+        quote: z.string().min(10).max(500),
+        rating: z.number().int().min(1).max(5).default(5),
+        mediaUrl: z.string().url().optional(),
+        mediaType: z.enum(["image", "video"]).optional(),
+      }))
+      .mutation(async ({ input }) => {
+        const id = await submitTestimonialMedia({
+          name: input.name,
+          quote: input.quote,
+          rating: input.rating,
+          mediaUrl: input.mediaUrl,
+          mediaType: input.mediaType,
+        });
+        return { success: true, id };
+      }),
+
+    listApproved: publicProcedure
+      .query(async () => {
+        return getApprovedTestimonialMedia(20);
+      }),
+
+    listPending: protectedProcedure
+      .use(({ ctx, next }) => {
+        if (ctx.user.role !== 'admin') throw new Error('Forbidden');
+        return next({ ctx });
+      })
+      .query(async () => {
+        return getPendingTestimonialMedia();
+      }),
+
+    moderate: protectedProcedure
+      .use(({ ctx, next }) => {
+        if (ctx.user.role !== 'admin') throw new Error('Forbidden');
+        return next({ ctx });
+      })
+      .input(z.object({
+        id: z.number().int().positive(),
+        status: z.enum(["approved", "rejected"]),
+      }))
+      .mutation(async ({ input }) => {
+        await moderateTestimonialMedia(input.id, input.status);
+        return { success: true };
       }),
   }),
 

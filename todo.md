@@ -184,3 +184,15 @@
 - [x] Rewrite quiz intro and result CTAs with new tone
 - [x] Rewrite ExitIntentPopup copy with new tone
 - [x] 122 tests passing
+
+## Phase 22: Quiz Score Trend + Chatbot Script + Social Proof Media [COMPLETED]
+- [x] DB: quiz_attempts table (session_id, score, label, created_at)
+- [x] tRPC: quiz.saveAttempt (public), quiz.getHistory (by sessionId)
+- [x] Quiz score trend chart (recharts LineChart, shows last 5 attempts, delta badge)
+- [x] ChatbotTeaserHook: 3-question qualifying script with conditional CTA (high/medium/low urgency)
+- [x] SocialProofWallHook: user-submitted photo/video testimonials (upload form + S3 + display)
+- [x] DB: testimonial_media table (url, type, name, quote, rating, approved)
+- [x] tRPC: testimonialMedia.submit, testimonialMedia.listApproved, testimonialMedia.moderate (admin)
+- [x] Admin: approve/reject media testimonials in Testimonials tab
+- [x] multer upload endpoint: POST /api/upload/testimonial → S3
+- [x] 136 tests passing

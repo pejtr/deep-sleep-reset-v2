@@ -568,3 +568,47 @@ export const abEvents = mysqlTable("ab_events", {
 
 export type AbEvent = typeof abEvents.$inferSelect;
 export type InsertAbEvent = typeof abEvents.$inferInsert;
+
+/**
+ * Quiz attempts — stores each Sleep Score Quiz result per session.
+ * Used to show score trend chart across multiple attempts.
+ */
+export const quizAttempts = mysqlTable("quiz_attempts", {
+  id: int("id").autoincrement().primaryKey(),
+  /** Anonymous session ID (from localStorage) */
+  sessionId: varchar("sessionId", { length: 64 }).notNull(),
+  /** Optional: email if captured */
+  email: varchar("email", { length: 320 }),
+  /** Score 0-100 */
+  score: int("score").notNull(),
+  /** Score label: Critical, Poor, Fair, Good, Excellent */
+  label: varchar("label", { length: 32 }).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type QuizAttempt = typeof quizAttempts.$inferSelect;
+export type InsertQuizAttempt = typeof quizAttempts.$inferInsert;
+
+/**
+ * Testimonial media — user-submitted photos or videos attached to testimonials.
+ * Displayed in the Social Proof Wall hook. Moderated before showing publicly.
+ */
+export const testimonialMedia = mysqlTable("testimonial_media", {
+  id: int("id").autoincrement().primaryKey(),
+  /** Submitter's display name */
+  name: varchar("name", { length: 128 }).notNull(),
+  /** Short testimonial quote */
+  quote: text("quote").notNull(),
+  /** Star rating 1-5 */
+  rating: int("rating").default(5).notNull(),
+  /** S3 CDN URL of the uploaded image or video */
+  mediaUrl: text("mediaUrl"),
+  /** Type of media: image | video */
+  mediaType: mysqlEnum("mediaType", ["image", "video"]),
+  /** Moderation status */
+  status: mysqlEnum("status", ["pending", "approved", "rejected"]).default("pending").notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type TestimonialMedia = typeof testimonialMedia.$inferSelect;
+export type InsertTestimonialMedia = typeof testimonialMedia.$inferInsert;
