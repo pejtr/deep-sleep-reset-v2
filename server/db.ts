@@ -1,6 +1,6 @@
 import { eq, gte, sql, desc, count, sum } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { chatInsights, chatSurveys, InsertChatInsight, InsertChatSurvey, InsertLead, InsertUser, leads, orders, users } from "../drizzle/schema";
+import { abEvents, chatInsights, chatSurveys, InsertAbEvent, InsertChatInsight, InsertChatSurvey, InsertLead, InsertUser, leads, orders, users } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
 let _db: ReturnType<typeof drizzle> | null = null;
@@ -339,6 +339,53 @@ export async function getLeadSourceStats() {
     total: Number(r.total),
     converted: Number(r.converted),
     convRate: r.total > 0 ? ((Number(r.converted) / Number(r.total)) * 100).toFixed(1) : "0.0",
+  }));
+}
+
+/**
+ * Save an A/B test event (impression or conversion).
+ */
+export async function saveAbEvent(event: InsertAbEvent): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+  try {
+    await db.insert(abEvents).values(event);
+  } catch (err) {
+    console.error("[AB] Failed to save event:", err);
+  }
+}
+
+/**
+ * Get A/B test stats: impressions, conversions, CVR per variant.
+ */
+export async function getAbStats() {
+  const db = await getDb();
+  if (!db) return [];
+
+  const result = await db
+    .select({
+      variant: abEvents.variant,
+      eventType: abEvents.eventType,
+      cnt: count(),
+    })
+    .from(abEvents)
+    .groupBy(abEvents.variant, abEvents.eventType);
+
+  // Pivot into per-variant rows
+  const map: Record<string, { impressions: number; conversions: number }> = {};
+  for (const row of result) {
+    if (!map[row.variant]) map[row.variant] = { impressions: 0, conversions: 0 };
+    if (row.eventType === "impression") map[row.variant].impressions = Number(row.cnt);
+    if (row.eventType === "conversion") map[row.variant].conversions = Number(row.cnt);
+  }
+
+  return Object.entries(map).map(([variant, data]) => ({
+    variant,
+    impressions: data.impressions,
+    conversions: data.conversions,
+    cvr: data.impressions > 0
+      ? ((data.conversions / data.impressions) * 100).toFixed(1)
+      : "0.0",
   }));
 }
 

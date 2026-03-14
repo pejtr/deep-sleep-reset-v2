@@ -16,6 +16,10 @@ import { trackEvent } from "@/components/MetaPixel";
 import SleepScoreQuiz from "@/components/SleepScoreQuiz";
 import LiveVisitorCounter from "@/components/LiveVisitorCounter";
 import UrgencyTimer from "@/components/UrgencyTimer";
+import ChatbotTeaserHook from "@/components/ChatbotTeaserHook";
+import SocialProofWallHook from "@/components/SocialProofWallHook";
+import ExitIntentPopup from "@/components/ExitIntentPopup";
+import { getHookVariant } from "@/lib/ab-hooks";
 import { trpc } from "@/lib/trpc";
 import {
   Moon,
@@ -268,6 +272,8 @@ export default function Home() {
   const headline = t.hero.variants[variant];
   const [scrollY, setScrollY] = useState(0);
   const [, navigate] = useLocation();
+  const hookVariant = useMemo(() => getHookVariant(), []);
+  const [chatOpen, setChatOpen] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => setScrollY(window.scrollY);
@@ -953,6 +959,20 @@ export default function Home() {
           </FadeInSection>
         </div>
       </section>
+
+      {/* ===== A/B HOOK VARIANTS ===== */}
+      {hookVariant === "chatbot" && (
+        <ChatbotTeaserHook
+          onConversion={() => goToOrder()}
+          onChatOpen={() => setChatOpen(true)}
+        />
+      )}
+      {hookVariant === "social" && (
+        <SocialProofWallHook onConversion={() => goToOrder()} />
+      )}
+
+      {/* ===== EXIT INTENT POPUP ===== */}
+      <ExitIntentPopup />
 
       {/* ===== FOOTER ===== */}
       <footer className="py-12 border-t border-border/20">

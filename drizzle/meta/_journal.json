@@ -78,6 +78,13 @@
       "when": 1773450263825,
       "tag": "0010_boring_nighthawk",
       "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "5",
+      "when": 1773486692509,
+      "tag": "0011_ordinary_amphibian",
+      "breakpoints": true
     }
   ]
 }

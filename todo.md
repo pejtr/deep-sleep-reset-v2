@@ -160,3 +160,27 @@
 - [x] Conversion Analytics admin dashboard (funnel drop-off, quiz completions, lead sources, recommendations)
 - [x] leadSources tRPC procedure + getLeadSourceStats DB helper
 - [x] 105 tests passing
+
+## Phase 20: Social Sharing + Exit Intent Popup [COMPLETED]
+- [x] Sleep Score Quiz: social sharing buttons on results screen (Twitter/X, Facebook, WhatsApp, copy link)
+- [x] Exit Intent Popup: wired into Home.tsx
+
+## Phase 20b: A/B Hook Variants [COMPLETED]
+- [x] Variant A: Sleep Score Quiz (existing) — social sharing added
+- [x] Variant B: Chatbot Teaser Hook — animated chat bubble with pre-seeded curiosity opener
+- [x] Variant C: Social Proof Wall Hook — live testimonial ticker + live counter
+- [x] A/B router: 24h localStorage cache, deterministic assignment, track impressions + conversions
+- [x] DB: ab_events table (variant, event_type, session_id, email, created_at)
+- [x] tRPC: ab.trackEvent (public), ab.getStats (admin-only)
+- [x] Admin Conversion tab: A/B test results table (impressions, conversions, CVR per variant, winner badge)
+- [x] Write tests for A/B router (11 tests passing)
+
+## Phase 21: Curiosity-Driven Sales Tone Rewrite [COMPLETED]
+- [x] Rewrite hero headline to curiosity/aspiration frame ("Change your sleep — change your life")
+- [x] Rewrite all CTAs to "price of one coffee" framing ($5 = 1 coffee)
+- [x] Rewrite pain section: from fear/problem to curiosity/possibility
+- [x] Rewrite product intro section: aspirational transformation language
+- [x] Rewrite offer section: value-stacking with coffee price anchor
+- [x] Rewrite quiz intro and result CTAs with new tone
+- [x] Rewrite ExitIntentPopup copy with new tone
+- [x] 122 tests passing

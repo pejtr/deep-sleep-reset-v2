@@ -134,6 +134,7 @@ export default function Admin() {
   const surveysQ = trpc.admin.chatSurveys.useQuery(undefined, { refetchInterval: 60_000 });
   const dailyQ = trpc.admin.dailyRevenue.useQuery(undefined, { refetchInterval: 60_000 });
   const leadSourcesQ = trpc.admin.leadSources.useQuery(undefined, { refetchInterval: 60_000 });
+  const abStatsQ = trpc.ab.getStats.useQuery(undefined, { refetchInterval: 60_000 });
 
   // Auth guard
   if (authLoading) {
@@ -176,6 +177,7 @@ export default function Admin() {
   const surveys = surveysQ.data ?? [];
   const daily = dailyQ.data ?? [];
   const leadSources = leadSourcesQ.data ?? [];
+  const abStats = abStatsQ.data ?? [];
 
   const convRate =
     stats && stats.totalLeads > 0
@@ -824,6 +826,60 @@ export default function Admin() {
                   accent
                 />
               </div>
+            </div>
+
+            {/* A/B Hook Variant Performance */}
+            <div className="border border-border/20 rounded-xl p-6">
+              <SectionHeader title="A/B Hook Varianty — Výkon" icon={BarChart2} />
+              {abStats.length === 0 ? (
+                <div className="text-center py-8 text-foreground/30">
+                  <BarChart2 className="w-8 h-8 mx-auto mb-2 opacity-30" />
+                  <p className="text-sm">Zatím žádná data. Varianty se začnou zobrazovat návštěvníkům automaticky.</p>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  <p className="text-foreground/40 text-xs mb-4">Každý návštěvník vidí jednu variantu po dobu 24 hodin (24h cache). Konverze = klik na CTA tlačítko.</p>
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-sm">
+                      <thead>
+                        <tr className="text-foreground/40 text-xs uppercase tracking-wider border-b border-border/20">
+                          <th className="text-left py-2 pr-4">Varianta</th>
+                          <th className="text-right py-2 pr-4">Zobrazení</th>
+                          <th className="text-right py-2 pr-4">Konverze</th>
+                          <th className="text-right py-2 pr-4">CVR</th>
+                          <th className="text-right py-2">Stav</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {[...abStats].sort((a, b) => parseFloat(b.cvr) - parseFloat(a.cvr)).map((row) => {
+                          const isWinner = abStats.length > 1 && parseFloat(row.cvr) === Math.max(...abStats.map(r => parseFloat(r.cvr)));
+                          const variantLabel = row.variant === 'quiz' ? '🧠 Sleep Score Quiz' : row.variant === 'chatbot' ? '💬 Chatbot Teaser' : '⭐ Social Proof Wall';
+                          return (
+                            <tr key={row.variant} className="border-b border-border/10 hover:bg-card/20">
+                              <td className="py-3 pr-4 font-medium">{variantLabel}</td>
+                              <td className="py-3 pr-4 text-right tabular-nums">{row.impressions.toLocaleString()}</td>
+                              <td className="py-3 pr-4 text-right tabular-nums text-amber">{row.conversions.toLocaleString()}</td>
+                              <td className="py-3 pr-4 text-right tabular-nums font-semibold">{row.cvr}%</td>
+                              <td className="py-3 text-right">
+                                {isWinner ? (
+                                  <span className="text-xs bg-amber/20 text-amber px-2 py-0.5 rounded-full">🏆 Vítěz</span>
+                                ) : (
+                                  <span className="text-xs bg-foreground/5 text-foreground/30 px-2 py-0.5 rounded-full">Testuje se</span>
+                                )}
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                  {abStats.length > 1 && (
+                    <p className="text-foreground/30 text-xs mt-2">
+                      Tip: Jakmile má vítěz &gt;100 zobrazení a &gt;2× vyšší CVR, zvažte deaktivaci slabších variant.
+                    </p>
+                  )}
+                </div>
+              )}
             </div>
 
             {/* Recommendations */}

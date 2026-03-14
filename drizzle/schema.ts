@@ -548,3 +548,23 @@ export const newsletterSubscribers = mysqlTable("newsletter_subscribers", {
 });
 export type NewsletterSubscriber = typeof newsletterSubscribers.$inferSelect;
 export type InsertNewsletterSubscriber = typeof newsletterSubscribers.$inferInsert;
+
+/**
+ * A/B test events — tracks impressions and conversions per hook variant.
+ * Variant IDs: 'quiz' (Sleep Score Quiz), 'chatbot' (Chatbot Teaser), 'social' (Social Proof Wall)
+ */
+export const abEvents = mysqlTable("ab_events", {
+  id: int("id").autoincrement().primaryKey(),
+  /** Which variant was shown: quiz | chatbot | social */
+  variant: mysqlEnum("variant", ["quiz", "chatbot", "social"]).notNull(),
+  /** Event type: impression (variant shown) or conversion (CTA clicked → checkout) */
+  eventType: mysqlEnum("eventType", ["impression", "conversion"]).notNull(),
+  /** Anonymous session ID (from localStorage) */
+  sessionId: varchar("sessionId", { length: 64 }).notNull(),
+  /** Optional: email if captured */
+  email: varchar("email", { length: 320 }),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type AbEvent = typeof abEvents.$inferSelect;
+export type InsertAbEvent = typeof abEvents.$inferInsert;

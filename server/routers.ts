@@ -5,7 +5,7 @@ import { systemRouter } from "./_core/systemRouter";
 import { publicProcedure, protectedProcedure, router } from "./_core/trpc";
 import { createCheckoutSession, createBundleCheckoutSession, PRODUCTS, type ProductKey } from "./stripe/index";
 import { invokeLLM } from "./_core/llm";
-import { saveLead, saveChatInsight, saveChatSurvey, getOrdersByEmail, getAdminStats, getFunnelStats, getRecentOrders, getRecentLeads, getRecentChatInsights, getRecentChatSurveys, getDailyRevenue, getLeadSourceStats } from "./db";
+import { saveLead, saveChatInsight, saveChatSurvey, getOrdersByEmail, getAdminStats, getFunnelStats, getRecentOrders, getRecentLeads, getRecentChatInsights, getRecentChatSurveys, getDailyRevenue, getLeadSourceStats, saveAbEvent, getAbStats } from "./db";
 import { igAutopilotRouter } from "./routers/igAutopilot";
 import { igDmAutoResponderRouter } from "./routers/igDmAutoResponder";
 import { emailSequenceRouter } from "./routers/emailSequence";
@@ -262,6 +262,35 @@ Extract:
       })
       .query(async () => {
         return getLeadSourceStats();
+      }),
+  }),
+
+  // A/B Hook Variant Tracking
+  ab: router({
+    trackEvent: publicProcedure
+      .input(z.object({
+        variant: z.enum(["quiz", "chatbot", "social"]),
+        eventType: z.enum(["impression", "conversion"]),
+        sessionId: z.string().max(64),
+        email: z.string().email().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        await saveAbEvent({
+          variant: input.variant,
+          eventType: input.eventType,
+          sessionId: input.sessionId,
+          email: input.email,
+        });
+        return { success: true };
+      }),
+
+    getStats: protectedProcedure
+      .use(({ ctx, next }) => {
+        if (ctx.user.role !== 'admin') throw new Error('Forbidden');
+        return next({ ctx });
+      })
+      .query(async () => {
+        return getAbStats();
       }),
   }),
 

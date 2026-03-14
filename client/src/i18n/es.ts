@@ -24,25 +24,25 @@ const es: Translations = {
 
   // Header
   header: {
-    ctaButton: "Obtener el Reset — $5",
+    ctaButton: "Cambia Mi Sueño — $5",
   },
 
   // Hero Section
   hero: {
-    protocol: "EL PROTOCOLO DE 7 NOCHES",
-    ctaButton: "Sí, Quiero Dormir Esta Noche",
+    protocol: "LA TRANSFORMACIÓN DE 7 NOCHES",
+    ctaButton: "Sí — Quiero Despertar Así",
     variants: {
       a: {
-        main: "¿Sigues Despierto a las ",
-        highlight: "3:17 AM",
-        continuation: ", Mirando el Techo?",
-        sub: "Descubre el Protocolo de 7 Noches Que Reactiva el Interruptor Natural de Sueño de Tu Cuerpo... Sin Melatonina, Pastillas para Dormir ni \"Contar Ovejas.\"",
+        main: "¿Cómo Sería Tu Vida Si Te Despertaras ",
+        highlight: "Verdaderamente Descansado",
+        continuation: " — Cada Mañana?",
+        sub: "Más energía, mente más clara, mejor humor — todo por arreglar lo que afecta todo lo demás. El Reset de Sueño Profundo de 7 Noches. Menos que el precio de un café.",
       },
       b: {
-        main: "¿Y Si Pudieras ",
-        highlight: "Dormirte en 15 Minutos",
-        continuation: " — Todas las Noches?",
-        sub: "El Reset de 7 Noches Respaldado por la Ciencia Que 10,000+ Personas Usaron Para Arreglar Su Sueño Roto. Sin Pastillas. Sin Apps. Solo Sueño.",
+        main: "Cambia Tu Sueño. ",
+        highlight: "Cambia Tu Vida.",
+        continuation: " Por el Precio de un Café.",
+        sub: "10,000+ personas descubrieron qué pasa cuando finalmente duermes profundo. El protocolo de 7 noches que lo hace permanente. Solo $5.",
       },
     },
   },
@@ -172,8 +172,8 @@ const es: Translations = {
     ],
     totalValue: "Valor Total:",
     yourPrice: "Tu Precio Hoy:",
-    justPrice: "Solo $5",
-    ctaButton: "¡SÍ, QUIERO DORMIR ESTA NOCHE! DAME EL RESET DE $5 AHORA",
+    justPrice: "Solo $5 — Menos que un Café",
+    ctaButton: "¡SÍ — CAMBIA MI SUEÑO POR $5!",
   },
 
   // Guarantee
@@ -221,36 +221,36 @@ const es: Translations = {
 
   // Final CTA
   finalCta: {
-    title: "¿Qué Va a Ser?",
-    desc1: "¿Otra noche dando vueltas, mirando el reloj y temiendo la mañana?",
-    desc2: "¿O estás listo para probar algo diferente? Algo que ",
-    desc2Highlight: "funciona.",
-    ctaButton: "HAZ CLIC AQUÍ PARA OBTENER ACCESO INSTANTÁNEO POR SOLO $5",
-    ps: "Piénsalo. Probablemente has gastado más de $5 en un solo café solo para lidiar con los ",
-    psItalic1: "síntomas",
-    psMid: " del mal sueño. Por ese mismo precio, puedes empezar a tratar la ",
-    psItalic2: "causa",
-    psEnd: ". ¿No te lo debes a ti mismo al menos intentarlo?",
+    title: "Un Café. Siete Noches. Una Vida Diferente.",
+    desc1: "Imagina despertar mañana y pensar: \"Realmente descansé\".",
+    desc2: "Más energía. Mente más clara. Mejor humor. La versión de ti mismo que aparece cuando no estás agotado.",
+    desc2Highlight: "Todo por $5.",
+    ctaButton: "CAMBIA MI SUEÑO — $5",
+    ps: "Has gastado más de $5 en un café que te puso más ansioso. Esto es $5 para cambiar permanentemente cómo duermes — y cómo se siente cada día después. La única pregunta es: ¿tienes suficiente curiosidad para descubrirlo?",
+    psItalic1: "",
+    psMid: "",
+    psItalic2: "",
+    psEnd: "",
   },
 
   // Exit Intent Popup
   exitPopup: {
-    badge: "20% DE DESCUENTO",
-    title: "Espera — ",
-    titleHighlight: "Oferta Especial",
-    subtitle: "Solo para ti, porque casi te fuiste...",
-    regularPrice: "Precio Regular",
-    yourPriceNow: "Tu Precio Ahora",
-    offerExpires: "La oferta expira en",
+    badge: "ESPERA — Una Última Cosa",
+    title: "¿Y Si Esta Noche Fuera ",
+    titleHighlight: "Diferente?",
+    subtitle: "Obtén el Reset Completo de 7 Noches por solo $4 — menos que tu último café. Garantía de 30 días.",
+    regularPrice: "Precio regular: $5",
+    yourPriceNow: "Tu precio ahora: $4",
+    offerExpires: "Esta oferta expira en:",
     items: [
       "Programa Completo de Reset de Sueño de 7 Noches",
-      "Sesiones de Audio Guiadas",
-      "Diario de Sueño Imprimible",
+      "5 Sesiones de Audio Guiadas",
+      "Diario de Sueño + Seguimiento de Progreso",
       "Garantía de Devolución de 30 Días",
     ],
-    ctaButton: "Obtener Mi Descuento de $4 Ahora",
-    savings: "Ahorras $1 — acceso digital instantáneo",
-    decline: "No gracias, prefiero pagar el precio completo después",
+    ctaButton: "Sí — Tengo Curiosidad. Dame Acceso por $4.",
+    savings: "Ahorra 20% — menos que un café",
+    decline: "No gracias, seguiré despertándome cansado",
   },
 
   // Sticky Mobile CTA
