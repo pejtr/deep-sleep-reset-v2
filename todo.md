@@ -196,3 +196,14 @@
 - [x] Admin: approve/reject media testimonials in Testimonials tab
 - [x] multer upload endpoint: POST /api/upload/testimonial → S3
 - [x] 136 tests passing
+
+## Phase 23: Chatbot A/B Script + Quiz Notes + Social Proof Filter [COMPLETED]
+- [x] ChatbotTeaserHook: A/B test 2 qualifying question sets (Empathetic Coach vs Direct Disruptor)
+- [x] ChatbotTeaserHook: script variant tracked in ab_events metadata field
+- [x] DB: note column added to quiz_attempts table (varchar 280)
+- [x] tRPC: quiz.updateNote procedure (ownership verified by sessionId)
+- [x] Quiz Score Trend chart: inline per-attempt note editor (click to edit, Enter/Escape)
+- [x] Quiz Score Trend chart: notes shown in recharts Tooltip on hover
+- [x] SocialProofWallHook: filter tabs (All / Photos / Videos) with live counts per type
+- [x] SocialProofWallHook: empty state per filter ("No photos yet — be the first!")
+- [x] 136 tests passing

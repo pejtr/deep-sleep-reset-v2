@@ -563,6 +563,8 @@ export const abEvents = mysqlTable("ab_events", {
   sessionId: varchar("sessionId", { length: 64 }).notNull(),
   /** Optional: email if captured */
   email: varchar("email", { length: 320 }),
+  /** Optional: extra metadata, e.g. chatbot script variant (sleep-impact | identity-shift) */
+  metadata: varchar("metadata", { length: 64 }),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
 });
 
@@ -583,6 +585,8 @@ export const quizAttempts = mysqlTable("quiz_attempts", {
   score: int("score").notNull(),
   /** Score label: Critical, Poor, Fair, Good, Excellent */
   label: varchar("label", { length: 32 }).notNull(),
+  /** Optional personal note the user can attach to this attempt */
+  note: varchar("note", { length: 280 }),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
 });
 

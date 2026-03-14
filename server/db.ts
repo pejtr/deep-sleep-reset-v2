@@ -1,4 +1,4 @@
-import { eq, gte, sql, desc, count, sum } from "drizzle-orm";
+import { eq, gte, sql, desc, count, sum, and } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
 import { abEvents, chatInsights, chatSurveys, InsertAbEvent, InsertChatInsight, InsertChatSurvey, InsertLead, InsertUser, InsertQuizAttempt, InsertTestimonialMedia, leads, orders, quizAttempts, testimonialMedia, users } from "../drizzle/schema";
 import { ENV } from './_core/env';
@@ -420,10 +420,32 @@ export async function getQuizHistory(sessionId: string) {
       id: r.id,
       score: r.score,
       label: r.label,
+      note: r.note ?? null,
       createdAt: r.createdAt,
     }));
   } catch {
     return [];
+  }
+}
+
+/**
+ * Update the personal note on a quiz attempt.
+ * Ownership is verified by matching sessionId — no auth required.
+ */
+export async function updateQuizAttemptNote(
+  id: number,
+  sessionId: string,
+  note: string
+): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+  try {
+    await db
+      .update(quizAttempts)
+      .set({ note })
+      .where(and(eq(quizAttempts.id, id), eq(quizAttempts.sessionId, sessionId)));
+  } catch (err) {
+    console.error("[Quiz] Failed to update note:", err);
   }
 }
 

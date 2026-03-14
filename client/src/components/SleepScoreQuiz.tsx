@@ -223,6 +223,13 @@ function SocialShareButtons({ score, label }: { score: number; label: string }) 
 function ScoreTrendChart({ sessionId, currentScore, currentLabel }: { sessionId: string; currentScore: number; currentLabel: string }) {
   const historyQ = trpc.quiz.getHistory.useQuery({ sessionId }, { staleTime: 0 });
   const history = historyQ.data ?? [];
+  const updateNote = trpc.quiz.updateNote.useMutation({
+    onSuccess: () => historyQ.refetch(),
+  });
+
+  // Note editor state: which attempt id is being edited
+  const [editingId, setEditingId] = useState<number | null>(null);
+  const [noteText, setNoteText] = useState("");
 
   if (history.length < 2) return null;
 
@@ -230,6 +237,8 @@ function ScoreTrendChart({ sessionId, currentScore, currentLabel }: { sessionId:
     attempt: `#${i + 1}`,
     score: h.score,
     label: h.label,
+    id: h.id,
+    note: h.note,
     date: new Date(h.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric" }),
   }));
 
@@ -237,6 +246,16 @@ function ScoreTrendChart({ sessionId, currentScore, currentLabel }: { sessionId:
   const latestScore = history[history.length - 1].score;
   const delta = latestScore - firstScore;
   const improving = delta > 0;
+
+  const startEdit = (id: number, existing: string | null) => {
+    setEditingId(id);
+    setNoteText(existing ?? "");
+  };
+
+  const saveNote = (id: number) => {
+    updateNote.mutate({ id, sessionId, note: noteText.trim() });
+    setEditingId(null);
+  };
 
   return (
     <div className="mb-8 bg-background/30 border border-border/20 rounded-xl p-5">
@@ -258,8 +277,11 @@ function ScoreTrendChart({ sessionId, currentScore, currentLabel }: { sessionId:
           <YAxis domain={[0, 100]} tick={{ fontSize: 11, fill: 'oklch(1 0 0 / 0.35)' }} axisLine={false} tickLine={false} />
           <Tooltip
             contentStyle={{ background: 'oklch(0.14 0.02 260)', border: '1px solid oklch(1 0 0 / 0.1)', borderRadius: '8px', fontSize: 12 }}
-            formatter={(value: number, _name: string, entry: { payload?: { label?: string } }) => [
-              <span key="v" style={{ color: 'oklch(0.78 0.13 65)' }}>{value}/100{entry.payload?.label ? ` — ${entry.payload.label}` : ''}</span>,
+            formatter={(value: number, _name: string, entry: { payload?: { label?: string; note?: string | null } }) => [
+              <span key="v" style={{ color: 'oklch(0.78 0.13 65)' }}>
+                {value}/100{entry.payload?.label ? ` — ${entry.payload.label}` : ''}
+                {entry.payload?.note ? <><br /><span style={{ color: 'oklch(1 0 0 / 0.45)', fontStyle: 'italic' }}>📝 {entry.payload.note}</span></> : null}
+              </span>,
               'Score'
             ]}
             labelFormatter={(label) => `Attempt ${label}`}
@@ -275,7 +297,41 @@ function ScoreTrendChart({ sessionId, currentScore, currentLabel }: { sessionId:
           />
         </LineChart>
       </ResponsiveContainer>
-      <p className="text-foreground/30 text-xs mt-2 text-center">
+
+      {/* Per-attempt note list */}
+      <div className="mt-4 space-y-2">
+        {history.map((h, i) => (
+          <div key={h.id} className="flex items-start gap-2 text-xs">
+            <span className="text-foreground/30 shrink-0 w-6 text-right">#{i + 1}</span>
+            <span className="text-amber/60 shrink-0 font-semibold w-8">{h.score}</span>
+            <span className="text-foreground/30 shrink-0">{new Date(h.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric" })}</span>
+            {editingId === h.id ? (
+              <div className="flex-1 flex gap-1.5">
+                <input
+                  autoFocus
+                  value={noteText}
+                  onChange={e => setNoteText(e.target.value)}
+                  onKeyDown={e => { if (e.key === 'Enter') saveNote(h.id); if (e.key === 'Escape') setEditingId(null); }}
+                  maxLength={280}
+                  placeholder="How did you feel this night?"
+                  className="flex-1 bg-foreground/5 border border-amber/20 rounded px-2 py-0.5 text-foreground/80 placeholder:text-foreground/20 outline-none focus:border-amber/40 text-xs"
+                />
+                <button onClick={() => saveNote(h.id)} className="text-amber/70 hover:text-amber text-xs px-1.5 py-0.5 rounded bg-amber/10 hover:bg-amber/20 transition-colors">Save</button>
+                <button onClick={() => setEditingId(null)} className="text-foreground/30 hover:text-foreground/60 text-xs">✕</button>
+              </div>
+            ) : (
+              <button
+                onClick={() => startEdit(h.id, h.note ?? null)}
+                className="flex-1 text-left text-foreground/30 hover:text-foreground/60 italic truncate transition-colors"
+              >
+                {h.note ? `📝 ${h.note}` : '+ add note'}
+              </button>
+            )}
+          </div>
+        ))}
+      </div>
+
+      <p className="text-foreground/30 text-xs mt-3 text-center">
         {history.length} attempt{history.length !== 1 ? 's' : ''} recorded · {improving ? '🎉 You are improving!' : 'Keep going — the protocol works in 7 nights.'}
       </p>
     </div>

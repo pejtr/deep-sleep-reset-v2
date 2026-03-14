@@ -5,7 +5,7 @@ import { systemRouter } from "./_core/systemRouter";
 import { publicProcedure, protectedProcedure, router } from "./_core/trpc";
 import { createCheckoutSession, createBundleCheckoutSession, PRODUCTS, type ProductKey } from "./stripe/index";
 import { invokeLLM } from "./_core/llm";
-import { saveLead, saveChatInsight, saveChatSurvey, getOrdersByEmail, getAdminStats, getFunnelStats, getRecentOrders, getRecentLeads, getRecentChatInsights, getRecentChatSurveys, getDailyRevenue, getLeadSourceStats, saveAbEvent, getAbStats, saveQuizAttempt, getQuizHistory, submitTestimonialMedia, getApprovedTestimonialMedia, getPendingTestimonialMedia, moderateTestimonialMedia } from "./db";
+import { saveLead, saveChatInsight, saveChatSurvey, getOrdersByEmail, getAdminStats, getFunnelStats, getRecentOrders, getRecentLeads, getRecentChatInsights, getRecentChatSurveys, getDailyRevenue, getLeadSourceStats, saveAbEvent, getAbStats, saveQuizAttempt, getQuizHistory, updateQuizAttemptNote, submitTestimonialMedia, getApprovedTestimonialMedia, getPendingTestimonialMedia, moderateTestimonialMedia } from "./db";
 import { igAutopilotRouter } from "./routers/igAutopilot";
 import { igDmAutoResponderRouter } from "./routers/igDmAutoResponder";
 import { emailSequenceRouter } from "./routers/emailSequence";
@@ -273,6 +273,7 @@ Extract:
         eventType: z.enum(["impression", "conversion"]),
         sessionId: z.string().max(64),
         email: z.string().email().optional(),
+        metadata: z.string().max(64).optional(), // e.g. chatbot script variant
       }))
       .mutation(async ({ input }) => {
         await saveAbEvent({
@@ -280,6 +281,7 @@ Extract:
           eventType: input.eventType,
           sessionId: input.sessionId,
           email: input.email,
+          metadata: input.metadata,
         });
         return { success: true };
       }),
@@ -317,6 +319,17 @@ Extract:
       .input(z.object({ sessionId: z.string().max(64) }))
       .query(async ({ input }) => {
         return getQuizHistory(input.sessionId);
+      }),
+
+    updateNote: publicProcedure
+      .input(z.object({
+        id: z.number().int().positive(),
+        sessionId: z.string().max(64), // ownership check
+        note: z.string().max(280),
+      }))
+      .mutation(async ({ input }) => {
+        await updateQuizAttemptNote(input.id, input.sessionId, input.note);
+        return { success: true };
       }),
   }),
 

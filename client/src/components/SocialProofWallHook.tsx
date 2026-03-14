@@ -237,6 +237,7 @@ export default function SocialProofWallHook({ onConversion }: SocialProofWallHoo
   const [currentIdx, setCurrentIdx] = useState(0);
   const [showUploadForm, setShowUploadForm] = useState(false);
   const [uploadSuccess, setUploadSuccess] = useState(false);
+  const [mediaFilter, setMediaFilter] = useState<"all" | "photo" | "video">("all");
   const weeklyCount = useLiveCounter(847);
 
   const trackAbEvent = trpc.ab.trackEvent.useMutation();
@@ -304,8 +305,11 @@ export default function SocialProofWallHook({ onConversion }: SocialProofWallHoo
 
   const testimonial = allTestimonials[currentIdx];
 
-  // User-submitted media thumbnails (approved only)
-  const mediaThumbnails = (approvedQ.data ?? []).filter(t => t.mediaUrl).slice(0, 4);
+  // User-submitted media thumbnails (approved only), filtered by type
+  const allMediaItems = (approvedQ.data ?? []).filter(t => t.mediaUrl);
+  const mediaThumbnails = allMediaItems
+    .filter(t => mediaFilter === "all" || (mediaFilter === "photo" ? t.mediaType === "image" : t.mediaType === "video"))
+    .slice(0, 5);
 
   return (
     <>
@@ -347,21 +351,49 @@ export default function SocialProofWallHook({ onConversion }: SocialProofWallHoo
             <div className="w-full max-w-2xl bg-[#0d1220]/95 backdrop-blur-md border border-amber/20 rounded-2xl shadow-2xl shadow-black/40 overflow-hidden">
               <div className="h-0.5 bg-gradient-to-r from-amber/0 via-amber/50 to-amber/0" />
 
-              {/* Media thumbnail strip (only shown when there are approved submissions) */}
-              {mediaThumbnails.length > 0 && (
-                <div className="flex items-center gap-2 px-4 pt-2.5 pb-0">
-                  {mediaThumbnails.map((t) => (
-                    <div key={t.id} className="w-8 h-8 rounded-lg overflow-hidden border border-amber/20 shrink-0">
-                      {t.mediaType === "video" ? (
-                        <video src={t.mediaUrl!} className="w-full h-full object-cover" muted />
-                      ) : (
-                        <img src={t.mediaUrl!} alt={t.name} className="w-full h-full object-cover" />
-                      )}
-                    </div>
-                  ))}
-                  <span className="text-[10px] text-foreground/35 ml-1">
-                    +{(approvedQ.data?.length ?? 0)} verified stories
-                  </span>
+              {/* Media thumbnail strip with filter tabs */}
+              {allMediaItems.length > 0 && (
+                <div className="px-4 pt-2.5 pb-0">
+                  {/* Filter tabs */}
+                  <div className="flex items-center gap-1.5 mb-2">
+                    {(["all", "photo", "video"] as const).map(f => (
+                      <button
+                        key={f}
+                        onClick={() => setMediaFilter(f)}
+                        className={`text-[10px] px-2 py-0.5 rounded-full border transition-all duration-150 ${
+                          mediaFilter === f
+                            ? 'border-amber/50 bg-amber/10 text-amber/80'
+                            : 'border-border/20 text-foreground/30 hover:border-border/40 hover:text-foreground/50'
+                        }`}
+                      >
+                        {f === "all" ? `All (${allMediaItems.length})` : f === "photo" ? `📷 Photos (${allMediaItems.filter(t => t.mediaType === "image").length})` : `🎥 Videos (${allMediaItems.filter(t => t.mediaType === "video").length})`}
+                      </button>
+                    ))}
+                  </div>
+                  {/* Thumbnails */}
+                  <div className="flex items-center gap-2">
+                    {mediaThumbnails.length > 0 ? mediaThumbnails.map((t) => (
+                      <div key={t.id} className="relative w-9 h-9 rounded-lg overflow-hidden border border-amber/20 shrink-0">
+                        {t.mediaType === "video" ? (
+                          <>
+                            <video src={t.mediaUrl!} className="w-full h-full object-cover" muted />
+                            <div className="absolute inset-0 flex items-center justify-center bg-black/30">
+                              <span className="text-white text-[8px]">▶</span>
+                            </div>
+                          </>
+                        ) : (
+                          <img src={t.mediaUrl!} alt={t.name} className="w-full h-full object-cover" />
+                        )}
+                      </div>
+                    )) : (
+                      <span className="text-[10px] text-foreground/25 italic">No {mediaFilter}s yet — be the first!</span>
+                    )}
+                    {mediaThumbnails.length > 0 && (
+                      <span className="text-[10px] text-foreground/35 ml-1">
+                        {(approvedQ.data?.length ?? 0)} verified stories
+                      </span>
+                    )}
+                  </div>
                 </div>
               )}
 

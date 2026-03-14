@@ -1,0 +1,1 @@
+ALTER TABLE `quiz_attempts` ADD `note` varchar(280);
