@@ -32,6 +32,7 @@ import {
   AlertTriangle,
   Instagram,
   Quote,
+  FileText,
 } from "lucide-react";
 
 // ─── helpers ──────────────────────────────────────────────────────────────────
@@ -246,6 +247,13 @@ export default function Admin() {
             >
               <Quote className="w-3.5 h-3.5" />
               Testimonials
+            </Link>
+            <Link
+              href="/admin/blog"
+              className="flex items-center gap-1.5 text-xs bg-gradient-to-r from-blue-600 to-cyan-600 text-white px-3 py-1.5 rounded-md hover:from-blue-500 hover:to-cyan-500 transition-all"
+            >
+              <FileText className="w-3.5 h-3.5" />
+              Blog Manager
             </Link>
             <span className="text-xs text-foreground/30">
               {user.name ?? user.openId}

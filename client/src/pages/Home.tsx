@@ -7,6 +7,7 @@
  */
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import SeoHead from "@/components/SeoHead";
 import { motion, useInView } from "framer-motion";
 import { getVariant } from "@/lib/ab-test";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -305,8 +306,82 @@ export default function Home() {
     document.getElementById("offer")?.scrollIntoView({ behavior: "smooth" });
   };
 
+  const homeSchemas = useMemo(() => [
+    {
+      "@context": "https://schema.org",
+      "@type": "Product",
+      "name": "The 7-Night Deep Sleep Reset",
+      "description": "A science-backed CBT-I protocol to fix insomnia, racing thoughts, and broken sleep cycles in 7 nights.",
+      "url": "https://deep-sleep-reset.com",
+      "brand": { "@type": "Brand", "name": "Deep Sleep Reset" },
+      "offers": {
+        "@type": "Offer",
+        "price": "5.00",
+        "priceCurrency": "USD",
+        "availability": "https://schema.org/InStock",
+        "url": "https://deep-sleep-reset.com/order",
+        "priceValidUntil": "2026-12-31",
+      },
+      "aggregateRating": {
+        "@type": "AggregateRating",
+        "ratingValue": "4.9",
+        "reviewCount": "847",
+        "bestRating": "5",
+        "worstRating": "1",
+      },
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "What is the 7-Night Deep Sleep Reset?",
+          "acceptedAnswer": { "@type": "Answer", "text": "It's a 7-night CBT-I (Cognitive Behavioral Therapy for Insomnia) protocol — the same method sleep doctors use. Each night you get one specific technique to fix a different root cause of insomnia." }
+        },
+        {
+          "@type": "Question",
+          "name": "How is this different from melatonin or sleeping pills?",
+          "acceptedAnswer": { "@type": "Answer", "text": "Melatonin and pills treat symptoms. CBT-I fixes the root cause — your brain's broken sleep patterns. The results are permanent, not temporary." }
+        },
+        {
+          "@type": "Question",
+          "name": "Why does it only cost $5?",
+          "acceptedAnswer": { "@type": "Answer", "text": "We believe everyone deserves access to evidence-based sleep help. The $5 price removes the barrier so you can experience the results risk-free. There's also a 30-day money-back guarantee." }
+        },
+        {
+          "@type": "Question",
+          "name": "How quickly will I see results?",
+          "acceptedAnswer": { "@type": "Answer", "text": "Most people notice improvement by Night 3. By Night 7, the majority report falling asleep faster and waking up less. Full results typically appear within 2-4 weeks." }
+        },
+        {
+          "@type": "Question",
+          "name": "What if it doesn't work for me?",
+          "acceptedAnswer": { "@type": "Answer", "text": "You're covered by a 30-day money-back guarantee. If you don't see improvement, email us and we'll refund every cent — no questions asked." }
+        },
+      ],
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "name": "Deep Sleep Reset",
+      "url": "https://deep-sleep-reset.com",
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": "https://deep-sleep-reset.com/blog?q={search_term_string}",
+        "query-input": "required name=search_term_string",
+      },
+    },
+  ], []);
+
   return (
     <div className="min-h-screen bg-background text-foreground overflow-x-hidden">
+      <SeoHead
+        title="Deep Sleep Reset: Fix Insomnia in 7 Nights — CBT-I Protocol"
+        description="Science-backed 7-night CBT-I protocol to fix insomnia and fall asleep faster. No pills, no apps. Trusted by 10,000+ people. Just $5. 30-day guarantee."
+        canonicalUrl="https://deep-sleep-reset.com"
+        schemas={homeSchemas}
+      />
       {/* ===== HEADER ===== */}
       <header className="fixed top-0 left-0 right-0 z-50 transition-all duration-500"
         style={{

@@ -463,3 +463,47 @@ export const testimonials = mysqlTable("testimonials", {
 
 export type Testimonial = typeof testimonials.$inferSelect;
 export type InsertTestimonial = typeof testimonials.$inferInsert;
+
+/**
+ * Blog posts — SEO-optimized articles targeting sleep/insomnia keywords.
+ * Drives organic traffic from Google and links back to the product.
+ */
+export const blogPosts = mysqlTable("blog_posts", {
+  id: int("id").autoincrement().primaryKey(),
+  /** URL-friendly slug, e.g. "how-to-fall-asleep-fast" */
+  slug: varchar("slug", { length: 255 }).notNull().unique(),
+  /** SEO title (50-60 chars) */
+  title: varchar("title", { length: 255 }).notNull(),
+  /** Meta description (120-160 chars) */
+  metaDescription: varchar("metaDescription", { length: 500 }),
+  /** Focus keyword for this article */
+  focusKeyword: varchar("focusKeyword", { length: 128 }),
+  /** Secondary keywords (JSON array) */
+  secondaryKeywords: text("secondaryKeywords"),
+  /** Full article body in Markdown */
+  body: text("body").notNull(),
+  /** Excerpt shown on blog listing page */
+  excerpt: text("excerpt"),
+  /** Hero image CDN URL */
+  heroImageUrl: text("heroImageUrl"),
+  /** Hero image alt text */
+  heroImageAlt: varchar("heroImageAlt", { length: 255 }),
+  /** Author name */
+  author: varchar("author", { length: 128 }).default("Deep Sleep Reset Team").notNull(),
+  /** Category: sleep-science, insomnia, anxiety, cbt-i, lifestyle */
+  category: varchar("category", { length: 64 }).default("sleep-science").notNull(),
+  /** Estimated read time in minutes */
+  readTimeMinutes: int("readTimeMinutes").default(5).notNull(),
+  /** Publication status */
+  status: mysqlEnum("status", ["draft", "published", "archived"]).default("draft").notNull(),
+  /** Whether to feature on blog homepage */
+  featured: int("featured").default(0).notNull(),
+  /** JSON-LD FAQ data for schema markup (JSON array of {question, answer}) */
+  faqSchema: text("faqSchema"),
+  publishedAt: timestamp("publishedAt"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type BlogPost = typeof blogPosts.$inferSelect;
+export type InsertBlogPost = typeof blogPosts.$inferInsert;

@@ -132,3 +132,14 @@
 - [ ] Build admin moderation UI in /admin (new Testimonials tab)
 - [ ] Auto-display approved testimonials on landing page
 - [ ] Write tests for testimonial router
+
+## Phase 17: Organic Traffic / SEO
+- [ ] Technical SEO: dynamic sitemap.xml endpoint
+- [ ] robots.txt with sitemap reference
+- [ ] SEO meta tags component (title, description, canonical, OG, Twitter Card)
+- [ ] JSON-LD structured data: Product, FAQ, Review, BreadcrumbList schemas
+- [ ] Blog system: DB schema, tRPC router, public /blog and /blog/:slug pages
+- [ ] Generate 10 SEO-optimized blog articles (sleep keywords)
+- [ ] Internal linking: blog → landing page CTAs
+- [ ] Admin: blog post manager (create, edit, publish, unpublish)
+- [ ] Write tests for SEO/blog router
