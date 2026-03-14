@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { publicProcedure, protectedProcedure, router } from "../_core/trpc";
 import { getDb } from "../db";
-import { blogPosts } from "../../drizzle/schema";
+import { blogPosts, blogComments, newsletterSubscribers } from "../../drizzle/schema";
 import { eq, desc, and, like, sql } from "drizzle-orm";
 import { invokeLLM } from "../_core/llm";
 import { TRPCError } from "@trpc/server";
@@ -376,9 +376,181 @@ export const blogRouter = router({
         secondaryKeywords: ["good sleep habits", "sleep routine", "bedtime routine", "sleep environment"],
         category: "lifestyle",
       },
+      // 10 new mindfulness & sleep improvement topics
+      {
+        title: "Mindfulness Meditation for Sleep: A Step-by-Step Guide",
+        focusKeyword: "mindfulness meditation for sleep",
+        secondaryKeywords: ["meditation insomnia", "mindfulness sleep", "guided meditation sleep", "sleep meditation"],
+        category: "mindfulness",
+      },
+      {
+        title: "Body Scan Meditation: The Technique That Melts Away Bedtime Tension",
+        focusKeyword: "body scan meditation sleep",
+        secondaryKeywords: ["body scan technique", "progressive muscle relaxation", "tension release sleep", "mindfulness body scan"],
+        category: "mindfulness",
+      },
+      {
+        title: "How to Stop Overthinking at Night: 8 Proven Strategies",
+        focusKeyword: "stop overthinking at night",
+        secondaryKeywords: ["overthinking insomnia", "racing thoughts at night", "quiet the mind", "cognitive offload"],
+        category: "anxiety",
+      },
+      {
+        title: "Magnesium for Sleep: Does It Really Work?",
+        focusKeyword: "magnesium for sleep",
+        secondaryKeywords: ["magnesium glycinate sleep", "magnesium insomnia", "supplements for sleep", "magnesium deficiency sleep"],
+        category: "lifestyle",
+      },
+      {
+        title: "Sleep and Anxiety: Breaking the Vicious Cycle",
+        focusKeyword: "sleep and anxiety",
+        secondaryKeywords: ["anxiety insomnia", "anxiety sleep problems", "sleep anxiety disorder", "anxiety waking at night"],
+        category: "anxiety",
+      },
+      {
+        title: "Circadian Rhythm Reset: How to Fix Your Internal Clock",
+        focusKeyword: "circadian rhythm reset",
+        secondaryKeywords: ["fix sleep schedule", "internal clock sleep", "circadian rhythm insomnia", "sleep wake cycle"],
+        category: "sleep-science",
+      },
+      {
+        title: "Deep Sleep Stages Explained: Why REM and Slow-Wave Sleep Matter",
+        focusKeyword: "deep sleep stages",
+        secondaryKeywords: ["REM sleep", "slow wave sleep", "sleep cycles", "sleep architecture", "how to get more deep sleep"],
+        category: "sleep-science",
+      },
+      {
+        title: "Yoga for Better Sleep: 7 Poses to Do Before Bed",
+        focusKeyword: "yoga for better sleep",
+        secondaryKeywords: ["bedtime yoga", "yoga insomnia", "sleep yoga poses", "relaxing yoga before bed"],
+        category: "mindfulness",
+      },
+      {
+        title: "Journaling Before Bed: How Writing Quiets the Mind",
+        focusKeyword: "journaling before bed",
+        secondaryKeywords: ["bedtime journaling", "gratitude journal sleep", "worry journal", "cognitive offload journaling"],
+        category: "mindfulness",
+      },
+      {
+        title: "Blue Light and Sleep: How Screens Are Destroying Your Rest",
+        focusKeyword: "blue light and sleep",
+        secondaryKeywords: ["screen time before bed", "blue light insomnia", "phone before bed sleep", "blue light blocking"],
+        category: "lifestyle",
+      },
     ];
 
     // Return topics list so admin can generate one by one (avoid timeout)
     return { topics, message: "Use the generate endpoint for each topic individually to avoid timeouts." };
+  }),
+
+  // ─── Comments ────────────────────────────────────────────────────────────────
+
+  addComment: publicProcedure
+    .input(z.object({
+      postId: z.number(),
+      authorName: z.string().min(1).max(128),
+      authorEmail: z.string().email().optional(),
+      body: z.string().min(10).max(2000),
+      rating: z.number().min(1).max(5).optional(),
+    }))
+    .mutation(async ({ input }) => {
+      const db = await requireDb();
+      await db.insert(blogComments).values({
+        postId: input.postId,
+        authorName: input.authorName,
+        authorEmail: input.authorEmail,
+        body: input.body,
+        rating: input.rating,
+        status: "pending",
+      });
+      return { success: true, message: "Comment submitted for moderation. Thank you!" };
+    }),
+
+  listComments: publicProcedure
+    .input(z.object({ postId: z.number() }))
+    .query(async ({ input }) => {
+      const db = await requireDb();
+      return db
+        .select({
+          id: blogComments.id,
+          authorName: blogComments.authorName,
+          body: blogComments.body,
+          rating: blogComments.rating,
+          createdAt: blogComments.createdAt,
+        })
+        .from(blogComments)
+        .where(and(eq(blogComments.postId, input.postId), eq(blogComments.status, "approved")))
+        .orderBy(desc(blogComments.createdAt))
+        .limit(50);
+    }),
+
+  // Admin: moderate comments
+  moderateComment: protectedProcedure
+    .input(z.object({
+      id: z.number(),
+      status: z.enum(["approved", "rejected"]),
+    }))
+    .mutation(async ({ input, ctx }) => {
+      if (ctx.user.role !== "admin" && ctx.user.openId !== process.env.OWNER_OPEN_ID) {
+        throw new TRPCError({ code: "FORBIDDEN" });
+      }
+      const db = await requireDb();
+      await db.update(blogComments).set({ status: input.status }).where(eq(blogComments.id, input.id));
+      return { success: true };
+    }),
+
+  // Admin: list pending comments
+  pendingComments: protectedProcedure.query(async ({ ctx }) => {
+    if (ctx.user.role !== "admin" && ctx.user.openId !== process.env.OWNER_OPEN_ID) {
+      throw new TRPCError({ code: "FORBIDDEN" });
+    }
+    const db = await requireDb();
+    return db
+      .select()
+      .from(blogComments)
+      .where(eq(blogComments.status, "pending"))
+      .orderBy(desc(blogComments.createdAt));
+  }),
+
+  // ─── Newsletter ──────────────────────────────────────────────────────────────
+
+  subscribeNewsletter: publicProcedure
+    .input(z.object({
+      email: z.string().email(),
+      firstName: z.string().max(128).optional(),
+      source: z.string().max(64).default("blog"),
+    }))
+    .mutation(async ({ input }) => {
+      const db = await requireDb();
+      // Upsert: if email exists, just return success silently
+      const existing = await db
+        .select({ id: newsletterSubscribers.id })
+        .from(newsletterSubscribers)
+        .where(eq(newsletterSubscribers.email, input.email))
+        .limit(1);
+      if (existing.length > 0) {
+        return { success: true, message: "You're already subscribed!" };
+      }
+      const token = Math.random().toString(36).slice(2) + Date.now().toString(36);
+      await db.insert(newsletterSubscribers).values({
+        email: input.email,
+        firstName: input.firstName,
+        source: input.source,
+        confirmed: 0,
+        confirmToken: token,
+      });
+      return { success: true, message: "Thanks! Check your inbox to confirm your subscription." };
+    }),
+
+  // Admin: list newsletter subscribers
+  newsletterList: protectedProcedure.query(async ({ ctx }) => {
+    if (ctx.user.role !== "admin" && ctx.user.openId !== process.env.OWNER_OPEN_ID) {
+      throw new TRPCError({ code: "FORBIDDEN" });
+    }
+    const db = await requireDb();
+    return db
+      .select()
+      .from(newsletterSubscribers)
+      .orderBy(desc(newsletterSubscribers.createdAt));
   }),
 });

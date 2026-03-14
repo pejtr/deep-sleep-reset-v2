@@ -507,3 +507,44 @@ export const blogPosts = mysqlTable("blog_posts", {
 
 export type BlogPost = typeof blogPosts.$inferSelect;
 export type InsertBlogPost = typeof blogPosts.$inferInsert;
+
+/**
+ * Blog comments — user-submitted comments on blog posts.
+ * Moderated: only approved comments are shown publicly.
+ */
+export const blogComments = mysqlTable("blog_comments", {
+  id: int("id").autoincrement().primaryKey(),
+  /** FK to blog_posts.id */
+  postId: int("postId").notNull(),
+  /** Display name (guest or user) */
+  authorName: varchar("authorName", { length: 128 }).notNull(),
+  /** Email (not shown publicly, for moderation) */
+  authorEmail: varchar("authorEmail", { length: 320 }),
+  /** Comment body */
+  body: text("body").notNull(),
+  /** Star rating 1-5 (optional) */
+  rating: int("rating"),
+  /** Moderation status */
+  status: mysqlEnum("status", ["pending", "approved", "rejected"]).default("pending").notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+export type BlogComment = typeof blogComments.$inferSelect;
+export type InsertBlogComment = typeof blogComments.$inferInsert;
+
+/**
+ * Newsletter subscribers — email addresses captured from the blog.
+ */
+export const newsletterSubscribers = mysqlTable("newsletter_subscribers", {
+  id: int("id").autoincrement().primaryKey(),
+  email: varchar("email", { length: 320 }).notNull().unique(),
+  firstName: varchar("firstName", { length: 128 }),
+  /** Source: blog, landing_page, exit_popup */
+  source: varchar("source", { length: 64 }).default("blog").notNull(),
+  /** Whether they confirmed via double opt-in */
+  confirmed: int("confirmed").default(0).notNull(),
+  /** Confirmation token for double opt-in */
+  confirmToken: varchar("confirmToken", { length: 128 }),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+export type NewsletterSubscriber = typeof newsletterSubscribers.$inferSelect;
+export type InsertNewsletterSubscriber = typeof newsletterSubscribers.$inferInsert;

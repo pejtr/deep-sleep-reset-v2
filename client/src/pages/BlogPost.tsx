@@ -1,7 +1,8 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
 import { Link, useParams } from "wouter";
 import { trpc } from "@/lib/trpc";
-import { Moon, Clock, ArrowLeft, ChevronRight } from "lucide-react";
+import { Moon, Clock, ArrowLeft, Star, MessageSquare, Send, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Streamdown } from "streamdown";
 
@@ -265,10 +266,181 @@ export default function BlogPost() {
         </div>
       </article>
 
+      {/* Comments Section */}
+      <CommentsSection postId={post.id} />
       {/* Footer */}
       <footer className="border-t border-border/20 py-8 text-center text-foreground/30 text-sm">
         <p>© {new Date().getFullYear()} Deep Sleep Reset. All rights reserved.</p>
       </footer>
     </div>
+  );
+}
+
+// ─── Comments Section Component ─────────────────────────────────────────────
+
+function StarRating({ value, onChange }: { value: number; onChange: (v: number) => void }) {
+  const [hovered, setHovered] = useState(0);
+  return (
+    <div className="flex gap-1">
+      {[1, 2, 3, 4, 5].map((star) => (
+        <button
+          key={star}
+          type="button"
+          onClick={() => onChange(star)}
+          onMouseEnter={() => setHovered(star)}
+          onMouseLeave={() => setHovered(0)}
+          className="transition-transform hover:scale-110"
+        >
+          <Star
+            className={`w-6 h-6 ${
+              star <= (hovered || value)
+                ? "fill-amber text-amber"
+                : "text-foreground/20"
+            }`}
+          />
+        </button>
+      ))}
+    </div>
+  );
+}
+
+function CommentsSection({ postId }: { postId: number }) {
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [body, setBody] = useState("");
+  const [rating, setRating] = useState(0);
+  const [submitted, setSubmitted] = useState(false);
+
+  const { data: comments = [], refetch } = trpc.blog.listComments.useQuery({ postId });
+  const addComment = trpc.blog.addComment.useMutation({
+    onSuccess: () => {
+      setSubmitted(true);
+      setName(""); setEmail(""); setBody(""); setRating(0);
+      toast.success("Comment submitted! It will appear after moderation.");
+      refetch();
+    },
+    onError: (err) => toast.error(err.message),
+  });
+
+  const avgRating = comments.length > 0
+    ? (comments.filter(c => c.rating).reduce((s, c) => s + (c.rating || 0), 0) / comments.filter(c => c.rating).length)
+    : 0;
+
+  return (
+    <section className="max-w-2xl mx-auto px-4 mt-16 mb-12">
+      <div className="flex items-center gap-3 mb-8">
+        <MessageSquare className="w-5 h-5 text-amber" />
+        <h2 className="text-xl font-bold">Reader Comments</h2>
+        {comments.length > 0 && (
+          <span className="text-sm text-foreground/40 ml-auto">{comments.length} comment{comments.length !== 1 ? "s" : ""}</span>
+        )}
+      </div>
+
+      {/* Average rating */}
+      {avgRating > 0 && (
+        <div className="flex items-center gap-3 mb-6 p-4 rounded-xl bg-amber/5 border border-amber/15">
+          <div className="flex gap-0.5">
+            {[1,2,3,4,5].map(s => (
+              <Star key={s} className={`w-4 h-4 ${s <= Math.round(avgRating) ? "fill-amber text-amber" : "text-foreground/20"}`} />
+            ))}
+          </div>
+          <span className="text-sm font-medium">{avgRating.toFixed(1)} / 5</span>
+          <span className="text-sm text-foreground/40">({comments.filter(c => c.rating).length} rating{comments.filter(c => c.rating).length !== 1 ? "s" : ""})</span>
+        </div>
+      )}
+
+      {/* Existing comments */}
+      {comments.length > 0 ? (
+        <div className="space-y-4 mb-10">
+          {comments.map((c) => (
+            <div key={c.id} className="p-5 rounded-xl border border-border/20 bg-card/30">
+              <div className="flex items-center justify-between mb-2">
+                <span className="font-semibold text-sm">{c.authorName}</span>
+                <div className="flex items-center gap-2">
+                  {c.rating && (
+                    <div className="flex gap-0.5">
+                      {[1,2,3,4,5].map(s => (
+                        <Star key={s} className={`w-3 h-3 ${s <= c.rating! ? "fill-amber text-amber" : "text-foreground/20"}`} />
+                      ))}
+                    </div>
+                  )}
+                  <span className="text-xs text-foreground/30">
+                    {new Date(c.createdAt).toLocaleDateString()}
+                  </span>
+                </div>
+              </div>
+              <p className="text-sm text-foreground/70 leading-relaxed">{c.body}</p>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <p className="text-foreground/40 text-sm mb-8">Be the first to leave a comment!</p>
+      )}
+
+      {/* Comment form */}
+      {!submitted ? (
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            if (!name.trim() || !body.trim()) return;
+            addComment.mutate({ postId, authorName: name, authorEmail: email || undefined, body, rating: rating || undefined });
+          }}
+          className="space-y-4 p-6 rounded-2xl border border-border/20 bg-card/20"
+        >
+          <h3 className="font-semibold text-base">Leave a Comment</h3>
+          <div className="space-y-1">
+            <label className="text-xs text-foreground/50 uppercase tracking-wider">Your Rating (optional)</label>
+            <StarRating value={rating} onChange={setRating} />
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-1">
+              <label className="text-xs text-foreground/50 uppercase tracking-wider">Name *</label>
+              <input
+                value={name}
+                onChange={e => setName(e.target.value)}
+                required
+                placeholder="Your name"
+                className="w-full bg-background/50 border border-border/30 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-amber/50"
+              />
+            </div>
+            <div className="space-y-1">
+              <label className="text-xs text-foreground/50 uppercase tracking-wider">Email (optional)</label>
+              <input
+                type="email"
+                value={email}
+                onChange={e => setEmail(e.target.value)}
+                placeholder="Not shown publicly"
+                className="w-full bg-background/50 border border-border/30 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-amber/50"
+              />
+            </div>
+          </div>
+          <div className="space-y-1">
+            <label className="text-xs text-foreground/50 uppercase tracking-wider">Comment *</label>
+            <textarea
+              value={body}
+              onChange={e => setBody(e.target.value)}
+              required
+              rows={4}
+              placeholder="Share your experience or thoughts..."
+              className="w-full bg-background/50 border border-border/30 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-amber/50 resize-none"
+            />
+          </div>
+          <Button
+            type="submit"
+            disabled={addComment.isPending || !name.trim() || !body.trim()}
+            className="bg-amber text-background hover:bg-amber/90 font-semibold gap-2"
+          >
+            <Send className="w-4 h-4" />
+            {addComment.isPending ? "Submitting..." : "Post Comment"}
+          </Button>
+        </form>
+      ) : (
+        <div className="p-6 rounded-2xl border border-amber/20 bg-amber/5 text-center">
+          <p className="font-semibold text-amber mb-1">Thank you for your comment!</p>
+          <p className="text-sm text-foreground/50">It will appear after moderation (usually within 24 hours).</p>
+          <button onClick={() => setSubmitted(false)} className="mt-3 text-xs text-foreground/40 hover:text-foreground/60 underline">Leave another comment</button>
+        </div>
+      )}
+    </section>
   );
 }

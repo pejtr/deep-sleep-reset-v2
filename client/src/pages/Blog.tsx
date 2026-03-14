@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { toast } from "sonner";
 import { Link } from "wouter";
 import { trpc } from "@/lib/trpc";
 import { Moon, Clock, ChevronRight, Search } from "lucide-react";
@@ -13,6 +14,7 @@ const CATEGORIES = [
   { value: "anxiety", label: "Anxiety" },
   { value: "sleep-science", label: "Sleep Science" },
   { value: "lifestyle", label: "Lifestyle" },
+  { value: "mindfulness", label: "Mindfulness" },
 ];
 
 const CATEGORY_COLORS: Record<string, string> = {
@@ -225,7 +227,10 @@ export default function Blog() {
         )}
 
         {/* CTA Banner */}
-        <div className="mt-16 rounded-2xl border border-amber/20 bg-gradient-to-r from-amber/5 to-transparent p-8 text-center">
+        {/* Newsletter Subscription Form */}
+        <NewsletterForm />
+
+        <div className="mt-8 rounded-2xl border border-amber/20 bg-gradient-to-r from-amber/5 to-transparent p-8 text-center">
           <h2 className="text-2xl font-bold mb-2">Ready to Fix Your Sleep?</h2>
           <p className="text-foreground/60 mb-6">The 7-Night Deep Sleep Reset — science-backed CBT-I protocol for just $5.</p>
           <Link href="/order">
@@ -247,6 +252,79 @@ export default function Blog() {
           <Link href="/order" className="hover:text-foreground/60 transition-colors">Get the Reset</Link>
         </p>
       </footer>
+    </div>
+  );
+}
+
+// ─── Newsletter Form Component ──────────────────────────────────────────────────────────
+
+function NewsletterForm() {
+  const [email, setEmail] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [done, setDone] = useState(false);
+
+  const subscribe = trpc.blog.subscribeNewsletter.useMutation({
+    onSuccess: (data) => {
+      setDone(true);
+      toast.success(data.message);
+    },
+    onError: (err) => toast.error(err.message),
+  });
+
+  if (done) {
+    return (
+      <div className="mt-16 rounded-2xl border border-teal-500/20 bg-teal-500/5 p-8 text-center">
+        <div className="text-3xl mb-3">🌙</div>
+        <h3 className="text-xl font-bold mb-1 text-teal-300">You're on the list!</h3>
+        <p className="text-foreground/50 text-sm">Check your inbox to confirm. We'll send you weekly sleep tips and new articles.</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="mt-16 rounded-2xl border border-teal-500/20 bg-gradient-to-br from-teal-500/8 to-transparent p-8">
+      <div className="max-w-xl mx-auto text-center">
+        <div className="inline-flex items-center gap-2 text-teal-300 text-sm font-medium uppercase tracking-wider mb-4">
+          <Moon className="w-4 h-4" />
+          Free Sleep Newsletter
+        </div>
+        <h2 className="text-2xl font-bold mb-2">Get Weekly Sleep Science in Your Inbox</h2>
+        <p className="text-foreground/50 text-sm mb-6">
+          Join 2,000+ readers getting evidence-based sleep tips, new articles, and exclusive CBT-I techniques every week. No spam, unsubscribe anytime.
+        </p>
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            if (!email) return;
+            subscribe.mutate({ email, firstName: firstName || undefined, source: "blog" });
+          }}
+          className="flex flex-col sm:flex-row gap-3"
+        >
+          <input
+            type="text"
+            value={firstName}
+            onChange={e => setFirstName(e.target.value)}
+            placeholder="First name (optional)"
+            className="flex-1 bg-background/50 border border-border/30 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-teal-500/50"
+          />
+          <input
+            type="email"
+            value={email}
+            onChange={e => setEmail(e.target.value)}
+            required
+            placeholder="Your email address"
+            className="flex-[2] bg-background/50 border border-border/30 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-teal-500/50"
+          />
+          <Button
+            type="submit"
+            disabled={subscribe.isPending || !email}
+            className="bg-teal-600 hover:bg-teal-500 text-white font-semibold px-6 shrink-0"
+          >
+            {subscribe.isPending ? "Subscribing..." : "Subscribe Free"}
+          </Button>
+        </form>
+        <p className="text-xs text-foreground/30 mt-3">No spam. Unsubscribe anytime. We respect your privacy.</p>
+      </div>
     </div>
   );
 }

@@ -143,3 +143,11 @@
 - [ ] Internal linking: blog → landing page CTAs
 - [ ] Admin: blog post manager (create, edit, publish, unpublish)
 - [ ] Write tests for SEO/blog router
+
+## Phase 18: Blog Comments, Ratings & Newsletter
+- [x] Add blog_comments and newsletter_subscribers tables to schema
+- [x] Build tRPC procedures: addComment, listComments, ratePost, subscribeNewsletter
+- [x] Expand bulkGenerate to 20 topics (sleep + mindfulness)
+- [x] Add comment/rating section to BlogPost page
+- [x] Add newsletter subscription form to Blog listing page
+- [x] Write tests for new procedures

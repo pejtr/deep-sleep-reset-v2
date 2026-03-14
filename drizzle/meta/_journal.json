@@ -71,6 +71,13 @@
       "when": 1773449577743,
       "tag": "0009_nosy_chat",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "5",
+      "when": 1773450263825,
+      "tag": "0010_boring_nighthawk",
+      "breakpoints": true
     }
   ]
 }
