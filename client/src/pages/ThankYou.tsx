@@ -6,7 +6,7 @@
  * i18n: All strings from useLanguage()
  */
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import { Link } from "wouter";
 import {
@@ -18,9 +18,13 @@ import {
   Sparkles,
   Heart,
   Star,
+  Headphones,
+  Zap,
+  Lock,
 } from "lucide-react";
 import { trackEvent } from "@/components/MetaPixel";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { openCheckout } from "@/lib/checkout";
 
 const stepIcons = [Mail, Download, Moon];
 
@@ -28,6 +32,8 @@ export default function ThankYou() {
   const { t, localePath } = useLanguage();
   const ty = t.thankYou;
   const hasFired = useRef(false);
+  const [showAudioUpsell, setShowAudioUpsell] = useState(false);
+  const [audioLoading, setAudioLoading] = useState(false);
 
   // Fire Purchase event once on page load
   useEffect(() => {
@@ -46,7 +52,21 @@ export default function ThankYou() {
       content_name: product,
       content_type: "product",
     });
+
+    // Show audio upsell if user skipped it on the order page
+    const skippedAudio = sessionStorage.getItem("skipped_audio_upsell") === "1";
+    if (skippedAudio) {
+      setShowAudioUpsell(true);
+      // Clean up so it doesn't show again on refresh
+      sessionStorage.removeItem("skipped_audio_upsell");
+    }
   }, []);
+
+  const handleAudioUpsell = async () => {
+    setAudioLoading(true);
+    await openCheckout("upsell1");
+    setAudioLoading(false);
+  };
 
   return (
     <div className="min-h-screen bg-background text-foreground overflow-x-hidden">
@@ -136,6 +156,106 @@ export default function ThankYou() {
           </motion.div>
         </div>
       </section>
+
+      {/* ===== POST-PURCHASE AUDIO UPSELL ===== */}
+      {showAudioUpsell && (
+        <section className="py-8">
+          <div className="max-w-2xl mx-auto px-4">
+            <motion.div
+              initial={{ opacity: 0, y: 30, scale: 0.97 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              transition={{ duration: 0.7, delay: 0.6 }}
+            >
+              <div className="relative border-2 border-amber/40 rounded-2xl p-6 sm:p-8 bg-amber/5 overflow-hidden">
+                {/* Glow accent */}
+                <div className="absolute top-0 right-0 w-48 h-48 bg-amber/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none" />
+
+                {/* Badge */}
+                <div className="flex items-center gap-2 mb-5">
+                  <span className="text-xs bg-amber text-background px-3 py-1 rounded-full font-bold uppercase tracking-wide">
+                    ⚡ One-Time Offer
+                  </span>
+                  <span className="text-xs text-foreground/40">Only available right now</span>
+                </div>
+
+                <div className="flex items-start gap-4 mb-5">
+                  <div className="w-12 h-12 rounded-full bg-amber/15 border border-amber/25 flex items-center justify-center shrink-0">
+                    <Headphones className="w-6 h-6 text-amber" />
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="font-[var(--font-display)] text-xl sm:text-2xl font-bold mb-1">
+                      🧠 Wait — You Forgot Something
+                    </h3>
+                    <p className="text-foreground/60 text-sm leading-relaxed">
+                      The <strong className="text-foreground/80">Anxiety Shutdown Audio Pack</strong> works best alongside your 7-Night Reset.
+                      5 guided sessions that silence racing thoughts in under 10 minutes — on demand.
+                    </p>
+                  </div>
+                  <div className="text-right shrink-0 hidden sm:block">
+                    <span className="text-foreground/35 line-through text-sm">$29</span>
+                    <div className="font-[var(--font-display)] text-3xl font-bold text-amber">$10</div>
+                    <span className="text-xs text-amber/60">today only</span>
+                  </div>
+                </div>
+
+                {/* Sessions list */}
+                <div className="space-y-2 mb-5 pl-16">
+                  {[
+                    { title: "The Emergency Calm Audio", duration: "5 min", desc: "Instant relief when anxiety spikes" },
+                    { title: "The Sleep Onset Meditation", duration: "15 min", desc: "Guides you from wakefulness into deep sleep" },
+                    { title: "The Morning Anxiety Shield", duration: "10 min", desc: "Start every day with a layer of calm" },
+                    { title: "The Afternoon Reset", duration: "10 min", desc: "Prevent stress buildup before it ruins your night" },
+                    { title: "The Deep Sunday Reset", duration: "20 min", desc: "Full nervous system reset for the week ahead" },
+                  ].map((s, i) => (
+                    <div key={i} className="flex items-center gap-2 text-sm">
+                      <CheckCircle className="w-3.5 h-3.5 text-amber/60 shrink-0" />
+                      <span className="text-foreground/70 font-medium">{s.title}</span>
+                      <span className="text-foreground/35 text-xs">({s.duration})</span>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Mobile price */}
+                <div className="sm:hidden flex items-center gap-3 mb-5 pl-16">
+                  <span className="text-foreground/35 line-through text-sm">$29</span>
+                  <span className="font-[var(--font-display)] text-2xl font-bold text-amber">$10</span>
+                  <span className="text-xs text-amber/60">today only</span>
+                </div>
+
+                {/* CTA */}
+                <button
+                  onClick={handleAudioUpsell}
+                  disabled={audioLoading}
+                  className="w-full bg-amber hover:bg-amber/90 text-background font-bold py-4 px-6 rounded-xl text-base transition-all duration-300 hover:scale-[1.02] flex items-center justify-center gap-3 disabled:opacity-60 disabled:cursor-not-allowed"
+                >
+                  {audioLoading ? (
+                    <>Processing...</>
+                  ) : (
+                    <>
+                      <Zap className="w-5 h-5" />
+                      Yes, Add the Audio Pack — $10
+                      <ArrowRight className="w-5 h-5" />
+                    </>
+                  )}
+                </button>
+
+                <div className="mt-3 flex items-center justify-center gap-2 text-foreground/35 text-xs">
+                  <Lock className="w-3 h-3" />
+                  <span>Secure checkout · 30-Day Money-Back Guarantee</span>
+                </div>
+
+                {/* Dismiss */}
+                <button
+                  onClick={() => setShowAudioUpsell(false)}
+                  className="mt-4 w-full text-center text-foreground/25 text-xs hover:text-foreground/40 transition-colors"
+                >
+                  No thanks, I don't need help with anxiety
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        </section>
+      )}
 
       {/* ===== REMINDER BOX ===== */}
       <section className="py-12">

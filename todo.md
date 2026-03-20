@@ -266,3 +266,10 @@
 ## Phase 27: Disable Audio Add-on + Test Coupon
 - [x] Disable "Anxiety Shutdown Audio" add-on — unchecked by default, overlay "Coming Soon — Audio files in production", excluded from price/checkout
 - [x] Create 99.9% off Stripe test coupon TEST999 via Stripe API
+
+## Phase 28: Post-Purchase Audio Upsell on Thank-You Page
+- [x] Set sessionStorage flag "skipped_audio_upsell" when user clicks decline on Upsell1
+- [x] Detect flag on ThankYou page and show audio upsell section (show-once, flag removed after read)
+- [x] Audio upsell card: amber border, sessions list, $29→$10 price, CTA button, dismiss link
+- [x] Wire CTA to openCheckout("upsell1") with loading state
+- [x] 12 vitest tests for detection logic (191 total passing)

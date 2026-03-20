@@ -243,6 +243,10 @@ export default function Upsell1() {
             <Link
               href={localePath("/upsell-2")}
               className="text-foreground/25 text-sm hover:text-foreground/40 transition-colors underline underline-offset-4"
+              onClick={() => {
+                // Mark audio as skipped so thank-you page can show post-purchase upsell
+                sessionStorage.setItem("skipped_audio_upsell", "1");
+              }}
             >
               {u.decline}
             </Link>
