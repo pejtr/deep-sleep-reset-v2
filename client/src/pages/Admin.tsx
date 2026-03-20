@@ -854,7 +854,15 @@ export default function Admin() {
                       <tbody>
                         {[...abStats].sort((a, b) => parseFloat(b.cvr) - parseFloat(a.cvr)).map((row) => {
                           const isWinner = abStats.length > 1 && parseFloat(row.cvr) === Math.max(...abStats.map(r => parseFloat(r.cvr)));
-                          const variantLabel = row.variant === 'quiz' ? '🧠 Sleep Score Quiz' : row.variant === 'chatbot' ? '💬 Chatbot Teaser' : '⭐ Social Proof Wall';
+                          const VARIANT_LABELS: Record<string, string> = {
+                            quiz: '🧠 Sleep Score Quiz',
+                            chatbot: '💬 Chatbot Teaser',
+                            social: '⭐ Social Proof Wall',
+                            btn_amber: '🟡 Button — Amber (Control)',
+                            btn_green: '🟢 Button — Green',
+                            btn_blue: '🔵 Button — Blue',
+                          };
+                          const variantLabel = VARIANT_LABELS[row.variant] ?? row.variant;
                           return (
                             <tr key={row.variant} className="border-b border-border/10 hover:bg-card/20">
                               <td className="py-3 pr-4 font-medium">{variantLabel}</td>

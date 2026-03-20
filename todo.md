@@ -231,3 +231,14 @@
 - [x] Write tests for new procedures (146 tests passing)
 - [x] Complete end-to-end flow test: homepage → quiz → order → Stripe test payment → upsells → thank you
 - [x] Fixed Upsell2 skip link to route to Upsell3 instead of Thank You
+
+## Phase 25: Checkout Button Color A/B Test
+- [x] Add button color variants to A/B test system (amber/gold, green, blue) — ab-button.ts with 24h TTL
+- [x] Wire OrderBump checkout button to display assigned color variant
+- [x] Track button color variant in ab_events on impression + checkout click
+- [x] Add admin analytics for button color A/B test results (emoji swatches in A/B table)
+- [x] Write vitest tests for button color A/B test (16 tests, 162 total passing)
+- [x] Verify in browser — all 3 variants render correctly
+
+## Phase 25b: Mobile Bug Fix
+- [x] Fix chatbot bubble overlapping CTA button on mobile (increased bottom offset from 5.5rem to 7rem)

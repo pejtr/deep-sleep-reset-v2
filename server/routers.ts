@@ -281,11 +281,11 @@ Extract:
   ab: router({
     trackEvent: publicProcedure
       .input(z.object({
-        variant: z.enum(["quiz", "chatbot", "social"]),
+        variant: z.enum(["quiz", "chatbot", "social", "btn_amber", "btn_green", "btn_blue"]),
         eventType: z.enum(["impression", "conversion"]),
         sessionId: z.string().max(64),
         email: z.string().email().optional(),
-        metadata: z.string().max(64).optional(), // e.g. chatbot script variant
+        metadata: z.string().max(64).optional(), // e.g. chatbot script variant or button color
       }))
       .mutation(async ({ input }) => {
         await saveAbEvent({

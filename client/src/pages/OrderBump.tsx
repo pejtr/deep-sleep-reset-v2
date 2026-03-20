@@ -10,13 +10,16 @@
  *   - Bump 2: Sleep Optimizer Toolkit ($10) — optional
  */
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import { Moon, CheckCircle, Headphones, BarChart3, Lock, ArrowRight, Star, Zap, AlertTriangle } from "lucide-react";
 import { openBundleCheckout, openCheckout, type ProductKey } from "@/lib/checkout";
 import { Link, useSearch } from "wouter";
 import { trackEvent } from "@/components/MetaPixel";
 import ReturningCustomerBanner from "@/components/ReturningCustomerBanner";
+import { getButtonColorVariant, BUTTON_VARIANTS, type ButtonColorVariant } from "@/lib/ab-button";
+import { getSessionId } from "@/lib/ab-hooks";
+import { trpc } from "@/lib/trpc";
 
 const AUDIO_SESSIONS = [
   { title: "The Emergency Calm Audio", duration: "5 min", desc: "Instant relief when anxiety spikes — use it anywhere, anytime." },
@@ -43,6 +46,28 @@ export default function OrderBump() {
   const [addToolkit, setAddToolkit] = useState(true);
   const [loading, setLoading] = useState(false);
 
+  // A/B test: checkout button color — assigned once per visitor (24h TTL)
+  const btnVariant: ButtonColorVariant = useMemo(() => getButtonColorVariant(), []);
+  const btnConfig = BUTTON_VARIANTS[btnVariant];
+  const sessionId = useMemo(() => getSessionId(), []);
+  const abTrackEvent = trpc.ab.trackEvent.useMutation();
+
+  // Track impression when the order page is first rendered
+  useMemo(() => {
+    // Fire once per session — use a flag in sessionStorage
+    const key = `dsr-btn-impression-${btnVariant}`;
+    if (typeof window !== "undefined" && !sessionStorage.getItem(key)) {
+      sessionStorage.setItem(key, "1");
+      abTrackEvent.mutate({
+        variant: `btn_${btnVariant}` as "btn_amber" | "btn_green" | "btn_blue",
+        eventType: "impression",
+        sessionId,
+        metadata: btnConfig.label,
+      });
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);  // intentionally empty — fire once on mount
+
   const basePrice = isExitDiscount ? 4 : 5;
   const audioPrice = 10;
   const toolkitPrice = 10;
@@ -54,6 +79,14 @@ export default function OrderBump() {
     const products: ProductKey[] = [primaryKey];
     if (addAudio) products.push("upsell1");
     if (addToolkit) products.push("upsell2");
+
+    // Track A/B conversion event (button click → Stripe)
+    abTrackEvent.mutate({
+      variant: `btn_${btnVariant}` as "btn_amber" | "btn_green" | "btn_blue",
+      eventType: "conversion",
+      sessionId,
+      metadata: btnConfig.label,
+    });
 
     // Fire InitiateCheckout event before redirecting to Stripe
     trackEvent("InitiateCheckout", {
@@ -424,10 +457,16 @@ export default function OrderBump() {
             )}
           </div>
 
+          {/* A/B test: button color variant badge (dev-only hint) */}
+          {process.env.NODE_ENV === "development" && (
+            <div className="mb-2 text-center text-xs text-foreground/30">
+              🧪 Button variant: <span className="font-mono">{btnVariant}</span> — {btnConfig.label}
+            </div>
+          )}
           <button
             onClick={handleCheckout}
             disabled={loading}
-            className="w-full bg-amber hover:bg-amber-light text-background font-bold py-4 px-6 rounded-xl text-lg transition-all duration-300 hover:scale-[1.02] flex items-center justify-center gap-3 disabled:opacity-60 disabled:cursor-not-allowed"
+            className={`w-full font-bold py-4 px-6 rounded-xl text-lg transition-all duration-300 hover:scale-[1.02] flex items-center justify-center gap-3 disabled:opacity-60 disabled:cursor-not-allowed ${btnConfig.className}`}
           >
             {loading ? (
               <>Processing...</>

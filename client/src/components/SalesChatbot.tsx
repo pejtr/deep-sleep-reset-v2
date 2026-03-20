@@ -280,7 +280,7 @@ export default function SalesChatbot() {
   return (
     <div
       className="fixed right-4 z-[60] flex flex-col items-end gap-3 transition-all duration-300"
-      style={{ bottom: stickyCtaVisible ? '5.5rem' : '1rem' }}
+      style={{ bottom: stickyCtaVisible ? '7rem' : '1.5rem' }}
     >
       {/* Chat Window */}
       {isOpen && (

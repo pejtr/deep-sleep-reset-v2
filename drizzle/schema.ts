@@ -555,8 +555,8 @@ export type InsertNewsletterSubscriber = typeof newsletterSubscribers.$inferInse
  */
 export const abEvents = mysqlTable("ab_events", {
   id: int("id").autoincrement().primaryKey(),
-  /** Which variant was shown: quiz | chatbot | social */
-  variant: mysqlEnum("variant", ["quiz", "chatbot", "social"]).notNull(),
+  /** Which variant was shown: quiz | chatbot | social | btn_amber | btn_green | btn_blue */
+  variant: mysqlEnum("variant", ["quiz", "chatbot", "social", "btn_amber", "btn_green", "btn_blue"]).notNull(),
   /** Event type: impression (variant shown) or conversion (CTA clicked → checkout) */
   eventType: mysqlEnum("eventType", ["impression", "conversion"]).notNull(),
   /** Anonymous session ID (from localStorage) */
