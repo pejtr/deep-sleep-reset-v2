@@ -216,7 +216,7 @@ export default function Upsell2() {
 
             {/* Decline link */}
             <Link
-              href={localePath("/thank-you")}
+              href={localePath("/upsell-3")}
               className="text-foreground/25 text-sm hover:text-foreground/40 transition-colors underline underline-offset-4"
             >
               {u.decline}

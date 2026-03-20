@@ -5,7 +5,7 @@
  * Prices are in cents (USD).
  */
 
-export type ProductKey = "frontEnd" | "exitDiscount" | "upsell1" | "upsell2";
+export type ProductKey = "frontEnd" | "exitDiscount" | "upsell1" | "upsell2" | "upsell3";
 
 export interface ProductConfig {
   key: ProductKey;
@@ -48,8 +48,16 @@ export const PRODUCTS: Record<ProductKey, ProductConfig> = {
     name: "Sleep Optimizer Toolkit",
     description: "Sleep Score Tracker, Bedroom Audit Checklist, Supplement Guide, and Screen Detox Protocol.",
     priceInCents: 1000, // $10.00
-    successPath: "/thank-you?value=25&product=Complete+Bundle",
-    cancelPath: "/thank-you?value=5&product=Deep+Sleep+Reset",
+    successPath: "/upsell-3?purchased=upsell2",
+    cancelPath: "/upsell-3",
+  },
+  upsell3: {
+    key: "upsell3",
+    name: "Advanced Sleep Mastery Protocol",
+    description: "The complete 30-day deep dive: advanced CBT-I techniques, sleep architecture optimization, and lifetime access to the Sleep Mastery Community.",
+    priceInCents: 1900, // $19.00
+    successPath: "/thank-you?value=44&product=Complete+Mastery+Bundle",
+    cancelPath: "/thank-you?value=25&product=Complete+Bundle",
   },
 };
 

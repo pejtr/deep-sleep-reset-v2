@@ -1,6 +1,6 @@
 import { eq, gte, sql, desc, count, sum, and } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { abEvents, chatInsights, chatSurveys, InsertAbEvent, InsertChatInsight, InsertChatSurvey, InsertLead, InsertUser, InsertQuizAttempt, InsertTestimonialMedia, leads, orders, quizAttempts, testimonialMedia, users } from "../drizzle/schema";
+import { abandonedCheckouts, abEvents, chatInsights, chatSurveys, InsertAbEvent, InsertChatInsight, InsertChatSurvey, InsertLead, InsertUser, InsertQuizAttempt, InsertTestimonialMedia, leads, orders, quizAttempts, testimonialMedia, users } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
 let _db: ReturnType<typeof drizzle> | null = null;
@@ -510,6 +510,91 @@ export async function moderateTestimonialMedia(id: number, status: "approved" | 
   } catch (err) {
     console.error("[Testimonial] Failed to moderate:", err);
   }
+}
+
+// ─── Abandoned Checkout helpers ──────────────────────────────────────────────
+
+/**
+ * Record an abandoned checkout (email entered but payment not completed).
+ * Uses onDuplicateKeyUpdate to silently ignore duplicate emails.
+ */
+export async function recordAbandonedCheckout(email: string, name?: string, productKey = "frontEnd"): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+  try {
+    await db.insert(abandonedCheckouts).values({ email, name: name ?? null, productKey }).onDuplicateKeyUpdate({ set: { productKey } });
+  } catch (err) {
+    console.error("[AbandonedCheckout] Failed to record:", err);
+  }
+}
+
+/**
+ * Get all abandoned checkouts that haven't received a recovery email yet.
+ * Returns entries older than 30 minutes (to avoid emailing people mid-checkout).
+ */
+export async function getPendingAbandonedCheckouts() {
+  const db = await getDb();
+  if (!db) return [];
+  const cutoff = new Date(Date.now() - 30 * 60 * 1000);
+  return db
+    .select()
+    .from(abandonedCheckouts)
+    .where(
+      and(
+        eq(abandonedCheckouts.recoverySent, 0),
+        eq(abandonedCheckouts.recovered, 0),
+        sql`${abandonedCheckouts.createdAt} <= ${cutoff}`
+      )
+    )
+    .limit(50);
+}
+
+/**
+ * Mark an abandoned checkout as having received a recovery email.
+ */
+export async function markAbandonedCheckoutSent(id: number): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+  await db
+    .update(abandonedCheckouts)
+    .set({ recoverySent: 1, recoverySentAt: new Date() })
+    .where(eq(abandonedCheckouts.id, id));
+}
+
+/**
+ * Mark an abandoned checkout as recovered (they completed purchase).
+ */
+export async function markAbandonedCheckoutRecovered(email: string): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+  await db
+    .update(abandonedCheckouts)
+    .set({ recovered: 1 })
+    .where(eq(abandonedCheckouts.email, email));
+}
+
+/**
+ * Get abandoned checkout stats for admin dashboard.
+ */
+export async function getAbandonedCheckoutStats() {
+  const db = await getDb();
+  if (!db) return { total: 0, sent: 0, recovered: 0, recoveryRate: 0 };
+  const [row] = await db
+    .select({
+      total: count(),
+      sent: sql<number>`COALESCE(SUM(recovery_sent), 0)`,
+      recovered: sql<number>`COALESCE(SUM(recovered), 0)`,
+    })
+    .from(abandonedCheckouts);
+  const total = Number(row?.total ?? 0);
+  const sent = Number(row?.sent ?? 0);
+  const recovered = Number(row?.recovered ?? 0);
+  return {
+    total,
+    sent,
+    recovered,
+    recoveryRate: sent > 0 ? Math.round((recovered / sent) * 100) : 0,
+  };
 }
 
 /**

@@ -325,8 +325,8 @@ const day4: SequenceEmail = {
       <h2>🎧 Want to go even deeper?</h2>
       <p>You've now completed 5 nights of the protocol. For customers who want audio-guided sessions — especially for the nights when anxiety is really bad — I created the <strong>Anxiety Dissolve Audio Pack.</strong></p>
       <p>5 professionally produced audio sessions (21 min, 12 min, 8 min, 35 min, 20 min) designed to work alongside the 7-Night Protocol. Normally $27.</p>
-      <p style="color: #c4a0e8; font-size: 14px; margin-bottom: 20px;">As a current customer, you can add it now for just <strong style="color: #d4a853;">$27</strong> — the same price as a single therapy session.</p>
-      <a href="${upsellUrl}" class="upsell-button">Add the Audio Pack — $27 →</a>
+      <p style="color: #c4a0e8; font-size: 14px; margin-bottom: 20px;">As a current customer, you can add it now for just <strong style="color: #d4a853;">$10</strong> — less than the price of a coffee per session.</p>
+      <a href="${upsellUrl}" class="upsell-button">Add the Audio Pack — $10 →</a>
       <p style="font-size: 12px; color: #6a6080; margin-top: 12px;">30-day money-back guarantee. Instant access.</p>
     </div>
 
@@ -363,7 +363,7 @@ SPECIAL OFFER FOR CURRENT CUSTOMERS:
 
 The Anxiety Dissolve Audio Pack — 5 guided audio sessions for the nights when anxiety is really bad.
 
-Normally $27. Add it here: ${upsellUrl}
+Normally $27. Today for current customers: $10. Add it here: ${upsellUrl}
 
 30-day money-back guarantee.
 
@@ -485,8 +485,8 @@ const day6: SequenceEmail = {
       <h2>🎧 One last thing before you go</h2>
       <p>The Anxiety Dissolve Audio Pack is still available. For the nights when stress is high, anxiety is spiking, or you wake at 3 AM and can't get back to sleep — these 5 guided audio sessions are your backup system.</p>
       <p>5 sessions: 21 min · 12 min · 8 min · 35 min · 20 min</p>
-      <p style="color: #c4a0e8; font-size: 14px; margin-bottom: 20px;">This is the last time I'll mention it. If you want it, now is the time: <strong style="color: #d4a853;">$27</strong> with a 30-day guarantee.</p>
-      <a href="${upsellUrl}" class="upsell-button">Get the Audio Pack — $27 →</a>
+      <p style="color: #c4a0e8; font-size: 14px; margin-bottom: 20px;">This is the last time I'll mention it. If you want it, now is the time: <strong style="color: #d4a853;">$10</strong> with a 30-day guarantee.</p>
+      <a href="${upsellUrl}" class="upsell-button">Get the Audio Pack — $10 →</a>
     </div>
 
     <hr class="divider">
@@ -522,7 +522,7 @@ Repeat this ritual every night. Within 2 weeks, it becomes automatic.
 
 ---
 
-FINAL OFFER — Anxiety Dissolve Audio Pack ($27):
+FINAL OFFER — Anxiety Dissolve Audio Pack ($10 today only):
 For the nights when anxiety spikes or you wake at 3 AM. 5 guided sessions.
 ${upsellUrl}
 

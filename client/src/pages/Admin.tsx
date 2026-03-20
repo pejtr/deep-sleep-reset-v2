@@ -119,7 +119,7 @@ function SectionHeader({ title, icon: Icon }: { title: string; icon: React.Eleme
 
 // ─── main component ───────────────────────────────────────────────────────────
 
-type Tab = "overview" | "orders" | "leads" | "chatbot" | "conversion";
+type Tab = "overview" | "orders" | "leads" | "chatbot" | "conversion" | "ads";
 
 export default function Admin() {
   const { user, loading: authLoading } = useAuth();
@@ -207,6 +207,7 @@ export default function Admin() {
     { id: "leads", label: `Leady (${leads.length})`, icon: Mail },
     { id: "chatbot", label: `Chatbot (${surveys.length})`, icon: MessageSquare },
     { id: "conversion", label: "Konverze", icon: Target },
+    { id: "ads", label: "Ads KPI", icon: Activity },
   ];
 
   return (
@@ -908,7 +909,201 @@ export default function Admin() {
             </div>
           </div>
         )}
+        {tab === "ads" && (
+          <div className="space-y-8">
+            <SectionHeader title="Ads KPI Dashboard" icon={Activity} />
+            <p className="text-foreground/50 text-sm">
+              Manuálně zadávejte denní metriky z Meta Ads Manageru. Dashboard automaticky vypočítá CPA, ROAS a doporučení.
+            </p>
+
+            {/* Daily KPI Input Form */}
+            <div className="bg-card/20 border border-border/20 rounded-xl p-6">
+              <h3 className="text-lg font-semibold text-foreground/80 mb-4">Přidat denní metriky</h3>
+              <AdsKpiForm onSubmit={() => {}} />
+            </div>
+
+            {/* KPI Reference Table */}
+            <div className="bg-card/20 border border-border/20 rounded-xl p-6">
+              <h3 className="text-lg font-semibold text-foreground/80 mb-4">Referenční metriky & pravidla</h3>
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b border-border/20">
+                      <th className="text-left py-2 px-3 text-foreground/50">Metrika</th>
+                      <th className="text-left py-2 px-3 text-green-400">Scale</th>
+                      <th className="text-left py-2 px-3 text-amber">Optimalizovat</th>
+                      <th className="text-left py-2 px-3 text-red-400">Kill</th>
+                    </tr>
+                  </thead>
+                  <tbody className="text-foreground/70">
+                    <tr className="border-b border-border/10">
+                      <td className="py-2 px-3 font-medium">CPA (Cost Per Acquisition)</td>
+                      <td className="py-2 px-3">&lt; $2.50</td>
+                      <td className="py-2 px-3">$2.50 – $5.00</td>
+                      <td className="py-2 px-3">&gt; $5.00</td>
+                    </tr>
+                    <tr className="border-b border-border/10">
+                      <td className="py-2 px-3 font-medium">CTR (Click-Through Rate)</td>
+                      <td className="py-2 px-3">&gt; 2.0%</td>
+                      <td className="py-2 px-3">1.0% – 2.0%</td>
+                      <td className="py-2 px-3">&lt; 1.0%</td>
+                    </tr>
+                    <tr className="border-b border-border/10">
+                      <td className="py-2 px-3 font-medium">CPC (Cost Per Click)</td>
+                      <td className="py-2 px-3">&lt; $0.50</td>
+                      <td className="py-2 px-3">$0.50 – $1.00</td>
+                      <td className="py-2 px-3">&gt; $1.00</td>
+                    </tr>
+                    <tr className="border-b border-border/10">
+                      <td className="py-2 px-3 font-medium">ROAS (Return on Ad Spend)</td>
+                      <td className="py-2 px-3">&gt; 3.0x</td>
+                      <td className="py-2 px-3">1.5x – 3.0x</td>
+                      <td className="py-2 px-3">&lt; 1.5x</td>
+                    </tr>
+                    <tr>
+                      <td className="py-2 px-3 font-medium">AOV (Average Order Value)</td>
+                      <td className="py-2 px-3">&gt; $15</td>
+                      <td className="py-2 px-3">$8 – $15</td>
+                      <td className="py-2 px-3">&lt; $8</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            {/* Revenue from DB */}
+            <div className="bg-card/20 border border-border/20 rounded-xl p-6">
+              <h3 className="text-lg font-semibold text-foreground/80 mb-4">Tržby z objednávek (posledních 30 dní)</h3>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                <div className="bg-background/30 rounded-lg p-4 text-center">
+                  <p className="text-foreground/40 text-xs uppercase tracking-wider">Celkové tržby</p>
+                  <p className="text-2xl font-bold text-green-400 mt-1">{fmt(stats?.totalRevenueCents || 0)}</p>
+                </div>
+                <div className="bg-background/30 rounded-lg p-4 text-center">
+                  <p className="text-foreground/40 text-xs uppercase tracking-wider">Objednávky</p>
+                  <p className="text-2xl font-bold text-foreground/80 mt-1">{stats?.totalOrders || 0}</p>
+                </div>
+                <div className="bg-background/30 rounded-lg p-4 text-center">
+                  <p className="text-foreground/40 text-xs uppercase tracking-wider">AOV</p>
+                  <p className="text-2xl font-bold text-amber mt-1">{fmt(stats?.totalOrders ? Math.round(stats.totalRevenueCents / stats.totalOrders) : 0)}</p>
+                </div>
+                <div className="bg-background/30 rounded-lg p-4 text-center">
+                  <p className="text-foreground/40 text-xs uppercase tracking-wider">CVR (lead→sale)</p>
+                  <p className="text-2xl font-bold text-blue-400 mt-1">{stats?.totalLeads ? ((stats.totalOrders / stats.totalLeads) * 100).toFixed(1) : 0}%</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Decision Framework */}
+            <div className="bg-card/20 border border-border/20 rounded-xl p-6">
+              <h3 className="text-lg font-semibold text-foreground/80 mb-4">Rozhodovací rámec</h3>
+              <div className="space-y-3">
+                <div className="flex items-start gap-3 p-3 rounded-lg bg-green-400/5 border border-green-400/20">
+                  <span className="text-green-400 text-lg">🟢</span>
+                  <div>
+                    <p className="font-medium text-green-400">SCALE — Zvyšte rozpočet o 20-30%</p>
+                    <p className="text-sm text-foreground/50 mt-1">CPA &lt; $2.50, CTR &gt; 2%, ROAS &gt; 3x. Reklama funguje — zvyšte denní budget a duplikujte do nových adsetů.</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3 p-3 rounded-lg bg-amber/5 border border-amber/20">
+                  <span className="text-amber text-lg">🟡</span>
+                  <div>
+                    <p className="font-medium text-amber">OPTIMALIZOVAT — Testujte kreativy a cílení</p>
+                    <p className="text-sm text-foreground/50 mt-1">CPA $2.50–$5, CTR 1–2%. Zkuste nové hooks, upravte copy, testujte jiné audiences. Nechte běžet 3-5 dní.</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3 p-3 rounded-lg bg-red-400/5 border border-red-400/20">
+                  <span className="text-red-400 text-lg">🔴</span>
+                  <div>
+                    <p className="font-medium text-red-400">KILL — Vypněte reklamu okamžitě</p>
+                    <p className="text-sm text-foreground/50 mt-1">CPA &gt; $5, CTR &lt; 1%, ROAS &lt; 1.5x po 3+ dnech. Přestaňte utrácet a začněte od nuly s novým kreativem.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </main>
+    </div>
+  );
+}
+
+// ─── Ads KPI Form ────────────────────────────────────────────────────────────
+
+function AdsKpiForm({ onSubmit }: { onSubmit: () => void }) {
+  const [formData, setFormData] = useState({
+    date: new Date().toISOString().split('T')[0],
+    spend: '',
+    impressions: '',
+    clicks: '',
+    purchases: '',
+    revenue: '',
+  });
+
+  const calculated = {
+    ctr: Number(formData.impressions) > 0 ? (Number(formData.clicks) / Number(formData.impressions) * 100).toFixed(2) : '—',
+    cpc: Number(formData.clicks) > 0 ? (Number(formData.spend) / Number(formData.clicks)).toFixed(2) : '—',
+    cpa: Number(formData.purchases) > 0 ? (Number(formData.spend) / Number(formData.purchases)).toFixed(2) : '—',
+    roas: Number(formData.spend) > 0 ? (Number(formData.revenue) / Number(formData.spend)).toFixed(2) : '—',
+    profit: (Number(formData.revenue) - Number(formData.spend)).toFixed(2),
+  };
+
+  const getColor = (metric: string, value: string) => {
+    if (value === '—') return 'text-foreground/40';
+    const v = parseFloat(value);
+    if (metric === 'cpa') return v < 2.5 ? 'text-green-400' : v < 5 ? 'text-amber' : 'text-red-400';
+    if (metric === 'ctr') return v > 2 ? 'text-green-400' : v > 1 ? 'text-amber' : 'text-red-400';
+    if (metric === 'cpc') return v < 0.5 ? 'text-green-400' : v < 1 ? 'text-amber' : 'text-red-400';
+    if (metric === 'roas') return v > 3 ? 'text-green-400' : v > 1.5 ? 'text-amber' : 'text-red-400';
+    if (metric === 'profit') return v > 0 ? 'text-green-400' : 'text-red-400';
+    return 'text-foreground/70';
+  };
+
+  return (
+    <div className="space-y-4">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+        {[
+          { key: 'date', label: 'Datum', type: 'date' },
+          { key: 'spend', label: 'Spend ($)', type: 'number' },
+          { key: 'impressions', label: 'Impressions', type: 'number' },
+          { key: 'clicks', label: 'Clicks', type: 'number' },
+          { key: 'purchases', label: 'Purchases', type: 'number' },
+          { key: 'revenue', label: 'Revenue ($)', type: 'number' },
+        ].map((field) => (
+          <div key={field.key}>
+            <label className="text-xs text-foreground/40 uppercase tracking-wider">{field.label}</label>
+            <input
+              type={field.type}
+              value={formData[field.key as keyof typeof formData]}
+              onChange={(e) => setFormData(prev => ({ ...prev, [field.key]: e.target.value }))}
+              className="w-full mt-1 px-3 py-2 bg-background/40 border border-border/20 rounded-lg text-sm text-foreground/80 focus:outline-none focus:border-amber/40"
+            />
+          </div>
+        ))}
+      </div>
+
+      {/* Calculated metrics */}
+      {Number(formData.spend) > 0 && (
+        <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 mt-4">
+          {[
+            { key: 'ctr', label: 'CTR', suffix: '%' },
+            { key: 'cpc', label: 'CPC', prefix: '$' },
+            { key: 'cpa', label: 'CPA', prefix: '$' },
+            { key: 'roas', label: 'ROAS', suffix: 'x' },
+            { key: 'profit', label: 'Profit', prefix: '$' },
+          ].map((m) => {
+            const val = calculated[m.key as keyof typeof calculated];
+            return (
+              <div key={m.key} className="bg-background/30 rounded-lg p-3 text-center">
+                <p className="text-foreground/40 text-xs uppercase tracking-wider">{m.label}</p>
+                <p className={`text-xl font-bold mt-1 ${getColor(m.key, val)}`}>
+                  {m.prefix || ''}{val}{m.suffix || ''}
+                </p>
+              </div>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 }

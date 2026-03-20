@@ -47,6 +47,12 @@ const en = {
         continuation: " For the Price of One Coffee.",
         sub: "10,000+ people discovered what happens when you finally sleep deeply — more energy, clearer thinking, better relationships. The 7-night protocol that makes it permanent. Just $5.",
       },
+      c: {
+        main: "This Is Why You ",
+        highlight: "Wake Up at 3AM",
+        continuation: " — And How to Stop It",
+        sub: "Your brain isn't broken. It's stuck in a loop. The 7-Night Deep Sleep Reset rewires your sleep cycle in one week. Less than a cup of coffee.",
+      },
     },
   },
 

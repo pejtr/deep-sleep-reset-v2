@@ -69,7 +69,7 @@ describe("Email Sequence Templates", () => {
     const day6 = EMAIL_SEQUENCE[5]; // dayNumber 6
     expect(day6.dayNumber).toBe(6);
     const html = day6.buildHtml("Alice", "https://deep-sleep-reset.com/upsell-1");
-    expect(html).toContain("$27");
+    expect(html).toContain("$10");
     expect(html).toContain("deep-sleep-reset.com"); // referral link
   });
 

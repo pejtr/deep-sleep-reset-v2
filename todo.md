@@ -46,9 +46,9 @@
 ## Phase 6: E2E Testing
 - [x] Test Stripe checkout session creation (vitest)
 - [x] Test chatbot AI conversation (vitest)
-- [ ] Test Stripe test mode purchase flow (manual)
-- [ ] Test upsell redirect chain (manual)
-- [ ] Test thank-you page Purchase event (manual)
+- [x] Test Stripe test mode purchase flow (manual)
+- [x] Test upsell redirect chain (manual)
+- [x] Test thank-you page Purchase event (manual)
 - [x] Test email delivery (Brevo IP authorized, all 4 email tests passing) after purchase
 - [ ] Test Spanish version end-to-end
 
@@ -207,3 +207,27 @@
 - [x] SocialProofWallHook: filter tabs (All / Photos / Videos) with live counts per type
 - [x] SocialProofWallHook: empty state per filter ("No photos yet — be the first!")
 - [x] 136 tests passing
+
+## Phase 24: Routing Fix + Meta CAPI + Community Stories + Quiz Tips
+- [x] Fix 404 on published site for /admin and other client-side routes (SPA fallback)
+- [x] Meta Conversions API: server-side Purchase event from Stripe webhook
+- [x] Meta Conversions API: server-side Lead event from leads.capture
+- [x] Meta Conversions API: server-side InitiateCheckout from checkout
+- [ ] Community Stories: DB table, tRPC procedures, /stories page
+- [ ] Community Stories: submission form with name, story, sleep improvement, rating
+- [ ] Community Stories: landing page section linking to /stories
+- [ ] Quiz results: personalized sleep tips based on specific question answers
+- [ ] Write tests for new procedures
+
+## Phase 24: ChatGPT Funnel System Implementation
+- [x] OrderBump page rewrite: "Don't Stop at 60%" headline, Anxiety Shutdown Audio $29→$10, Sleep Optimizer Toolkit $27→$10, Bundle $14 (default checked), Stripe checkout
+- [x] Post-purchase upsell page: "Advanced Protocol $19" shown after Stripe success_url before thank-you
+- [x] 6-email Brevo post-purchase sequence: immediate, Day1, Day2 upsell push, Day3, Day5 social proof, Day7 recovery
+- [x] Abandoned checkout recovery email via Brevo
+- [x] Meta Pixel: ViewContent, InitiateCheckout, Purchase events (client-side)
+- [x] Meta CAPI: server-side Purchase + Lead events from Stripe webhook
+- [x] Admin Ads KPI dashboard tab: Spend/CTR/CPC/CPA/Revenue/AOV/Profit with kill/scale thresholds
+- [x] 3 A/B hero headline variants updated with ChatGPT copy
+- [x] Write tests for new procedures (146 tests passing)
+- [x] Complete end-to-end flow test: homepage → quiz → order → Stripe test payment → upsells → thank you
+- [x] Fixed Upsell2 skip link to route to Upsell3 instead of Thank You

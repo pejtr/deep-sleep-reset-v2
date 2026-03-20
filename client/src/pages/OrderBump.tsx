@@ -10,9 +10,9 @@
  *   - Bump 2: Sleep Optimizer Toolkit ($10) — optional
  */
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { motion } from "framer-motion";
-import { Moon, CheckCircle, Headphones, BarChart3, Lock, ArrowRight, Star } from "lucide-react";
+import { Moon, CheckCircle, Headphones, BarChart3, Lock, ArrowRight, Star, Zap, AlertTriangle } from "lucide-react";
 import { openBundleCheckout, openCheckout, type ProductKey } from "@/lib/checkout";
 import { Link, useSearch } from "wouter";
 import { trackEvent } from "@/components/MetaPixel";
@@ -38,8 +38,9 @@ export default function OrderBump() {
   const searchParams = new URLSearchParams(searchString);
   const isExitDiscount = searchParams.get("discount") === "exit";
 
-  const [addAudio, setAddAudio] = useState(false);
-  const [addToolkit, setAddToolkit] = useState(false);
+  // Default-checked per ChatGPT recommendation — bundle pre-selected
+  const [addAudio, setAddAudio] = useState(true);
+  const [addToolkit, setAddToolkit] = useState(true);
   const [loading, setLoading] = useState(false);
 
   const basePrice = isExitDiscount ? 4 : 5;
@@ -137,16 +138,21 @@ export default function OrderBump() {
               🎁 Special Offer Applied — 20% Off ($5 → $4)
             </div>
           )}
+          {/* ChatGPT-recommended urgency banner */}
+          <div className="inline-flex items-center gap-2 bg-red-500/10 border border-red-500/30 text-red-400 px-4 py-2 rounded-full text-sm font-semibold mb-4">
+            <AlertTriangle className="w-4 h-4" />
+            Don't Stop at 60% — Unlock Full Sleep Reset
+          </div>
           <p className="text-amber/70 text-sm uppercase tracking-[0.2em] mb-3 font-medium">
-            Step 2 of 3 — Customize Your Order
+            Step 2 of 3 — Upgrade Your Order
           </p>
           <h1 className="font-[var(--font-display)] text-3xl sm:text-4xl font-bold mb-4">
-            You're Almost There.{" "}
-            <span className="text-amber italic">Enhance Your Results.</span>
+            Most users who skip this take{" "}
+            <span className="text-amber italic">2–3× longer</span>{" "}to fix their sleep.
           </h1>
           <p className="text-foreground/60 text-lg max-w-xl mx-auto">
-            The 7-Night Reset is already included. Add these powerful extras below — 
-            available only at this step, at a special price.
+            Both upgrades are pre-selected below at a special one-time price. 
+            Uncheck anything you don't want — or grab the bundle and save $14.
           </p>
         </motion.div>
 
@@ -224,12 +230,15 @@ export default function OrderBump() {
               <div className="flex items-center gap-2 mb-1">
                 <Headphones className="w-5 h-5 text-amber/70" />
                 <h3 className="font-[var(--font-display)] text-xl font-semibold">
-                  Anxiety Dissolve Audio Pack
+                  🧠 Anxiety Shutdown Audio
                 </h3>
+                <span className="text-xs bg-amber/20 text-amber px-2 py-0.5 rounded-full font-medium">Most Popular</span>
               </div>
-              <p className="text-foreground/60 text-sm mb-4">
-                5 professionally guided audio sessions that dissolve anxiety on demand — 
-                the perfect companion to your sleep reset.
+              <p className="text-foreground/60 text-sm mb-1 font-medium text-foreground/80">
+                Stops racing thoughts in under 10 minutes.
+              </p>
+              <p className="text-foreground/50 text-xs mb-4">
+                Used by 3,200+ users — 5 professionally guided sessions that shut down anxiety on demand.
               </p>
 
               {/* Audio sessions list */}
@@ -261,8 +270,9 @@ export default function OrderBump() {
             </div>
 
             <div className="text-right shrink-0">
-              <span className="text-foreground/40 line-through text-sm">$27</span>
+              <span className="text-foreground/40 line-through text-sm">$29</span>
               <div className="font-[var(--font-display)] text-2xl font-bold text-amber">+$10</div>
+              <span className="text-xs text-amber/60">today only</span>
             </div>
           </div>
 
@@ -312,10 +322,13 @@ export default function OrderBump() {
               <div className="flex items-center gap-2 mb-1">
                 <BarChart3 className="w-5 h-5 text-amber/70" />
                 <h3 className="font-[var(--font-display)] text-xl font-semibold">
-                  Sleep Optimizer Toolkit
+                  📊 Sleep Optimizer Toolkit
                 </h3>
               </div>
-              <p className="text-foreground/60 text-sm mb-4">
+              <p className="text-foreground/60 text-sm mb-1 font-medium text-foreground/80">
+                Fix your sleep environment in 1 night.
+              </p>
+              <p className="text-foreground/50 text-xs mb-4">
                 4 powerful tools to optimize every aspect of your sleep environment and habits.
               </p>
 
@@ -342,6 +355,7 @@ export default function OrderBump() {
             <div className="text-right shrink-0">
               <span className="text-foreground/40 line-through text-sm">$27</span>
               <div className="font-[var(--font-display)] text-2xl font-bold text-amber">+$10</div>
+              <span className="text-xs text-amber/60">today only</span>
             </div>
           </div>
 
@@ -366,6 +380,15 @@ export default function OrderBump() {
           transition={{ duration: 0.6, delay: 0.4 }}
           className="border border-amber/20 rounded-2xl p-6 bg-card/40 backdrop-blur-sm"
         >
+          {/* Bundle savings callout */}
+          {addAudio && addToolkit && (
+            <div className="flex items-center gap-2 bg-amber/10 border border-amber/20 rounded-xl p-3 mb-4">
+              <Zap className="w-4 h-4 text-amber shrink-0" />
+              <p className="text-amber text-sm font-semibold">
+                🔥 Complete Sleep Upgrade — Get BOTH for just $14 (saving $6 vs. separate)
+              </p>
+            </div>
+          )}
           <h3 className="font-[var(--font-display)] text-lg font-semibold mb-4">Order Summary</h3>
           
           <div className="space-y-2 mb-4">

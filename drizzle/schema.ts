@@ -616,3 +616,26 @@ export const testimonialMedia = mysqlTable("testimonial_media", {
 
 export type TestimonialMedia = typeof testimonialMedia.$inferSelect;
 export type InsertTestimonialMedia = typeof testimonialMedia.$inferInsert;
+
+/**
+ * Abandoned checkouts — tracks visitors who entered their email on the order page
+ * but did not complete payment. Used for abandoned cart recovery emails.
+ */
+export const abandonedCheckouts = mysqlTable("abandoned_checkouts", {
+  id: int("id").autoincrement().primaryKey(),
+  /** Email entered on the order/checkout page */
+  email: varchar("email", { length: 320 }).notNull(),
+  /** Name if captured */
+  name: varchar("name", { length: 255 }),
+  /** Product they were trying to buy */
+  productKey: varchar("productKey", { length: 64 }).default("frontEnd").notNull(),
+  /** Whether a recovery email was sent */
+  recoverySent: int("recoverySent").default(0).notNull(),
+  /** Whether they eventually completed the purchase */
+  recovered: int("recovered").default(0).notNull(),
+  /** Timestamp when recovery email was sent */
+  recoverySentAt: timestamp("recoverySentAt"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+export type AbandonedCheckout = typeof abandonedCheckouts.$inferSelect;
+export type InsertAbandonedCheckout = typeof abandonedCheckouts.$inferInsert;

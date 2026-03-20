@@ -12,6 +12,7 @@ import { notifyOwner } from "../_core/notification";
 import { sendPurchaseEmail } from "../email";
 import { enrollInSequence } from "../routers/emailSequence";
 import { eq } from "drizzle-orm";
+import { fireMetaPurchase } from "../meta-capi";
 
 export async function handleStripeWebhook(req: Request, res: Response) {
   const stripe = getStripe();
@@ -94,6 +95,7 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
     exitDiscount: "7-Night Deep Sleep Reset — Exit Discount ($4)",
     upsell1: "Anxiety Dissolve Audio Pack ($10)",
     upsell2: "Sleep Optimizer Toolkit ($10)",
+    upsell3: "Advanced Sleep Mastery Protocol ($19)",
   };
 
   await notifyOwner({
@@ -111,7 +113,17 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
     }).catch(err => console.warn("[Webhook] Customer email failed:", err));
   }
 
-  // 4. Enroll in 7-day nurture sequence (only for core product purchases)
+  // 4. Fire Meta Conversions API Purchase event
+  if (customerEmail) {
+    await fireMetaPurchase({
+      email: customerEmail,
+      value: amountCents / 100,
+      currency: currency.toUpperCase(),
+      productName: productLabels[productKey],
+    }).catch(err => console.warn("[Webhook] Meta CAPI Purchase failed:", err));
+  }
+
+  // 5. Enroll in 7-day nurture sequence (only for core product purchases)
   const coreProducts: ProductKey[] = ["frontEnd", "exitDiscount"];
   if (customerEmail && coreProducts.includes(productKey)) {
     const recentOrder = await db

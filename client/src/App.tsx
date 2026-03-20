@@ -19,6 +19,7 @@ import PrivacyPolicy from "./pages/PrivacyPolicy";
 import Terms from "./pages/Terms";
 import Affiliates from "./pages/Affiliates";
 import OrderBump from "./pages/OrderBump";
+import Upsell3 from "./pages/Upsell3";
 import Admin from "./pages/Admin";
 import AdminInstagram from "./pages/AdminInstagram";
 import AdminDmAutoResponder from "./pages/AdminDmAutoResponder";
@@ -40,6 +41,7 @@ function Router() {
       <Route path={"/order"} component={OrderBump} />
       <Route path={"/upsell-1"} component={Upsell1} />
       <Route path={"/upsell-2"} component={Upsell2} />
+      <Route path={"/upsell-3"} component={Upsell3} />
       <Route path={"/thank-you"} component={ThankYou} />
       <Route path={"/privacy"} component={PrivacyPolicy} />
       <Route path={"/terms"} component={Terms} />

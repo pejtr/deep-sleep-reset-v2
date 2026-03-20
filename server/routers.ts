@@ -5,14 +5,15 @@ import { systemRouter } from "./_core/systemRouter";
 import { publicProcedure, protectedProcedure, router } from "./_core/trpc";
 import { createCheckoutSession, createBundleCheckoutSession, PRODUCTS, type ProductKey } from "./stripe/index";
 import { invokeLLM } from "./_core/llm";
-import { saveLead, saveChatInsight, saveChatSurvey, getOrdersByEmail, getAdminStats, getFunnelStats, getRecentOrders, getRecentLeads, getRecentChatInsights, getRecentChatSurveys, getDailyRevenue, getLeadSourceStats, saveAbEvent, getAbStats, saveQuizAttempt, getQuizHistory, updateQuizAttemptNote, submitTestimonialMedia, getApprovedTestimonialMedia, getPendingTestimonialMedia, moderateTestimonialMedia } from "./db";
+import { saveLead, saveChatInsight, saveChatSurvey, getOrdersByEmail, getAdminStats, getFunnelStats, getRecentOrders, getRecentLeads, getRecentChatInsights, getRecentChatSurveys, getDailyRevenue, getLeadSourceStats, saveAbEvent, getAbStats, saveQuizAttempt, getQuizHistory, updateQuizAttemptNote, submitTestimonialMedia, getApprovedTestimonialMedia, getPendingTestimonialMedia, moderateTestimonialMedia, recordAbandonedCheckout, getAbandonedCheckoutStats, markAbandonedCheckoutRecovered } from "./db";
 import { igAutopilotRouter } from "./routers/igAutopilot";
 import { igDmAutoResponderRouter } from "./routers/igDmAutoResponder";
 import { emailSequenceRouter } from "./routers/emailSequence";
 import { testimonialsRouter } from "./routers/testimonials";
 import { blogRouter } from "./routers/blog";
+import { fireMetaLead, fireMetaInitiateCheckout } from "./meta-capi";
 
-const productKeySchema = z.enum(["frontEnd", "exitDiscount", "upsell1", "upsell2"]);
+const productKeySchema = z.enum(["frontEnd", "exitDiscount", "upsell1", "upsell2", "upsell3"]);
 
 export const appRouter = router({
   system: systemRouter,
@@ -60,6 +61,13 @@ export const appRouter = router({
           customerEmail: ctx.user?.email || undefined,
           metadata: ctx.user ? { userId: String(ctx.user.id) } : undefined,
         });
+        // Fire Meta CAPI InitiateCheckout event
+        const totalCents = input.productKeys.reduce((sum, key) => sum + (PRODUCTS[key]?.priceInCents ?? 0), 0);
+        fireMetaInitiateCheckout({
+          email: ctx.user?.email || undefined,
+          value: totalCents / 100,
+          productName: input.productKeys.join("+"),
+        }).catch((err) => console.warn("[Checkout] Meta CAPI InitiateCheckout failed:", err));
         return result;
       }),
   }),
@@ -98,6 +106,10 @@ export const appRouter = router({
           source: input.source,
           abVariant: input.abVariant,
         });
+        // Fire Meta CAPI Lead event
+        fireMetaLead({ email: input.email, source: input.source }).catch(
+          (err) => console.warn("[Leads] Meta CAPI Lead failed:", err)
+        );
         return { success: true };
       }),
   }),
@@ -434,6 +446,36 @@ RULES:
           : "";
 
         return { reply };
+      }),
+  }),
+
+  // Abandoned checkout recovery
+  abandonedCheckout: router({
+    /** Called when a visitor enters their email on the order page but hasn't paid yet */
+    record: publicProcedure
+      .input(z.object({
+        email: z.string().email(),
+        name: z.string().optional(),
+        productKey: z.string().default("frontEnd"),
+      }))
+      .mutation(async ({ input }) => {
+        await recordAbandonedCheckout(input.email, input.name, input.productKey);
+        return { ok: true };
+      }),
+
+    /** Called by Stripe webhook when purchase completes — marks as recovered */
+    markRecovered: publicProcedure
+      .input(z.object({ email: z.string().email() }))
+      .mutation(async ({ input }) => {
+        await markAbandonedCheckoutRecovered(input.email);
+        return { ok: true };
+      }),
+
+    /** Admin: get abandoned checkout stats */
+    getStats: protectedProcedure
+      .query(async ({ ctx }) => {
+        if (ctx.user?.role !== "admin") throw new Error("Forbidden");
+        return getAbandonedCheckoutStats();
       }),
   }),
 });

@@ -27,22 +27,28 @@ export interface HeadlineVariant {
   sub: string;
 }
 
-export const HEADLINES: Record<"a" | "b", HeadlineVariant> = {
+export const HEADLINES: Record<"a" | "b" | "c", HeadlineVariant> = {
   a: {
-    main: "Still Lying Awake at ",
-    highlight: "3:17 AM",
-    continuation: ", Staring at the Ceiling?",
-    sub: 'Discover the 7-Night Protocol That Resets Your Body\'s Natural Sleep Switch... Without Melatonin, Sleeping Pills, or "Counting Sheep."',
+    main: "You're Not Tired. Your Brain Is ",
+    highlight: "Stuck Awake.",
+    continuation: "",
+    sub: "Discover the 7-Night Protocol that resets your body's natural sleep switch — for the price of one coffee.",
   },
   b: {
-    main: "What If You Could ",
-    highlight: "Fall Asleep in 15 Minutes",
-    continuation: " — Every Single Night?",
-    sub: "The Science-Backed 7-Night Reset That 10,000+ People Used to Fix Their Broken Sleep. No Pills. No Apps. Just Sleep.",
+    main: "Fix Your Sleep in ",
+    highlight: "3 Nights",
+    continuation: " (Without Pills)",
+    sub: "The science-backed protocol 10,000+ people used to fall asleep in 15 minutes. No melatonin. No apps. Just sleep.",
+  },
+  c: {
+    main: "This Is Why You ",
+    highlight: "Wake Up at 3AM",
+    continuation: " — And How to Stop It",
+    sub: "Change your sleep. Change your life. The 7-Night Deep Sleep Reset for less than a cup of coffee.",
   },
 };
 
-export type ABVariant = "a" | "b";
+export type ABVariant = "a" | "b" | "c";
 
 const STORAGE_KEY = "dsr-ab-variant";
 
@@ -54,12 +60,13 @@ const STORAGE_KEY = "dsr-ab-variant";
 export function getVariant(): ABVariant {
   // Check if already assigned
   const stored = localStorage.getItem(STORAGE_KEY);
-  if (stored === "a" || stored === "b") {
+  if (stored === "a" || stored === "b" || stored === "c") {
     return stored;
   }
 
-  // Randomly assign 50/50
-  const variant: ABVariant = Math.random() < 0.5 ? "a" : "b";
+  // Randomly assign 33/33/33
+  const r = Math.random();
+  const variant: ABVariant = r < 0.33 ? "a" : r < 0.66 ? "b" : "c";
   localStorage.setItem(STORAGE_KEY, variant);
 
   // Fire tracking event

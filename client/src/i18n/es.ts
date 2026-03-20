@@ -44,6 +44,12 @@ const es: Translations = {
         continuation: " Por el Precio de un Café.",
         sub: "10,000+ personas descubrieron qué pasa cuando finalmente duermes profundo. El protocolo de 7 noches que lo hace permanente. Solo $5.",
       },
+      c: {
+        main: "Por Esto Te ",
+        highlight: "Despiertas a las 3AM",
+        continuation: " — Y Cómo Pararlo",
+        sub: "Tu cerebro no está roto. Está atrapado en un bucle. El Reset de Sueño Profundo de 7 Noches reconfigura tu ciclo de sueño en una semana. Menos que un café.",
+      },
     },
   },
 
