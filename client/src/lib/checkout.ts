@@ -14,7 +14,7 @@
  *   Upsell 2 ($10) → /thank-you
  */
 
-export type ProductKey = "frontEnd" | "exitDiscount" | "upsell1" | "upsell2" | "upsell3";
+export type ProductKey = "frontEnd" | "frontEnd7" | "exitDiscount" | "upsell1" | "upsell2" | "upsell3";
 
 /**
  * Open Stripe Checkout for multiple products (order bump).
@@ -61,6 +61,7 @@ export async function openBundleCheckout(products: ProductKey[]) {
 
 export const PRICES: Record<ProductKey, number> = {
   frontEnd: 5,
+  frontEnd7: 7, // A/B test challenger
   exitDiscount: 4,
   upsell1: 10,
   upsell2: 10,

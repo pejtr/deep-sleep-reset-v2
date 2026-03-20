@@ -92,6 +92,7 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
   // 2. Notify owner about the sale
   const productLabels: Record<ProductKey, string> = {
     frontEnd: "7-Night Deep Sleep Reset ($5)",
+    frontEnd7: "7-Night Deep Sleep Reset ($7 — A/B test)",
     exitDiscount: "7-Night Deep Sleep Reset — Exit Discount ($4)",
     upsell1: "Anxiety Dissolve Audio Pack ($10)",
     upsell2: "Sleep Optimizer Toolkit ($10)",

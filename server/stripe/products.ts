@@ -5,7 +5,7 @@
  * Prices are in cents (USD).
  */
 
-export type ProductKey = "frontEnd" | "exitDiscount" | "upsell1" | "upsell2" | "upsell3";
+export type ProductKey = "frontEnd" | "frontEnd7" | "exitDiscount" | "upsell1" | "upsell2" | "upsell3";
 
 export interface ProductConfig {
   key: ProductKey;
@@ -23,8 +23,16 @@ export const PRODUCTS: Record<ProductKey, ProductConfig> = {
     key: "frontEnd",
     name: "The 7-Night Deep Sleep Reset",
     description: "The science-backed, step-by-step protocol to fix your broken sleep cycle in 7 nights.",
-    priceInCents: 500, // $5.00
+    priceInCents: 500, // $5.00 — A/B test control
     successPath: "/upsell-1?value=5&currency=USD",
+    cancelPath: "/",
+  },
+  frontEnd7: {
+    key: "frontEnd7",
+    name: "The 7-Night Deep Sleep Reset",
+    description: "The science-backed, step-by-step protocol to fix your broken sleep cycle in 7 nights.",
+    priceInCents: 700, // $7.00 — A/B test challenger
+    successPath: "/upsell-1?value=7&currency=USD",
     cancelPath: "/",
   },
   exitDiscount: {

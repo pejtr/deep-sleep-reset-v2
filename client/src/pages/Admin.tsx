@@ -861,6 +861,8 @@ export default function Admin() {
                             btn_amber: '🟡 Button — Amber (Control)',
                             btn_green: '🟢 Button — Green',
                             btn_blue: '🔵 Button — Blue',
+                            price_5: '💵 Price — $5 (Control)',
+                            price_7: '💰 Price — $7 (Challenger)',
                           };
                           const variantLabel = VARIANT_LABELS[row.variant] ?? row.variant;
                           return (

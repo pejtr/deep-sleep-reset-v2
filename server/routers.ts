@@ -281,7 +281,7 @@ Extract:
   ab: router({
     trackEvent: publicProcedure
       .input(z.object({
-        variant: z.enum(["quiz", "chatbot", "social", "btn_amber", "btn_green", "btn_blue"]),
+        variant: z.enum(["quiz", "chatbot", "social", "btn_amber", "btn_green", "btn_blue", "price_5", "price_7"]),
         eventType: z.enum(["impression", "conversion"]),
         sessionId: z.string().max(64),
         email: z.string().email().optional(),

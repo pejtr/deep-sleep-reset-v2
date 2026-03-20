@@ -18,6 +18,7 @@ import { Link, useSearch } from "wouter";
 import { trackEvent } from "@/components/MetaPixel";
 import ReturningCustomerBanner from "@/components/ReturningCustomerBanner";
 import { getButtonColorVariant, BUTTON_VARIANTS, type ButtonColorVariant } from "@/lib/ab-button";
+import { getPriceVariant, PRICE_VARIANTS, type PriceVariant } from "@/lib/ab-price";
 import { getSessionId } from "@/lib/ab-hooks";
 import { trpc } from "@/lib/trpc";
 
@@ -41,8 +42,9 @@ export default function OrderBump() {
   const searchParams = new URLSearchParams(searchString);
   const isExitDiscount = searchParams.get("discount") === "exit";
 
-  // Default-checked per ChatGPT recommendation — bundle pre-selected
-  const [addAudio, setAddAudio] = useState(true);
+  // Audio add-on disabled until audio files are ready
+  const AUDIO_ENABLED = false;
+  const [addAudio, setAddAudio] = useState(false);
   const [addToolkit, setAddToolkit] = useState(true);
   const [loading, setLoading] = useState(false);
 
@@ -52,12 +54,19 @@ export default function OrderBump() {
   const sessionId = useMemo(() => getSessionId(), []);
   const abTrackEvent = trpc.ab.trackEvent.useMutation();
 
-  // Track impression when the order page is first rendered
+  // A/B test: base product price — $5 (control) vs $7 (challenger), 24h TTL
+  // Only applies to non-exit-discount visitors
+  const priceVariant: PriceVariant = useMemo(() => getPriceVariant(), []);
+  const priceConfig = PRICE_VARIANTS[priceVariant];
+
+  // Track impressions when the order page is first rendered
   useMemo(() => {
-    // Fire once per session — use a flag in sessionStorage
-    const key = `dsr-btn-impression-${btnVariant}`;
-    if (typeof window !== "undefined" && !sessionStorage.getItem(key)) {
-      sessionStorage.setItem(key, "1");
+    if (typeof window === "undefined") return;
+
+    // Button color impression
+    const btnKey = `dsr-btn-impression-${btnVariant}`;
+    if (!sessionStorage.getItem(btnKey)) {
+      sessionStorage.setItem(btnKey, "1");
       abTrackEvent.mutate({
         variant: `btn_${btnVariant}` as "btn_amber" | "btn_green" | "btn_blue",
         eventType: "impression",
@@ -65,14 +74,29 @@ export default function OrderBump() {
         metadata: btnConfig.label,
       });
     }
+
+    // Price variant impression (only for non-exit-discount)
+    if (!isExitDiscount) {
+      const priceKey = `dsr-price-impression-${priceVariant}`;
+      if (!sessionStorage.getItem(priceKey)) {
+        sessionStorage.setItem(priceKey, "1");
+        abTrackEvent.mutate({
+          variant: priceVariant,
+          eventType: "impression",
+          sessionId,
+          metadata: priceConfig.label,
+        });
+      }
+    }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);  // intentionally empty — fire once on mount
 
-  const basePrice = isExitDiscount ? 4 : 5;
+  // Use A/B price for non-exit-discount visitors; exit discount always $4
+  const basePrice = isExitDiscount ? 4 : priceConfig.priceUsd;
   const audioPrice = 10;
   const toolkitPrice = 10;
   const totalPrice = basePrice + (addAudio ? audioPrice : 0) + (addToolkit ? toolkitPrice : 0);
-  const primaryKey: ProductKey = isExitDiscount ? "exitDiscount" : "frontEnd";
+  const primaryKey: ProductKey = isExitDiscount ? "exitDiscount" : priceConfig.productKey;
 
   const handleCheckout = async () => {
     setLoading(true);
@@ -80,13 +104,21 @@ export default function OrderBump() {
     if (addAudio) products.push("upsell1");
     if (addToolkit) products.push("upsell2");
 
-    // Track A/B conversion event (button click → Stripe)
+    // Track A/B conversion events (button click → Stripe)
     abTrackEvent.mutate({
       variant: `btn_${btnVariant}` as "btn_amber" | "btn_green" | "btn_blue",
       eventType: "conversion",
       sessionId,
       metadata: btnConfig.label,
     });
+    if (!isExitDiscount) {
+      abTrackEvent.mutate({
+        variant: priceVariant,
+        eventType: "conversion",
+        sessionId,
+        metadata: priceConfig.label,
+      });
+    }
 
     // Fire InitiateCheckout event before redirecting to Stripe
     trackEvent("InitiateCheckout", {
@@ -229,18 +261,19 @@ export default function OrderBump() {
           </div>
         </motion.div>
 
-        {/* Order Bump 1 — Anxiety Dissolve Audio Pack */}
+        {/* Order Bump 1 — Anxiety Dissolve Audio Pack (DISABLED until audio files ready) */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.2 }}
-          className={`border-2 rounded-2xl p-6 mb-6 cursor-pointer transition-all duration-300 ${
-            addAudio
-              ? "border-amber bg-amber/5"
-              : "border-border/40 bg-card/20 hover:border-amber/40 hover:bg-card/30"
-          }`}
-          onClick={() => setAddAudio(!addAudio)}
+          className="relative border-2 rounded-2xl p-6 mb-6 border-border/20 bg-card/10 opacity-50 select-none"
         >
+          {/* Coming Soon overlay */}
+          <div className="absolute inset-0 rounded-2xl flex items-center justify-center z-10 cursor-not-allowed">
+            <span className="bg-background/80 backdrop-blur-sm border border-border/30 text-foreground/50 text-sm font-semibold px-4 py-2 rounded-full">
+              🎧 Coming Soon — Audio files in production
+            </span>
+          </div>
           {/* Bump badge */}
           <div className="flex items-center gap-2 mb-4">
             <span className="text-xs bg-amber text-background px-3 py-1 rounded-full font-bold uppercase tracking-wide">
@@ -427,7 +460,7 @@ export default function OrderBump() {
           <div className="space-y-2 mb-4">
             <div className="flex justify-between text-sm">
               <span className="text-foreground/70">7-Night Deep Sleep Reset</span>
-              <span className="text-foreground/70">$5.00</span>
+              <span className="text-foreground/70">${isExitDiscount ? "4" : priceConfig.priceUsd}.00</span>
             </div>
             {addAudio && (
               <div className="flex justify-between text-sm">

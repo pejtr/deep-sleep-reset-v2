@@ -308,7 +308,7 @@ export default function Home() {
   }, []);
 
   const goToOrder = () => {
-    navigate(`${localePath}/order`);
+    navigate(localePath("/order"));
   };
 
   const scrollToOffer = () => {

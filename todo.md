@@ -242,3 +242,27 @@
 
 ## Phase 25b: Mobile Bug Fix
 - [x] Fix chatbot bubble overlapping CTA button on mobile (increased bottom offset from 5.5rem to 7rem)
+
+## Phase 26: Price A/B Test ($5 vs $7)
+- [x] Create ab-price.ts utility: 2 variants (price_5/$5 control, price_7/$7 challenger), 50/50 split, 24h TTL
+- [x] Add frontEnd7 ($7) Stripe product to products.ts
+- [x] Extend ab_events schema: add price_5, price_7 to variant enum
+- [x] Extend ab.trackEvent procedure to accept price variants
+- [x] Wire price A/B test into OrderBump.tsx: show dynamic price, use correct Stripe product on checkout
+- [x] Track impression on /order page load, conversion on checkout click
+- [x] Update Admin A/B stats table to show price variants (💵 $5 Control / 💰 $7 Challenger)ts
+- [x] Write vitest tests for price A/B test (17 tests, 179 total passing)
+- [x] Verify in browser — both price points render and route to correct Stripe product
+
+## Phase 26b: Hero Parallax Background
+- [x] Parallax already implemented (translateY(scrollY * 0.3) + scale(1.1)) — confirmed working
+
+## Phase 26c: Bug Fixes
+- [x] Fix all broken CTAs — root cause: localePath used as string instead of called as function in goToOrder()
+
+## Phase 27: Disable Audio Add-on (Not Ready)
+- [ ] Disable "Anxiety Shutdown Audio" add-on on OrderBump — uncheck by default, disable checkbox, grey out card, exclude from price/order summary
+
+## Phase 27: Disable Audio Add-on + Test Coupon
+- [x] Disable "Anxiety Shutdown Audio" add-on — unchecked by default, overlay "Coming Soon — Audio files in production", excluded from price/checkout
+- [x] Create 99.9% off Stripe test coupon TEST999 via Stripe API
