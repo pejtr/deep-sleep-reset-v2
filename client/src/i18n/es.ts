@@ -50,6 +50,13 @@ const es: Translations = {
         continuation: " — Y Cómo Pararlo",
         sub: "Tu cerebro no está roto. Está atrapado en un bucle. El Reset de Sueño Profundo de 7 Noches reconfigura tu ciclo de sueño en una semana. Menos que un café.",
       },
+      // Variant D — Fear of Loss Frame
+      d: {
+        main: "Cada Noche Sin Dormir Te Está ",
+        highlight: "Costando Más",
+        continuation: " Que $5.",
+        sub: "Productividad perdida, salud dañada, relaciones rotas — el precio real del insomnio es enorme. La solución cuesta menos que un café.",
+      },
     },
   },
 
@@ -368,6 +375,9 @@ const es: Translations = {
       "Noté que sigues aquí... ¿el insomnio te mantiene despierto esta noche también? Tal vez pueda ayudar.",
       "¿Sigues navegando? Lo entiendo — cuando no puedes dormir, terminas scrolleando. ¿Quieres que comparta un consejo rápido que realmente funciona?",
     ],
+    // Persona-specific greeting messages
+    lucyGreeting: "¡Hola! Soy Lucy 🌙 He ayudado a cientos de personas a arreglar su sueño. ¿Qué te mantiene despierto por las noches?",
+    petraGreeting: "Hola. Soy Petra. Sin rodeos — ¿cuál es tu problema de sueño y cuánto tiempo llevas con él?",
     errorMessage: "Lo siento, tuve un pequeño problema. ¿Podrías intentar de nuevo?",
   },
 

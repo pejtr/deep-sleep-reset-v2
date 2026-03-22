@@ -511,7 +511,20 @@ export default function SalesChatbot() {
 
       {/* Toggle Button */}
       <button
-        onClick={() => isOpen ? handleClose() : setIsOpen(true)}
+        onClick={() => {
+          if (isOpen) {
+            handleClose();
+          } else {
+            setIsOpen(true);
+            // Show persona-specific greeting on first open (if no messages yet)
+            if (messages.length === 0) {
+              const greeting = persona === "petra"
+                ? t.chatbot.petraGreeting
+                : t.chatbot.lucyGreeting;
+              setMessages([{ role: "assistant", content: greeting }]);
+            }
+          }
+        }}
         className={`relative w-14 h-14 rounded-full shadow-lg transition-all duration-300 hover:scale-110 overflow-hidden border-2 ${
           isOpen
             ? "border-foreground/20"

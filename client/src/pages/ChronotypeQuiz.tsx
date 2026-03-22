@@ -10,8 +10,9 @@ import { useState, useId } from "react";
 import { trpc } from "@/lib/trpc";
 import { Streamdown } from "streamdown";
 import { Button } from "@/components/ui/button";
-import { Moon, Sun, Zap, Wind, ChevronRight, ChevronLeft, Loader2, Share2 } from "lucide-react";
+import { Moon, Sun, Zap, Wind, ChevronRight, ChevronLeft, Loader2, Share2, FileText } from "lucide-react";
 import { Link } from "wouter";
+import { openCheckout } from "@/lib/checkout";
 
 // ─── Quiz Questions ────────────────────────────────────────────────────────────
 const QUESTIONS = [
@@ -475,21 +476,51 @@ export default function ChronotypeQuiz() {
               </div>
             )}
 
-            {/* CTA */}
-            <div className="border border-amber-400/30 rounded-2xl p-8 bg-amber-400/5 text-center">
-              <h3 className="text-2xl font-bold mb-3">
-                Ready to Fix Your Sleep Tonight?
+            {/* Chronotype Report Upsell — $9 */}
+            <div className="border-2 border-amber-400/50 rounded-2xl p-8 bg-gradient-to-br from-amber-400/10 to-amber-600/5 text-center relative overflow-hidden">
+              <div className="absolute top-3 right-3 bg-amber-400 text-background text-xs font-bold px-3 py-1 rounded-full">
+                SPECIAL OFFER
+              </div>
+              <FileText className="w-10 h-10 text-amber-400 mx-auto mb-4" />
+              <h3 className="text-2xl font-bold mb-2">
+                Get Your Full {meta?.name} Blueprint — <span className="text-amber-400">$9</span>
               </h3>
-              <p className="text-foreground/60 mb-6 leading-relaxed">
-                The 7-Night Deep Sleep Reset is specifically designed for <strong className="text-foreground/80">{meta.name}s</strong> — with techniques that work with your natural biology, not against it.
+              <p className="text-foreground/60 mb-2 text-sm leading-relaxed">
+                Your free results show <em>what</em> you are. The full report tells you <em>exactly what to do</em>:
+              </p>
+              <ul className="text-left text-sm text-foreground/70 mb-6 space-y-1 max-w-xs mx-auto">
+                <li>✓ Optimal sleep &amp; wake times for your chronotype</li>
+                <li>✓ Ideal morning routine (minute-by-minute)</li>
+                <li>✓ Peak performance &amp; focus windows</li>
+                <li>✓ Foods &amp; supplements that match your biology</li>
+                <li>✓ 7-day implementation calendar</li>
+              </ul>
+              <Button
+                onClick={() => {
+                  openCheckout("chronotypeReport");
+                }}
+                className="bg-amber-400 hover:bg-amber-500 text-background font-bold px-8 py-4 text-lg rounded-xl w-full mb-3"
+              >
+                Get My Full {meta?.name} Report — $9
+                <ChevronRight className="w-5 h-5 ml-2" />
+              </Button>
+              <p className="text-foreground/30 text-xs">Instant PDF download · 30-day money-back guarantee</p>
+            </div>
+
+            {/* CTA — main product */}
+            <div className="border border-foreground/10 rounded-2xl p-6 bg-foreground/5 text-center">
+              <h3 className="text-lg font-semibold mb-2">
+                Or start with the 7-Night Protocol
+              </h3>
+              <p className="text-foreground/50 mb-4 text-sm leading-relaxed">
+                Specifically designed for <strong className="text-foreground/70">{meta?.name}s</strong> — techniques that work with your natural biology.
               </p>
               <Link href="/order">
-                <Button className="bg-amber-400 hover:bg-amber-500 text-background font-bold px-8 py-4 text-lg rounded-xl">
+                <Button variant="outline" className="border-amber-400/30 text-amber-400 hover:bg-amber-400/10 px-6 py-3">
                   Get The Deep Sleep Reset — $17
-                  <ChevronRight className="w-5 h-5 ml-2" />
+                  <ChevronRight className="w-4 h-4 ml-2" />
                 </Button>
               </Link>
-              <p className="text-foreground/30 text-xs mt-3">30-day money-back guarantee · Instant access</p>
             </div>
 
             {/* Share */}

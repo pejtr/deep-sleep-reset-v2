@@ -14,7 +14,7 @@
  *   Upsell 2 ($10) → /thank-you
  */
 
-export type ProductKey = "frontEnd" | "frontEnd7" | "exitDiscount" | "upsell1" | "upsell2" | "upsell3";
+export type ProductKey = "frontEnd" | "frontEnd7" | "exitDiscount" | "upsell1" | "upsell2" | "upsell3" | "chronotypeReport";
 
 /**
  * Open Stripe Checkout for multiple products (order bump).
@@ -66,6 +66,7 @@ export const PRICES: Record<ProductKey, number> = {
   upsell1: 10,
   upsell2: 10,
   upsell3: 19,
+  chronotypeReport: 9,
 };
 
 /**

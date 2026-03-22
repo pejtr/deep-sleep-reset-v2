@@ -5,7 +5,7 @@
  * Prices are in cents (USD).
  */
 
-export type ProductKey = "frontEnd" | "frontEnd7" | "exitDiscount" | "upsell1" | "upsell2" | "upsell3";
+export type ProductKey = "frontEnd" | "frontEnd7" | "exitDiscount" | "upsell1" | "upsell2" | "upsell3" | "chronotypeReport";
 
 export interface ProductConfig {
   key: ProductKey;
@@ -66,6 +66,14 @@ export const PRODUCTS: Record<ProductKey, ProductConfig> = {
     priceInCents: 1900, // $19.00
     successPath: "/thank-you?value=44&product=Complete+Mastery+Bundle",
     cancelPath: "/thank-you?value=25&product=Complete+Bundle",
+  },
+  chronotypeReport: {
+    key: "chronotypeReport",
+    name: "Personalized Chronotype Sleep Report",
+    description: "Your complete personalized sleep blueprint: optimal sleep/wake times, ideal morning routine, peak performance windows, and a 7-day implementation plan — all based on your unique chronotype.",
+    priceInCents: 900, // $9.00
+    successPath: "/thank-you?value=9&product=Chronotype+Report",
+    cancelPath: "/chronotype-quiz",
   },
 };
 

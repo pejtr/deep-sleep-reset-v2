@@ -35,23 +35,33 @@ const en = {
     protocol: "THE 7-NIGHT SLEEP TRANSFORMATION",
     ctaButton: "Yes — I Want to Sleep Like This",
     variants: {
+      // Variant A — Pain Interruption Frame
       a: {
-        main: "What Would Your Life Look Like If You ",
-        highlight: "Woke Up Rested",
-        continuation: " — Every Single Morning?",
-        sub: "Imagine: more energy, sharper focus, better mood — all from fixing the one thing that affects everything else. The 7-Night Deep Sleep Reset is the science-backed shortcut. Less than the price of one coffee.",
+        main: "You're Not Tired. You're ",
+        highlight: "Sleep-Deprived.",
+        continuation: " There's a Fix.",
+        sub: "The 7-Night Deep Sleep Reset uses the same CBT-I protocol sleep clinics charge $800 for — for the price of one coffee.",
       },
+      // Variant B — Transformation Specificity Frame
       b: {
-        main: "Change Your Sleep. ",
-        highlight: "Change Your Life.",
-        continuation: " For the Price of One Coffee.",
-        sub: "10,000+ people discovered what happens when you finally sleep deeply — more energy, clearer thinking, better relationships. The 7-night protocol that makes it permanent. Just $5.",
+        main: "What If You Woke Up With ",
+        highlight: "Energy",
+        continuation: " Tomorrow Morning?",
+        sub: "The 7-Night Deep Sleep Reset has helped 10,000+ people fix their sleep permanently — for $5.",
       },
+      // Variant C — Social Proof / Curiosity Frame
       c: {
-        main: "This Is Why You ",
-        highlight: "Wake Up at 3AM",
-        continuation: " — And How to Stop It",
-        sub: "Your brain isn't broken. It's stuck in a loop. The 7-Night Deep Sleep Reset rewires your sleep cycle in one week. Less than a cup of coffee.",
+        main: "10,247 People Fixed Their Sleep With This ",
+        highlight: "7-Night Protocol.",
+        continuation: "",
+        sub: "Here's exactly how — a science-backed, step-by-step system that works even if you've tried everything else.",
+      },
+      // Variant D — Fear of Loss Frame
+      d: {
+        main: "Every Night You Don't Sleep Is ",
+        highlight: "Costing You More",
+        continuation: " Than $5.",
+        sub: "Lost productivity, damaged health, broken relationships — the real price of insomnia is enormous. The fix costs less than a coffee.",
       },
     },
   },
@@ -295,6 +305,9 @@ const en = {
       "Still exploring? Good. The best decisions come from curiosity, not desperation. What's your biggest sleep challenge right now?",
       "Quick question: when was the last time you woke up and genuinely thought \"that was a great night's sleep\"? Let's get you back there.",
     ],
+    // Persona-specific greeting messages (used when chatbot first opens)
+    lucyGreeting: "Hi! I'm Lucy 🌙 I've helped hundreds of people finally fix their sleep. What's keeping you up at night?",
+    petraGreeting: "Hey. I'm Petra. I don't do small talk — I do results. What's your sleep problem and how long has it been going on?",
     errorMessage: "Sorry, I had a small issue. Could you try again?",
   },
 

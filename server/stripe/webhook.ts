@@ -99,6 +99,7 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
     upsell1: "Anxiety Dissolve Audio Pack ($10)",
     upsell2: "Sleep Optimizer Toolkit ($10)",
     upsell3: "Advanced Sleep Mastery Protocol ($19)",
+    chronotypeReport: "Personalized Chronotype Sleep Report ($9)",
   };
 
   await notifyOwner({
