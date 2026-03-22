@@ -28,12 +28,39 @@ import { openCheckout } from "@/lib/checkout";
 
 const stepIcons = [Mail, Download, Moon];
 
+const COUNTDOWN_SECONDS = 15 * 60; // 15 minutes
+
 export default function ThankYou() {
   const { t, localePath } = useLanguage();
   const ty = t.thankYou;
   const hasFired = useRef(false);
   const [showAudioUpsell, setShowAudioUpsell] = useState(false);
   const [audioLoading, setAudioLoading] = useState(false);
+  const [secondsLeft, setSecondsLeft] = useState(COUNTDOWN_SECONDS);
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  // Start countdown when audio upsell becomes visible
+  useEffect(() => {
+    if (!showAudioUpsell) return;
+    setSecondsLeft(COUNTDOWN_SECONDS);
+    timerRef.current = setInterval(() => {
+      setSecondsLeft((s) => {
+        if (s <= 1) {
+          clearInterval(timerRef.current!);
+          setShowAudioUpsell(false);
+          return 0;
+        }
+        return s - 1;
+      });
+    }, 1000);
+    return () => { if (timerRef.current) clearInterval(timerRef.current); };
+  }, [showAudioUpsell]);
+
+  const formatCountdown = (secs: number) => {
+    const m = Math.floor(secs / 60).toString().padStart(2, "0");
+    const s = (secs % 60).toString().padStart(2, "0");
+    return `${m}:${s}`;
+  };
 
   // Fire Purchase event once on page load
   useEffect(() => {
@@ -170,12 +197,22 @@ export default function ThankYou() {
                 {/* Glow accent */}
                 <div className="absolute top-0 right-0 w-48 h-48 bg-amber/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none" />
 
-                {/* Badge */}
-                <div className="flex items-center gap-2 mb-5">
-                  <span className="text-xs bg-amber text-background px-3 py-1 rounded-full font-bold uppercase tracking-wide">
-                    ⚡ One-Time Offer
-                  </span>
-                  <span className="text-xs text-foreground/40">Only available right now</span>
+                {/* Badge + Countdown */}
+                <div className="flex items-center justify-between gap-2 mb-5 flex-wrap">
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs bg-amber text-background px-3 py-1 rounded-full font-bold uppercase tracking-wide">
+                      ⚡ One-Time Offer
+                    </span>
+                    <span className="text-xs text-foreground/40">Only available right now</span>
+                  </div>
+                  {/* Countdown timer */}
+                  <div className="flex items-center gap-1.5 bg-red-500/10 border border-red-500/20 rounded-full px-3 py-1">
+                    <span className="inline-block w-1.5 h-1.5 rounded-full bg-red-400 animate-pulse" />
+                    <span className="text-red-400 text-xs font-mono font-bold tabular-nums">
+                      {formatCountdown(secondsLeft)}
+                    </span>
+                    <span className="text-red-400/60 text-xs">left</span>
+                  </div>
                 </div>
 
                 <div className="flex items-start gap-4 mb-5">

@@ -273,3 +273,11 @@
 - [x] Audio upsell card: amber border, sessions list, $29→$10 price, CTA button, dismiss link
 - [x] Wire CTA to openCheckout("upsell1") with loading state
 - [x] 12 vitest tests for detection logic (191 total passing)
+
+## Phase 30: Countdown Timer + OG Tags + Funnel Test
+- [ ] Add 15-minute countdown timer to audio upsell on thank-you page (resets on each visit, hides when expired)
+- [ ] Add OG meta tags dynamically to /order page (react-helmet or server-side)
+- [ ] Test full purchase funnel with TEST999 coupon end-to-end
+
+## Phase 26: Sale Notification Email
+- [x] Slavnostní email notifikace na petr.matej@gmail.com při každém prodeji (přes Brevo) + celkový kumulativní zisk v emailu

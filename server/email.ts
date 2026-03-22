@@ -194,3 +194,132 @@ export async function sendPurchaseEmail(options: PurchaseEmailOptions): Promise<
     name: options.name,
   });
 }
+
+// ─── Admin Sale Notification ─────────────────────────────────────────────────
+
+interface SaleNotificationOptions {
+  customerEmail: string | null;
+  customerName: string | null;
+  productLabel: string;
+  amountCents: number;
+  currency: string;
+  totalRevenueCents: number;
+  totalOrders: number;
+}
+
+export async function sendSaleNotificationEmail(opts: SaleNotificationOptions): Promise<void> {
+  const amount = `$${(opts.amountCents / 100).toFixed(2)} ${opts.currency.toUpperCase()}`;
+  const totalRevenue = `$${(opts.totalRevenueCents / 100).toFixed(2)}`;
+  const avgOrder = opts.totalOrders > 0
+    ? `$${(opts.totalRevenueCents / opts.totalOrders / 100).toFixed(2)}`
+    : "—";
+
+  const subject = `🎉 PRODEJ! ${opts.productLabel} — ${amount}`;
+
+  const htmlContent = `
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>${subject}</title>
+</head>
+<body style="margin:0;padding:0;background:#0a0e1a;font-family:'Segoe UI',Arial,sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#0a0e1a;padding:40px 20px;">
+    <tr>
+      <td align="center">
+        <table width="600" cellpadding="0" cellspacing="0" style="background:#111827;border-radius:16px;overflow:hidden;border:1px solid #1f2937;">
+
+          <!-- Header -->
+          <tr>
+            <td style="background:linear-gradient(135deg,#1a1f35 0%,#0f172a 100%);padding:40px 40px 30px;text-align:center;border-bottom:2px solid #d4a853;">
+              <div style="font-size:48px;margin-bottom:12px;">🎉</div>
+              <h1 style="margin:0;color:#d4a853;font-size:28px;font-weight:700;letter-spacing:1px;">NOVÝ PRODEJ!</h1>
+              <p style="margin:8px 0 0;color:#9ca3af;font-size:14px;letter-spacing:2px;text-transform:uppercase;">Deep Sleep Reset</p>
+            </td>
+          </tr>
+
+          <!-- Sale Details -->
+          <tr>
+            <td style="padding:32px 40px;">
+              <table width="100%" cellpadding="0" cellspacing="0">
+                <tr>
+                  <td style="padding:0 0 24px;">
+                    <div style="background:#1f2937;border-radius:12px;padding:24px;border-left:4px solid #d4a853;">
+                      <p style="margin:0 0 8px;color:#9ca3af;font-size:12px;text-transform:uppercase;letter-spacing:1px;">Produkt</p>
+                      <p style="margin:0;color:#f9fafb;font-size:18px;font-weight:600;">${opts.productLabel}</p>
+                    </div>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="padding:0 0 24px;">
+                    <table width="100%" cellpadding="0" cellspacing="0">
+                      <tr>
+                        <td width="48%" style="padding-right:8px;">
+                          <div style="background:#1f2937;border-radius:12px;padding:20px;text-align:center;">
+                            <p style="margin:0 0 4px;color:#9ca3af;font-size:11px;text-transform:uppercase;letter-spacing:1px;">Tato objednávka</p>
+                            <p style="margin:0;color:#d4a853;font-size:28px;font-weight:700;">${amount}</p>
+                          </div>
+                        </td>
+                        <td width="4%"></td>
+                        <td width="48%" style="padding-left:8px;">
+                          <div style="background:#1f2937;border-radius:12px;padding:20px;text-align:center;">
+                            <p style="margin:0 0 4px;color:#9ca3af;font-size:11px;text-transform:uppercase;letter-spacing:1px;">Zákazník</p>
+                            <p style="margin:0;color:#f9fafb;font-size:14px;font-weight:500;">${opts.customerName || "Neznámý"}</p>
+                            <p style="margin:4px 0 0;color:#6b7280;font-size:12px;">${opts.customerEmail || "—"}</p>
+                          </div>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- Total Revenue Banner -->
+          <tr>
+            <td style="padding:0 40px 32px;">
+              <div style="background:linear-gradient(135deg,#1a2744 0%,#0f1f3d 100%);border-radius:16px;padding:28px;text-align:center;border:1px solid #2d4a8a;">
+                <p style="margin:0 0 6px;color:#93c5fd;font-size:12px;text-transform:uppercase;letter-spacing:2px;">💰 CELKOVÝ ZISK ZE VŠECH OBJEDNÁVEK</p>
+                <p style="margin:0;color:#60a5fa;font-size:42px;font-weight:800;letter-spacing:-1px;">${totalRevenue}</p>
+                <p style="margin:8px 0 0;color:#6b7280;font-size:13px;">${opts.totalOrders} objednávek celkem &nbsp;·&nbsp; průměr ${avgOrder} / objednávka</p>
+              </div>
+            </td>
+          </tr>
+
+          <!-- Footer -->
+          <tr>
+            <td style="background:#0d1117;padding:20px 40px;text-align:center;border-top:1px solid #1f2937;">
+              <p style="margin:0;color:#4b5563;font-size:12px;">Deep Sleep Reset — Admin Notifikace</p>
+              <p style="margin:4px 0 0;color:#374151;font-size:11px;">Tato zpráva je určena pouze pro tebe jako vlastníka.</p>
+            </td>
+          </tr>
+
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
+  `.trim();
+
+  const textContent = `
+🎉 NOVÝ PRODEJ — Deep Sleep Reset
+
+Produkt: ${opts.productLabel}
+Zákazník: ${opts.customerName || "Neznámý"} (${opts.customerEmail || "—"})
+Tato objednávka: ${amount}
+
+💰 CELKOVÝ ZISK ZE VŠECH OBJEDNÁVEK: ${totalRevenue}
+(${opts.totalOrders} objednávek · průměr ${avgOrder} / objednávka)
+  `.trim();
+
+  await sendEmail({
+    to: "petr.matej@gmail.com",
+    name: "Petr",
+    subject,
+    htmlContent,
+    textContent,
+  });
+}

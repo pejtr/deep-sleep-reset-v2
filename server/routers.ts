@@ -13,7 +13,7 @@ import { testimonialsRouter } from "./routers/testimonials";
 import { blogRouter } from "./routers/blog";
 import { fireMetaLead, fireMetaInitiateCheckout } from "./meta-capi";
 
-const productKeySchema = z.enum(["frontEnd", "exitDiscount", "upsell1", "upsell2", "upsell3"]);
+const productKeySchema = z.enum(["frontEnd", "frontEnd7", "exitDiscount", "upsell1", "upsell2", "upsell3"]);
 
 export const appRouter = router({
   system: systemRouter,

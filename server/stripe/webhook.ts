@@ -11,8 +11,9 @@ import type { ProductKey } from "./products";
 import { notifyOwner } from "../_core/notification";
 import { sendPurchaseEmail } from "../email";
 import { enrollInSequence } from "../routers/emailSequence";
-import { eq } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 import { fireMetaPurchase } from "../meta-capi";
+import { sendSaleNotificationEmail } from "../email";
 
 export async function handleStripeWebhook(req: Request, res: Response) {
   const stripe = getStripe();
@@ -124,7 +125,30 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
     }).catch(err => console.warn("[Webhook] Meta CAPI Purchase failed:", err));
   }
 
-  // 5. Enroll in 7-day nurture sequence (only for core product purchases)
+  // 5. Send celebratory admin notification email with cumulative revenue
+  try {
+    const [totalRevRow] = await db
+      .select({ total: sql<number>`COALESCE(SUM(amount_cents), 0)` })
+      .from(orders)
+      .where(eq(orders.status, "completed"));
+    const [totalOrdRow] = await db
+      .select({ cnt: sql<number>`COUNT(*)` })
+      .from(orders)
+      .where(eq(orders.status, "completed"));
+    await sendSaleNotificationEmail({
+      customerEmail,
+      customerName,
+      productLabel: productLabels[productKey],
+      amountCents,
+      currency,
+      totalRevenueCents: Number(totalRevRow?.total ?? 0),
+      totalOrders: Number(totalOrdRow?.cnt ?? 0),
+    });
+  } catch (err) {
+    console.warn("[Webhook] Admin sale notification email failed:", err);
+  }
+
+  // 6. Enroll in 7-day nurture sequence (only for core product purchases)
   const coreProducts: ProductKey[] = ["frontEnd", "exitDiscount"];
   if (customerEmail && coreProducts.includes(productKey)) {
     const recentOrder = await db
