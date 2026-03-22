@@ -309,3 +309,17 @@
 - [ ] Email sekvence Day 3: odkaz na /chronotype quiz s personalizovaným výsledkem
 - [ ] Výsledek: 4 typy (Lion/Bear/Wolf/Dolphin) + doporučené spánkové okno + 3 tipy
 - [ ] CTA na výsledku: upsell na Advanced Protocol ($19) pro "Wolf" a "Dolphin" typy
+
+## Phase 28: A/B Test Optimization
+- [ ] Replace 3 headline variants with high-converting copy (Pain Interruption / Transformation / Social Proof)
+- [ ] Add 4th "fear of loss" headline variant: "Every Night You Don't Sleep Is Costing You More Than $5"
+- [ ] Add CTA button A/B testing (3 variants) tracked separately in ab_events
+- [ ] Auto-lock winner after 200 impressions (stop testing, serve winner only)
+
+## Phase 29: Petra Chatbot Personality + A/B Headline Optimization
+- [ ] Upload Petra avatar to CDN
+- [ ] Add Petra personality to SalesChatbot (bold, direct, provocative style)
+- [ ] A/B rotate Lucy vs Petra in chatbot (50/50 split, tracked in ab_events)
+- [ ] Replace 3 headline variants with high-converting copy + add 4th fear-of-loss variant
+- [ ] Add CTA button copy A/B test (3 text variants)
+- [ ] Auto-lock winner after 200 impressions

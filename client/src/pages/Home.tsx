@@ -400,12 +400,12 @@ export default function Home() {
         }}
       >
         <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-2">
+          <Link href="/" className="flex items-center gap-2 cursor-pointer hover:opacity-80 transition-opacity">
             <Moon className="w-5 h-5 text-amber" />
             <span className="font-[var(--font-display)] text-lg font-semibold tracking-wide text-amber">
               {t.common.brandName}
             </span>
-          </div>
+          </Link>
           <button
             onClick={goToOrder}
             className="bg-amber/10 hover:bg-amber/20 text-amber border border-amber/30 px-4 py-2 rounded-md text-sm font-medium transition-all duration-300"

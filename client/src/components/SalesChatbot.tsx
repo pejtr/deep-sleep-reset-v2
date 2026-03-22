@@ -30,8 +30,37 @@ function getSessionId(): string {
   return id;
 }
 
+// Persona avatars
+const PERSONAS = {
+  lucy: {
+    name: "Lucy",
+    avatar: "https://d2xsxph8kpxj0f.cloudfront.net/310419663032296198/RrG9k2uFQkqVyNWK8WEbxj/lucy-avatar_5bfe1c06.png",
+    title: "Sleep Guide",
+  },
+  petra: {
+    name: "Petra",
+    avatar: "https://d2xsxph8kpxj0f.cloudfront.net/310419663032296198/RrG9k2uFQkqVyNWK8WEbxj/petra-avatar_71e83cba.png",
+    title: "Sleep Coach",
+  },
+} as const;
+
+type PersonaKey = keyof typeof PERSONAS;
+
+function getPersona(): PersonaKey {
+  const stored = localStorage.getItem("dsr-chatbot-persona");
+  if (stored === "lucy" || stored === "petra") return stored;
+  const variant: PersonaKey = Math.random() < 0.5 ? "lucy" : "petra";
+  localStorage.setItem("dsr-chatbot-persona", variant);
+  return variant;
+}
+
 export default function SalesChatbot() {
   const { t, locale } = useLanguage();
+  const [persona] = useState<PersonaKey>(() => {
+    if (typeof window === "undefined") return "lucy";
+    return getPersona();
+  });
+  const currentPersona = PERSONAS[persona];
   const [isOpen, setIsOpen] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -235,6 +264,7 @@ export default function SalesChatbot() {
       const result = await chatMutation.mutateAsync({
         messages: newMessages.map(m => ({ role: m.role, content: m.content })),
         scrollPercent: Math.round((window.scrollY / (document.documentElement.scrollHeight - window.innerHeight)) * 100),
+        persona,
       });
 
       // After 2 user messages, trigger email capture (if not already captured)
@@ -294,14 +324,16 @@ export default function SalesChatbot() {
           {/* Header */}
           <div className="flex items-center gap-3 px-4 py-3 bg-gradient-to-r from-amber/10 to-transparent border-b border-amber/15">
             <div className="relative">
-              <div className="w-9 h-9 rounded-full bg-amber/20 flex items-center justify-center">
-                <Moon className="w-4 h-4 text-amber" />
-              </div>
+              <img
+                src={currentPersona.avatar}
+                alt={currentPersona.name}
+                className="w-10 h-10 rounded-full object-cover object-top border-2 border-amber/30"
+              />
               <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-400 rounded-full border-2 border-[#0d1220]" />
             </div>
             <div className="flex-1">
-              <p className="font-semibold text-foreground/90 text-sm">{t.chatbot.name}</p>
-              <p className="text-foreground/40 text-xs">{t.chatbot.title} • {t.chatbot.status}</p>
+              <p className="font-semibold text-foreground/90 text-sm">{currentPersona.name}</p>
+              <p className="text-foreground/40 text-xs">{currentPersona.title} • {t.chatbot.status}</p>
             </div>
             <button
               onClick={handleClose}
@@ -480,17 +512,23 @@ export default function SalesChatbot() {
       {/* Toggle Button */}
       <button
         onClick={() => isOpen ? handleClose() : setIsOpen(true)}
-        className={`relative w-14 h-14 rounded-full shadow-lg transition-all duration-300 hover:scale-110 ${
+        className={`relative w-14 h-14 rounded-full shadow-lg transition-all duration-300 hover:scale-110 overflow-hidden border-2 ${
           isOpen
-            ? "bg-foreground/10 border border-foreground/20"
-            : "bg-amber border border-amber/50 cta-pulse"
+            ? "border-foreground/20"
+            : "border-amber/60 cta-pulse"
         }`}
       >
         {isOpen ? (
-          <X className="w-6 h-6 text-foreground/70 mx-auto" />
+          <div className="w-full h-full bg-foreground/10 flex items-center justify-center">
+            <X className="w-6 h-6 text-foreground/70" />
+          </div>
         ) : (
           <>
-            <MessageCircle className="w-6 h-6 text-background mx-auto" />
+            <img
+              src={currentPersona.avatar}
+              alt={currentPersona.name}
+              className="w-full h-full object-cover object-top"
+            />
             {showPulse && (
               <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full border-2 border-background animate-pulse" />
             )}
