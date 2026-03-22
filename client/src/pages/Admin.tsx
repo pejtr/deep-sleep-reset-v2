@@ -135,6 +135,7 @@ export default function Admin() {
   const dailyQ = trpc.admin.dailyRevenue.useQuery(undefined, { refetchInterval: 60_000 });
   const leadSourcesQ = trpc.admin.leadSources.useQuery(undefined, { refetchInterval: 60_000 });
   const abStatsQ = trpc.ab.getStats.useQuery(undefined, { refetchInterval: 60_000 });
+  const emailAbQ = trpc.admin.emailAbStats.useQuery(undefined, { refetchInterval: 60_000 });
 
   // Auth guard
   if (authLoading) {
@@ -889,6 +890,57 @@ export default function Admin() {
                       Tip: Jakmile má vítěz &gt;100 zobrazení a &gt;2× vyšší CVR, zvažte deaktivaci slabších variant.
                     </p>
                   )}
+                </div>
+              )}
+            </div>
+
+            {/* Email A/B Subject Test Results */}
+            <div className="border border-border/20 rounded-xl p-6">
+              <SectionHeader title="A/B Test — Subject Lines Emailů" icon={Mail} />
+              {(emailAbQ.data?.length ?? 0) === 0 ? (
+                <div className="text-center py-8 text-foreground/30">
+                  <Mail className="w-8 h-8 mx-auto mb-2 opacity-30" />
+                  <p className="text-sm">Zatím žádná data. Data se zobrazí po prvních prodejích.</p>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  <p className="text-foreground/40 text-xs mb-4">Každý zákazník dostane deterministicky přiřazenou variantu (hash emailu). Sledujte open rate a click rate pro optimalizaci.</p>
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-sm">
+                      <thead>
+                        <tr className="text-foreground/40 text-xs uppercase tracking-wider border-b border-border/20">
+                          <th className="text-left py-2 pr-4">Varianta</th>
+                          <th className="text-left py-2 pr-4">Subject</th>
+                          <th className="text-right py-2 pr-4">Odesláno</th>
+                          <th className="text-right py-2 pr-4">Open Rate</th>
+                          <th className="text-right py-2 pr-4">Click Rate</th>
+                          <th className="text-right py-2">Stav</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {(emailAbQ.data ?? []).map((row) => {
+                          const allRows = emailAbQ.data ?? [];
+                          const isWinner = allRows.length > 1 && row.openRate === Math.max(...allRows.map(r => r.openRate));
+                          return (
+                            <tr key={row.variant} className="border-b border-border/10 hover:bg-card/20">
+                              <td className="py-3 pr-4 font-bold text-amber">{row.variant}</td>
+                              <td className="py-3 pr-4 text-foreground/70 max-w-[220px] truncate">{row.subject}</td>
+                              <td className="py-3 pr-4 text-right tabular-nums">{row.sent}</td>
+                              <td className="py-3 pr-4 text-right tabular-nums font-semibold">{row.openRate}%</td>
+                              <td className="py-3 pr-4 text-right tabular-nums">{row.clickRate}%</td>
+                              <td className="py-3 text-right">
+                                {isWinner ? (
+                                  <span className="text-xs bg-amber/20 text-amber px-2 py-0.5 rounded-full">🏆 Vítěz</span>
+                                ) : (
+                                  <span className="text-xs bg-foreground/5 text-foreground/30 px-2 py-0.5 rounded-full">Testuje se</span>
+                                )}
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
                 </div>
               )}
             </div>

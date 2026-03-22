@@ -902,6 +902,53 @@ export default function Home() {
         </div>
       </section>
 
+      {/* ===== CHRONOTYPE QUIZ TEASER ===== */}
+      <section className="py-20 lg:py-28 relative">
+        <div className="max-w-4xl mx-auto px-4">
+          <FadeInSection>
+            <div className="relative rounded-2xl overflow-hidden border border-purple-500/20 bg-gradient-to-br from-[#0d1b3e] to-[#1a1040] p-8 sm:p-12 text-center">
+              {/* Ambient glow */}
+              <div className="absolute inset-0 pointer-events-none">
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[300px] bg-purple-600/10 rounded-full blur-3xl" />
+              </div>
+              <div className="relative z-10">
+                <div className="text-5xl mb-4">🦁 🐻 🐺 🐬</div>
+                <div className="inline-flex items-center gap-2 bg-purple-500/10 border border-purple-500/20 rounded-full px-4 py-1.5 text-purple-300 text-sm font-medium mb-6">
+                  Free 2-minute quiz
+                </div>
+                <h2 className="font-[var(--font-display)] text-3xl sm:text-4xl font-bold mb-4">
+                  What's Your <span className="text-purple-300">Sleep Chronotype?</span>
+                </h2>
+                <p className="text-foreground/60 text-lg leading-relaxed mb-8 max-w-2xl mx-auto">
+                  Are you a Lion, Bear, Wolf, or Dolphin? Discover your biological sleep type and get a free AI-generated personalised sleep plan — built for your unique biology.
+                </p>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8 max-w-lg mx-auto">
+                  {[
+                    { emoji: "🦁", name: "Lion", desc: "Early riser" },
+                    { emoji: "🐻", name: "Bear", desc: "Solar sleeper" },
+                    { emoji: "🐺", name: "Wolf", desc: "Night owl" },
+                    { emoji: "🐬", name: "Dolphin", desc: "Light sleeper" },
+                  ].map((t) => (
+                    <div key={t.name} className="bg-white/5 border border-white/10 rounded-xl p-3 text-center">
+                      <div className="text-2xl mb-1">{t.emoji}</div>
+                      <div className="font-semibold text-sm text-purple-200">{t.name}</div>
+                      <div className="text-foreground/40 text-xs">{t.desc}</div>
+                    </div>
+                  ))}
+                </div>
+                <Link href="/chronotype-quiz">
+                  <button className="inline-flex items-center gap-2 bg-purple-500 hover:bg-purple-400 text-white font-bold px-8 py-4 rounded-xl text-lg transition-all duration-300 hover:scale-105">
+                    Discover My Chronotype
+                    <ChevronRight className="w-5 h-5" />
+                  </button>
+                </Link>
+                <p className="text-foreground/30 text-xs mt-4">8 questions · Takes 2 minutes · 100% free · Personalised AI plan</p>
+              </div>
+            </div>
+          </FadeInSection>
+        </div>
+      </section>
+
       {/* ===== FAQ SECTION ===== */}
       <section className="py-24 lg:py-32">
         <div className="max-w-3xl mx-auto px-4">

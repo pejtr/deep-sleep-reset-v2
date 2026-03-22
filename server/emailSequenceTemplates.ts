@@ -491,6 +491,14 @@ const day6: SequenceEmail = {
 
     <hr class="divider">
 
+    <div style="background: linear-gradient(135deg, #0d1b3e 0%, #1a1040 100%); border: 1px solid rgba(180,140,255,0.25); border-radius: 14px; padding: 28px; margin: 28px 0; text-align: center;">
+      <div style="font-size: 36px; margin-bottom: 12px;">🦁 🐻 🐺 🐬</div>
+      <h3 style="color: #c4a0e8; font-size: 20px; margin: 0 0 10px;">Discover Your Sleep Chronotype</h3>
+      <p style="color: #9ca3af; font-size: 14px; line-height: 1.6; margin: 0 0 18px;">Now that you've completed the 7-Night Reset, go deeper. Take our free 2-minute quiz to discover whether you're a Lion, Bear, Wolf, or Dolphin — and get a personalised AI sleep plan built for your biology.</p>
+      <a href="https://deepsleepreset.manus.space/chronotype-quiz" style="display: inline-block; background: #c4a0e8; color: #0a0e1a; font-weight: bold; padding: 12px 28px; border-radius: 8px; text-decoration: none; font-size: 15px;">Take the Free Chronotype Quiz →</a>
+      <p style="color: #6b7280; font-size: 12px; margin: 12px 0 0;">Free · 2 minutes · Personalised AI plan included</p>
+    </div>
+
     <p><strong>One favor:</strong> If this protocol helped you, please share it with one person who struggles with sleep. You know someone who does. A friend, a family member, a coworker who's always exhausted.</p>
 
     <p>The link: <a href="https://deep-sleep-reset.com">deep-sleep-reset.com</a> — $5, 30-day guarantee.</p>

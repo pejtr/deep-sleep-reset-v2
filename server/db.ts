@@ -1,6 +1,6 @@
 import { eq, gte, sql, desc, count, sum, and } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { abandonedCheckouts, abEvents, chatInsights, chatSurveys, InsertAbEvent, InsertChatInsight, InsertChatSurvey, InsertLead, InsertUser, InsertQuizAttempt, InsertTestimonialMedia, leads, orders, quizAttempts, testimonialMedia, users } from "../drizzle/schema";
+import { abandonedCheckouts, abEvents, chatInsights, chatSurveys, emailAbTests, InsertAbEvent, InsertChatInsight, InsertChatSurvey, InsertLead, InsertUser, InsertQuizAttempt, InsertTestimonialMedia, leads, orders, quizAttempts, testimonialMedia, users } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
 let _db: ReturnType<typeof drizzle> | null = null;
@@ -621,5 +621,32 @@ export async function getDailyRevenue() {
     date: String(r.date),
     totalCents: Number(r.totalCents),
     orderCount: Number(r.orderCount),
+  }));
+}
+
+export async function getEmailAbStats() {
+  const db = await getDb();
+  if (!db) return [];
+
+  const result = await db
+    .select({
+      variant: emailAbTests.variant,
+      subject: emailAbTests.subject,
+      sent: sql<number>`COUNT(*)`,
+      opens: sql<number>`COALESCE(SUM(opened), 0)`,
+      clicks: sql<number>`COALESCE(SUM(clicked), 0)`,
+    })
+    .from(emailAbTests)
+    .groupBy(emailAbTests.variant, emailAbTests.subject)
+    .orderBy(emailAbTests.variant);
+
+  return result.map(r => ({
+    variant: r.variant,
+    subject: r.subject,
+    sent: Number(r.sent),
+    opens: Number(r.opens),
+    clicks: Number(r.clicks),
+    openRate: Number(r.sent) > 0 ? Math.round((Number(r.opens) / Number(r.sent)) * 100) : 0,
+    clickRate: Number(r.sent) > 0 ? Math.round((Number(r.clicks) / Number(r.sent)) * 100) : 0,
   }));
 }

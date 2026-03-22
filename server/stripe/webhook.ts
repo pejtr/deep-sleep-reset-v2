@@ -9,11 +9,12 @@ import { getDb } from "../db";
 import { orders } from "../../drizzle/schema";
 import type { ProductKey } from "./products";
 import { notifyOwner } from "../_core/notification";
-import { sendPurchaseEmail } from "../email";
+import { sendPurchaseEmail, getPurchaseEmailVariant, EMAIL_SUBJECT_VARIANTS } from "../email";
+import { sendSaleNotificationEmail } from "../email";
 import { enrollInSequence } from "../routers/emailSequence";
 import { eq, sql } from "drizzle-orm";
 import { fireMetaPurchase } from "../meta-capi";
-import { sendSaleNotificationEmail } from "../email";
+import { emailAbTests } from "../../drizzle/schema";
 
 export async function handleStripeWebhook(req: Request, res: Response) {
   const stripe = getStripe();
@@ -105,7 +106,7 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
     content: `Customer: ${customerName || "Unknown"}\nEmail: ${customerEmail || "N/A"}\nProduct: ${productLabels[productKey]}\nAmount: $${(amountCents / 100).toFixed(2)} ${currency.toUpperCase()}\nSession: ${session.id}`,
   }).catch(err => console.warn("[Webhook] Owner notification failed:", err));
 
-  // 3. Send welcome email to customer (if email available)
+  // 3. Send welcome email to customer (if email available) + record A/B variant
   if (customerEmail) {
     await sendPurchaseEmail({
       to: customerEmail,
@@ -113,6 +114,17 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
       productKey,
       amountCents,
     }).catch(err => console.warn("[Webhook] Customer email failed:", err));
+
+    // Record which A/B subject variant was sent for analytics
+    const abVariant = getPurchaseEmailVariant(customerEmail, productKey);
+    if (abVariant) {
+      await db.insert(emailAbTests).values({
+        email: customerEmail,
+        variant: abVariant,
+        subject: EMAIL_SUBJECT_VARIANTS[abVariant],
+        productKey,
+      }).catch(err => console.warn("[Webhook] A/B tracking insert failed:", err));
+    }
   }
 
   // 4. Fire Meta Conversions API Purchase event

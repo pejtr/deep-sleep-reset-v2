@@ -68,7 +68,27 @@ async function sendEmail(options: SendEmailOptions): Promise<void> {
   console.log(`[Email] Sent "${options.subject}" to ${options.to}`);
 }
 
-function buildWelcomeEmail(name: string | undefined, productKey: ProductKey, amountCents: number): SendEmailOptions {
+// ─── A/B Subject Variants ────────────────────────────────────────────────────
+// Three variants for the core welcome email subject line.
+// The variant is chosen deterministically by hashing the email address so the
+// same customer always gets the same variant (stable assignment).
+export type EmailSubjectVariant = "A" | "B" | "C";
+
+export const EMAIL_SUBJECT_VARIANTS: Record<EmailSubjectVariant, string> = {
+  A: "🌙 Your 7-Night Deep Sleep Reset — Access Inside",       // curiosity
+  B: "✅ You'll sleep better starting tonight — here's how",   // benefit
+  C: "⏰ Start Night 1 tonight — your reset begins now",       // urgency
+};
+
+export function pickSubjectVariant(email: string): EmailSubjectVariant {
+  // Simple deterministic hash: sum char codes mod 3
+  const hash = email.split("").reduce((acc, c) => acc + c.charCodeAt(0), 0);
+  const variants: EmailSubjectVariant[] = ["A", "B", "C"];
+  return variants[hash % 3];
+}
+
+// ─── Welcome Email Builder ────────────────────────────────────────────────────
+function buildWelcomeEmail(name: string | undefined, productKey: ProductKey, amountCents: number, subjectVariant?: EmailSubjectVariant): SendEmailOptions {
   const firstName = name?.split(" ")[0] || "there";
   const amount = `$${(amountCents / 100).toFixed(2)}`;
 
@@ -80,8 +100,27 @@ function buildWelcomeEmail(name: string | undefined, productKey: ProductKey, amo
   let productName: string;
   let nextSteps: string;
 
+  // Sharing URLs (UTM-tagged)
+  const siteUrl = "https://deep-sleep-reset.com";
+  const shareText = encodeURIComponent("I just invested in better sleep — 7-Night Deep Sleep Reset for the price of one coffee 🌙");
+  const shareUrl = encodeURIComponent(`${siteUrl}?utm_source=share&utm_medium=email&utm_campaign=purchase`);
+  const twitterUrl = `https://twitter.com/intent/tweet?text=${shareText}&url=${shareUrl}`;
+  const facebookUrl = `https://www.facebook.com/sharer/sharer.php?u=${shareUrl}`;
+  const whatsappUrl = `https://wa.me/?text=${shareText}%20${shareUrl}`;
+
+  const socialShareBlock = `
+    <div style="text-align:center;margin:32px 0;padding:24px;background:#111827;border-radius:12px;border:1px solid #1f2937;">
+      <p style="color:#9ca3af;font-size:13px;text-transform:uppercase;letter-spacing:1px;margin:0 0 16px;">Share the love 💛</p>
+      <p style="color:#d1d5db;font-size:14px;margin:0 0 20px;">Know someone who struggles with sleep? Share this and help them too.</p>
+      <a href="${twitterUrl}" style="display:inline-block;background:#1DA1F2;color:#fff;font-weight:600;padding:10px 20px;border-radius:8px;text-decoration:none;margin:4px;font-size:13px;">𝕏 Twitter</a>
+      <a href="${facebookUrl}" style="display:inline-block;background:#1877F2;color:#fff;font-weight:600;padding:10px 20px;border-radius:8px;text-decoration:none;margin:4px;font-size:13px;">Facebook</a>
+      <a href="${whatsappUrl}" style="display:inline-block;background:#25D366;color:#fff;font-weight:600;padding:10px 20px;border-radius:8px;text-decoration:none;margin:4px;font-size:13px;">WhatsApp</a>
+    </div>
+  `;
+
   if (isCore) {
-    subject = "🌙 Your 7-Night Deep Sleep Reset — Access Inside";
+    // Use A/B variant subject if provided, else default to A
+    subject = subjectVariant ? EMAIL_SUBJECT_VARIANTS[subjectVariant] : EMAIL_SUBJECT_VARIANTS["A"];
     productName = "7-Night Deep Sleep Reset";
     nextSteps = `
       <p>Here's what to do right now:</p>
@@ -160,6 +199,8 @@ function buildWelcomeEmail(name: string | undefined, productKey: ProductKey, amo
 
     <p>— The Deep Sleep Reset Team</p>
 
+    ${isCore ? socialShareBlock : ""}
+
     <div class="footer">
       <p>You're receiving this because you purchased from Deep Sleep Reset.</p>
       <p>© ${new Date().getFullYear()} Deep Sleep Reset. All rights reserved.</p>
@@ -187,12 +228,24 @@ Tonight, you sleep.
 }
 
 export async function sendPurchaseEmail(options: PurchaseEmailOptions): Promise<void> {
-  const emailData = buildWelcomeEmail(options.name, options.productKey, options.amountCents);
+  const isCore = options.productKey === "frontEnd" || options.productKey === "exitDiscount";
+  const variant = isCore ? pickSubjectVariant(options.to) : undefined;
+  const emailData = buildWelcomeEmail(options.name, options.productKey, options.amountCents, variant);
   await sendEmail({
     ...emailData,
     to: options.to,
     name: options.name,
   });
+  // Return variant for tracking (caller can log to DB)
+  if (variant) {
+    console.log(`[Email] A/B subject variant ${variant} sent to ${options.to}`);
+  }
+}
+
+// Export variant for webhook to record in DB
+export function getPurchaseEmailVariant(email: string, productKey: ProductKey): EmailSubjectVariant | null {
+  const isCore = productKey === "frontEnd" || productKey === "exitDiscount";
+  return isCore ? pickSubjectVariant(email) : null;
 }
 
 // ─── Admin Sale Notification ─────────────────────────────────────────────────

@@ -281,3 +281,31 @@
 
 ## Phase 26: Sale Notification Email
 - [x] Slavnostní email notifikace na petr.matej@gmail.com při každém prodeji (přes Brevo) + celkový kumulativní zisk v emailu
+
+## Phase 27: Conversion Optimization — 3 Iterations + Chronotype Bonus
+
+### Iter 1: Social Sharing in Confirmation Email
+- [ ] Přidat social sharing tlačítka do purchase confirmation emailu (Twitter/X, Facebook, WhatsApp)
+- [ ] Personalizovaný sharing text: "Právě jsem investoval do lepšího spánku — 7-Night Deep Sleep Reset za cenu jedné kávy"
+- [ ] UTM parametry na sharing odkazech pro tracking
+
+### Iter 2: A/B Test Email Subject Lines
+- [ ] DB: email_ab_tests tabulka (variant, subject, sent_count, open_count, click_count)
+- [ ] tRPC: emailAb.getStats (admin), emailAb.recordOpen, emailAb.recordClick
+- [ ] 3 varianty subject pro welcome email (A: curiosity, B: benefit, C: urgency)
+- [ ] Webhook: náhodně přiřadit variantu při odesílání emailu + zaznamenat do DB
+- [ ] Admin: tabulka s open rate a click rate per varianta
+
+### Iter 3: Revenue-Over-Time Chart v Admin Dashboardu
+- [ ] tRPC: admin.getRevenueTimeSeries (denní součty za posledních 30 dní)
+- [ ] Admin dashboard: Recharts AreaChart s revenue over time
+- [ ] Přidat do Přehled tabu vedle KPI karet
+
+### Bonus: Sleep Chronotype Personalisation
+- [ ] DB: chronotype_results tabulka (session_id, email, chronotype, score_data, created_at)
+- [ ] tRPC: chronotype.submit (public), chronotype.getResult (by sessionId)
+- [ ] /chronotype stránka: 8-otázkový quiz (ranní/noční typ, energetické vrcholy, spánkové okno)
+- [ ] LLM: personalizovaný spánkový plán na základě chronotypu (Gemini)
+- [ ] Email sekvence Day 3: odkaz na /chronotype quiz s personalizovaným výsledkem
+- [ ] Výsledek: 4 typy (Lion/Bear/Wolf/Dolphin) + doporučené spánkové okno + 3 tipy
+- [ ] CTA na výsledku: upsell na Advanced Protocol ($19) pro "Wolf" a "Dolphin" typy

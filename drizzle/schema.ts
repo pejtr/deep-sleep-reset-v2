@@ -639,3 +639,52 @@ export const abandonedCheckouts = mysqlTable("abandoned_checkouts", {
 });
 export type AbandonedCheckout = typeof abandonedCheckouts.$inferSelect;
 export type InsertAbandonedCheckout = typeof abandonedCheckouts.$inferInsert;
+
+/**
+ * Email A/B test tracking — records which subject variant was sent and tracks opens/clicks.
+ */
+export const emailAbTests = mysqlTable("email_ab_tests", {
+  id: int("id").autoincrement().primaryKey(),
+  /** Customer email */
+  email: varchar("email", { length: 320 }).notNull(),
+  /** Subject variant: A, B, or C */
+  variant: varchar("variant", { length: 4 }).notNull(),
+  /** The actual subject line sent */
+  subject: varchar("subject", { length: 255 }).notNull(),
+  /** Product key for context */
+  productKey: varchar("productKey", { length: 64 }).notNull(),
+  /** Whether the email was opened (tracked via pixel) */
+  opened: int("opened").default(0).notNull(),
+  /** Whether a link was clicked */
+  clicked: int("clicked").default(0).notNull(),
+  /** Timestamp of first open */
+  openedAt: timestamp("openedAt"),
+  /** Timestamp of first click */
+  clickedAt: timestamp("clickedAt"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+export type EmailAbTest = typeof emailAbTests.$inferSelect;
+export type InsertEmailAbTest = typeof emailAbTests.$inferInsert;
+
+/**
+ * Sleep Chronotype quiz results — personalised sleep type assessment.
+ * 4 types: Lion (early riser), Bear (solar), Wolf (night owl), Dolphin (light sleeper).
+ */
+export const chronotypeResults = mysqlTable("chronotype_results", {
+  id: int("id").autoincrement().primaryKey(),
+  /** Anonymous session identifier */
+  sessionId: varchar("sessionId", { length: 128 }).notNull(),
+  /** Optional email if captured */
+  email: varchar("email", { length: 320 }),
+  /** Chronotype: lion, bear, wolf, dolphin */
+  chronotype: varchar("chronotype", { length: 32 }).notNull(),
+  /** Raw score JSON: { lion: number, bear: number, wolf: number, dolphin: number } */
+  scoreData: text("scoreData").notNull(),
+  /** LLM-generated personalised sleep plan (markdown) */
+  personalPlan: text("personalPlan"),
+  /** Optimal sleep window e.g. "22:30 – 06:30" */
+  sleepWindow: varchar("sleepWindow", { length: 32 }),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+export type ChronotypeResult = typeof chronotypeResults.$inferSelect;
+export type InsertChronotypeResult = typeof chronotypeResults.$inferInsert;

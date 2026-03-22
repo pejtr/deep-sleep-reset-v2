@@ -29,6 +29,7 @@ import AdminTestimonials from "./pages/AdminTestimonials";
 import Blog from "./pages/Blog";
 import BlogPost from "./pages/BlogPost";
 import AdminBlog from "./pages/AdminBlog";
+import ChronotypeQuiz from "./pages/ChronotypeQuiz";
 
 function Router() {
   // make sure to consider if you need authentication for certain routes
@@ -65,6 +66,7 @@ function Router() {
       <Route path={"/blog"} component={Blog} />
       <Route path={"/blog/:slug"} component={BlogPost} />
       <Route path={"/admin/blog"} component={AdminBlog} />
+      <Route path={"/chronotype-quiz"} component={ChronotypeQuiz} />
       <Route path={"/404"} component={NotFound} />
       <Route component={NotFound} />
     </Switch>

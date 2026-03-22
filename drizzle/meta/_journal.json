@@ -127,6 +127,13 @@
       "when": 1774033350910,
       "tag": "0017_smiling_lady_ursula",
       "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "5",
+      "when": 1774214493953,
+      "tag": "0018_cool_yellowjacket",
+      "breakpoints": true
     }
   ]
 }

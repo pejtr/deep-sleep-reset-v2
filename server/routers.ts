@@ -5,7 +5,7 @@ import { systemRouter } from "./_core/systemRouter";
 import { publicProcedure, protectedProcedure, router } from "./_core/trpc";
 import { createCheckoutSession, createBundleCheckoutSession, PRODUCTS, type ProductKey } from "./stripe/index";
 import { invokeLLM } from "./_core/llm";
-import { saveLead, saveChatInsight, saveChatSurvey, getOrdersByEmail, getAdminStats, getFunnelStats, getRecentOrders, getRecentLeads, getRecentChatInsights, getRecentChatSurveys, getDailyRevenue, getLeadSourceStats, saveAbEvent, getAbStats, saveQuizAttempt, getQuizHistory, updateQuizAttemptNote, submitTestimonialMedia, getApprovedTestimonialMedia, getPendingTestimonialMedia, moderateTestimonialMedia, recordAbandonedCheckout, getAbandonedCheckoutStats, markAbandonedCheckoutRecovered } from "./db";
+import { saveLead, saveChatInsight, saveChatSurvey, getOrdersByEmail, getAdminStats, getFunnelStats, getRecentOrders, getRecentLeads, getRecentChatInsights, getRecentChatSurveys, getDailyRevenue, getLeadSourceStats, saveAbEvent, getAbStats, saveQuizAttempt, getQuizHistory, updateQuizAttemptNote, submitTestimonialMedia, getApprovedTestimonialMedia, getPendingTestimonialMedia, moderateTestimonialMedia, recordAbandonedCheckout, getAbandonedCheckoutStats, markAbandonedCheckoutRecovered, getEmailAbStats } from "./db";
 import { igAutopilotRouter } from "./routers/igAutopilot";
 import { igDmAutoResponderRouter } from "./routers/igDmAutoResponder";
 import { emailSequenceRouter } from "./routers/emailSequence";
@@ -275,6 +275,15 @@ Extract:
       .query(async () => {
         return getLeadSourceStats();
       }),
+
+    emailAbStats: protectedProcedure
+      .use(({ ctx, next }) => {
+        if (ctx.user.role !== 'admin') throw new Error('Forbidden');
+        return next({ ctx });
+      })
+      .query(async () => {
+        return getEmailAbStats();
+      }),
   }),
 
   // A/B Hook Variant Tracking
@@ -476,6 +485,120 @@ RULES:
       .query(async ({ ctx }) => {
         if (ctx.user?.role !== "admin") throw new Error("Forbidden");
         return getAbandonedCheckoutStats();
+      }),
+  }),
+
+  // ─── Sleep Chronotype Quiz ────────────────────────────────────────────────────
+  chronotype: router({
+    /** Submit quiz answers and get AI-generated personalised sleep plan */
+    submit: publicProcedure
+      .input(z.object({
+        sessionId: z.string().max(128),
+        email: z.string().email().optional(),
+        answers: z.array(z.object({
+          questionId: z.string(),
+          value: z.number().min(0).max(3),
+        })).min(8).max(8),
+      }))
+      .mutation(async ({ input }) => {
+        const { getDb } = await import("./db");
+        const db = await getDb();
+        if (!db) throw new Error("DB unavailable");
+        const { chronotypeResults } = await import("../drizzle/schema");
+
+        // Score calculation: each answer maps to a chronotype
+        // Questions 0-7 map to: lion, bear, wolf, dolphin
+        // Each answer value 0-3 maps to chronotype weight
+        const scores = { lion: 0, bear: 0, wolf: 0, dolphin: 0 };
+        const questionMap: Array<keyof typeof scores> = [
+          "lion",    // Q1: Wake up time preference
+          "bear",    // Q2: Energy peak time
+          "wolf",    // Q3: Bedtime preference
+          "dolphin", // Q4: Sleep quality
+          "lion",    // Q5: Morning alertness
+          "wolf",    // Q6: Night creativity
+          "bear",    // Q7: Social energy timing
+          "dolphin", // Q8: Anxiety/rumination at night
+        ];
+
+        input.answers.forEach((a, i) => {
+          const type = questionMap[i];
+          scores[type] += a.value;
+        });
+
+        // Determine dominant chronotype
+        const chronotype = (Object.entries(scores).sort((a, b) => b[1] - a[1])[0][0]) as keyof typeof scores;
+
+        // Sleep windows per chronotype
+        const sleepWindows: Record<string, string> = {
+          lion: "21:30 – 05:30",
+          bear: "23:00 – 07:00",
+          wolf: "00:30 – 08:30",
+          dolphin: "23:30 – 06:30",
+        };
+
+        // Generate personalised plan via LLM
+        const chronotypeDescriptions: Record<string, string> = {
+          lion: "Lion (early riser, peak energy 8-12 AM, natural leader, disciplined)",
+          bear: "Bear (solar schedule, peak energy 10 AM-2 PM, social, consistent)",
+          wolf: "Wolf (night owl, peak energy 6-10 PM, creative, impulsive)",
+          dolphin: "Dolphin (light sleeper, anxious, peak energy 3-9 PM, intelligent, detail-oriented)",
+        };
+
+        let personalPlan: string | null = null;
+        try {
+          const llmResponse = await invokeLLM({
+            messages: [
+              {
+                role: "system",
+                content: `You are a sleep science expert specializing in chronobiology. Create a concise, actionable personalised sleep plan. Use markdown formatting. Be warm, encouraging and specific. Focus on practical tips the person can implement tonight.`,
+              },
+              {
+                role: "user",
+                content: `My sleep chronotype is: ${chronotypeDescriptions[chronotype]}\n\nScores: Lion=${scores.lion}, Bear=${scores.bear}, Wolf=${scores.wolf}, Dolphin=${scores.dolphin}\n\nCreate a personalised 7-night sleep optimisation plan for my chronotype. Include:\n1. My ideal sleep window (${sleepWindows[chronotype]})\n2. 3 specific evening rituals for my type\n3. 2 morning habits to reinforce my natural rhythm\n4. 1 thing I should AVOID that most people with my chronotype do wrong\n5. A motivating closing message\n\nKeep it under 400 words. Use emoji sparingly.`,
+              },
+            ],
+          });
+          const rawContent = llmResponse.choices?.[0]?.message?.content;
+          personalPlan = typeof rawContent === "string" ? rawContent : null;
+        } catch (err) {
+          console.warn("[Chronotype] LLM plan generation failed:", err);
+        }
+
+        // Save to DB
+        await db.insert(chronotypeResults).values({
+          sessionId: input.sessionId,
+          email: input.email ?? null,
+          chronotype,
+          scoreData: JSON.stringify(scores),
+          personalPlan,
+          sleepWindow: sleepWindows[chronotype],
+        });
+
+        return {
+          chronotype,
+          scores,
+          sleepWindow: sleepWindows[chronotype],
+          personalPlan,
+        };
+      }),
+
+    /** Get result by sessionId */
+    getResult: publicProcedure
+      .input(z.object({ sessionId: z.string().max(128) }))
+      .query(async ({ input }) => {
+        const { getDb } = await import("./db");
+        const db = await getDb();
+        if (!db) return null;
+        const { chronotypeResults } = await import("../drizzle/schema");
+        const { eq } = await import("drizzle-orm");
+        const [result] = await db
+          .select()
+          .from(chronotypeResults)
+          .where(eq(chronotypeResults.sessionId, input.sessionId))
+          .orderBy(chronotypeResults.createdAt)
+          .limit(1);
+        return result ?? null;
       }),
   }),
 });
