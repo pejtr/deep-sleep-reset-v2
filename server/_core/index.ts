@@ -11,6 +11,7 @@ import { serveStatic, setupVite } from "./vite";
 import { handleStripeWebhook } from "../stripe/webhook";
 import { igCronTick } from "../igCronJob";
 import { storagePut } from "../storage";
+import { runLeadOSDailyCron } from "../leadosDailyCron";
 
 function isPortAvailable(port: number): Promise<boolean> {
   return new Promise(resolve => {
@@ -142,3 +143,13 @@ setInterval(() => {
 setTimeout(() => {
   igCronTick().catch(e => console.error("[IG Cron] Startup error:", e));
 }, 30 * 1000);
+
+// LeadOS Daily Summary — runs every hour, fires actual report at midnight UTC
+setInterval(() => {
+  runLeadOSDailyCron().catch(e => console.error("[LeadOS Cron] Uncaught error:", e));
+}, 60 * 60 * 1000);
+
+// Also run once on startup after 60 seconds (to catch any missed midnight reports)
+setTimeout(() => {
+  runLeadOSDailyCron().catch(e => console.error("[LeadOS Cron] Startup error:", e));
+}, 60 * 1000);

@@ -15,6 +15,7 @@ import { enrollInSequence } from "../routers/emailSequence";
 import { eq, sql } from "drizzle-orm";
 import { fireMetaPurchase } from "../meta-capi";
 import { emailAbTests } from "../../drizzle/schema";
+import { reportSaleToLeadOS } from "../leadosReporter";
 
 export async function handleStripeWebhook(req: Request, res: Response) {
   const stripe = getStripe();
@@ -161,7 +162,15 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
     console.warn("[Webhook] Admin sale notification email failed:", err);
   }
 
-  // 6. Enroll in 7-day nurture sequence (only for core product purchases)
+  // 6. Report sale to LeadOS in real-time
+  await reportSaleToLeadOS({
+    amountUsd: amountCents / 100,
+    orderId: session.id,
+    productName: productLabels[productKey],
+    customerEmail: customerEmail || undefined,
+  }).catch(err => console.warn("[Webhook] LeadOS sale report failed:", err));
+
+  // 7. Enroll in 7-day nurture sequence (only for core product purchases)
   const coreProducts: ProductKey[] = ["frontEnd", "exitDiscount"];
   if (customerEmail && coreProducts.includes(productKey)) {
     const recentOrder = await db

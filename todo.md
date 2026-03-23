@@ -328,3 +328,10 @@
 - [x] CTA button A/B test (3 variants: "Yes — I Want to Sleep Like This" / "Fix My Sleep Tonight — $5" / "Start My 7-Night Reset") tracked in ab_events
 - [x] Auto-lock winner after 200 impressions (CTA) — stop testing, serve winner only
 - [x] Admin dashboard: CTA variants labeled, auto-lock status badge (Vítěz zamceno / Poražen)
+
+## Phase 32: LeadOS Daily Sales Reporting
+- [x] Add LEADGEN_INGEST_URL secret (crmleadsystem.com API endpoint)
+- [x] Real-time sale event push to LeadOS on every Stripe purchase (in stripeWebhook handler)
+- [x] Scheduled daily summary cron job (midnight UTC) — aggregate daily sales and POST to LeadOS
+- [x] LeadOS reporting helper (server/leadosReporter.ts) with retry logic (3 retries, exponential backoff)
+- [x] Vitest tests: 8 tests passing (payload validation, retry logic, zero-order edge case, skip outside midnight window)

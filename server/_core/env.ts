@@ -10,4 +10,6 @@ export const ENV = {
   // Meta Conversions API
   metaPixelId: process.env.META_PIXEL_ID ?? "",
   metaCapiToken: process.env.META_CAPI_TOKEN ?? "",
+  // LeadOS reporting
+  leadgenIngestUrl: process.env.LEADGEN_INGEST_URL ?? "",
 };
