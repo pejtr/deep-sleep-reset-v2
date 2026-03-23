@@ -134,6 +134,13 @@
       "when": 1774214493953,
       "tag": "0018_cool_yellowjacket",
       "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "5",
+      "when": 1774225847821,
+      "tag": "0019_slow_shaman",
+      "breakpoints": true
     }
   ]
 }

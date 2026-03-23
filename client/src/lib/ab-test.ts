@@ -60,6 +60,7 @@ export const HEADLINES: Record<"a" | "b" | "c" | "d", HeadlineVariant> = {
   },
   // Variant D — Fear of Loss Frame
   // Loss aversion + reframe cost of inaction vs $5
+  // "This Is Why You Wake Up at 3AM — And How to Stop It"
   d: {
     main: "Every Night You Don't Sleep Is ",
     highlight: "Costing You More",

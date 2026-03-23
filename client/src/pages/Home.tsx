@@ -10,6 +10,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import SeoHead from "@/components/SeoHead";
 import { motion, useInView } from "framer-motion";
 import { getVariant } from "@/lib/ab-test";
+import { getCTAVariant, getCTAText, lockCTAWinner, CTA_VARIANTS, type CTAVariant } from "@/lib/ab-cta";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Link, useLocation } from "wouter";
 import { trackEvent } from "@/components/MetaPixel";
@@ -19,7 +20,7 @@ import UrgencyTimer from "@/components/UrgencyTimer";
 import ChatbotTeaserHook from "@/components/ChatbotTeaserHook";
 import SocialProofWallHook from "@/components/SocialProofWallHook";
 import ExitIntentPopup from "@/components/ExitIntentPopup";
-import { getHookVariant } from "@/lib/ab-hooks";
+import { getHookVariant, getSessionId } from "@/lib/ab-hooks";
 import { trpc } from "@/lib/trpc";
 import {
   Moon,
@@ -275,6 +276,38 @@ export default function Home() {
   const hookVariant = useMemo(() => getHookVariant(), []);
   const [chatOpen, setChatOpen] = useState(false);
 
+  // CTA Button A/B Test
+  const ctaVariant = useMemo(() => getCTAVariant(), []);
+  const [ctaText, setCtaText] = useState(() => getCTAText());
+  const sessionId = useMemo(() => getSessionId(), []);
+  const trackAbEvent = trpc.ab.trackEvent.useMutation();
+  const ctaImpressionTracked = useRef(false);
+
+  // Check if a winner has been locked server-side (auto-lock after 200 impressions)
+  const { data: ctaWinnerData } = trpc.ab.getCTAWinner.useQuery(undefined, {
+    staleTime: 5 * 60 * 1000, // re-check every 5 minutes
+  });
+
+  useEffect(() => {
+    if (!ctaWinnerData?.winner) return;
+    const winner = ctaWinnerData.winner as CTAVariant;
+    // Lock the winner in localStorage so future visits always see the winner
+    lockCTAWinner(winner);
+    // Update the button text to the winner's text
+    setCtaText(CTA_VARIANTS[winner].text);
+  }, [ctaWinnerData?.winner]);
+
+  // Track CTA impression once on mount
+  useEffect(() => {
+    if (ctaImpressionTracked.current) return;
+    ctaImpressionTracked.current = true;
+    trackAbEvent.mutate({
+      variant: ctaVariant,
+      eventType: "impression",
+      sessionId,
+    });
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
   useEffect(() => {
     const handleScroll = () => setScrollY(window.scrollY);
     window.addEventListener("scroll", handleScroll, { passive: true });
@@ -308,6 +341,12 @@ export default function Home() {
   }, []);
 
   const goToOrder = () => {
+    // Track CTA conversion for A/B test
+    trackAbEvent.mutate({
+      variant: ctaVariant,
+      eventType: "conversion",
+      sessionId,
+    });
     navigate(localePath("/order"));
   };
 
@@ -450,9 +489,10 @@ export default function Home() {
             </p>
             <button
               onClick={goToOrder}
+              data-ab-variant={ctaVariant}
               className="cta-pulse cta-shimmer inline-flex items-center gap-3 bg-amber text-background font-semibold px-8 py-4 rounded-lg text-lg transition-all duration-300 hover:scale-105 hover:bg-amber-light"
             >
-              {t.hero.ctaButton}
+              {ctaText}
               <ChevronDown className="w-5 h-5 animate-bounce" />
             </button>
           </motion.div>
@@ -851,13 +891,14 @@ export default function Home() {
             </div>
           </FadeInSection>
 
-          {/* CTA Button */}
+          {/* CTA Button — A/B tested text */}
           <FadeInSection delay={0.4}>
             <button
               onClick={goToOrder}
+              data-ab-variant={ctaVariant}
               className="cta-pulse cta-shimmer w-full sm:w-auto inline-flex items-center justify-center gap-3 bg-amber hover:bg-amber-light text-background font-bold px-10 py-5 rounded-xl text-xl transition-all duration-300 hover:scale-105"
             >
-              {t.offer.ctaButton}
+              {ctaText}
             </button>
             {/* Stock scarcity */}
             <p className="mt-3 text-xs text-foreground/40 flex items-center justify-center gap-1.5">

@@ -864,7 +864,16 @@ export default function Admin() {
                             btn_blue: '🔵 Button — Blue',
                             price_5: '💵 Price — $5 (Control)',
                             price_7: '💰 Price — $7 (Challenger)',
+                            cta_a: '🅰 CTA — "Yes — I Want to Sleep Like This"',
+                            cta_b: '🅱 CTA — "Fix My Sleep Tonight — $5"',
+                            cta_c: '🅲 CTA — "Start My 7-Night Reset"',
                           };
+                          // CTA auto-lock: mark as locked if impressions >= 200 and it's the winner
+                          const ctaVariants = ['cta_a', 'cta_b', 'cta_c'];
+                          const isCTAVariant = ctaVariants.includes(row.variant);
+                          const ctaRows = abStats.filter(r => ctaVariants.includes(r.variant));
+                          const ctaAutoLocked = isCTAVariant && ctaRows.some(r => r.impressions >= 200);
+                          const ctaWinner = ctaAutoLocked ? ctaRows.reduce((best, cur) => parseFloat(cur.cvr) > parseFloat(best.cvr) ? cur : best) : null;
                           const variantLabel = VARIANT_LABELS[row.variant] ?? row.variant;
                           return (
                             <tr key={row.variant} className="border-b border-border/10 hover:bg-card/20">
@@ -873,7 +882,11 @@ export default function Admin() {
                               <td className="py-3 pr-4 text-right tabular-nums text-amber">{row.conversions.toLocaleString()}</td>
                               <td className="py-3 pr-4 text-right tabular-nums font-semibold">{row.cvr}%</td>
                               <td className="py-3 text-right">
-                                {isWinner ? (
+                                {isCTAVariant && ctaAutoLocked && ctaWinner?.variant === row.variant ? (
+                                  <span className="text-xs bg-amber/20 text-amber px-2 py-0.5 rounded-full">🏆 Vítěz (zamčeno)</span>
+                                ) : isCTAVariant && ctaAutoLocked ? (
+                                  <span className="text-xs bg-red-500/10 text-red-400/70 px-2 py-0.5 rounded-full">Poražen</span>
+                                ) : isWinner ? (
                                   <span className="text-xs bg-amber/20 text-amber px-2 py-0.5 rounded-full">🏆 Vítěz</span>
                                 ) : (
                                   <span className="text-xs bg-foreground/5 text-foreground/30 px-2 py-0.5 rounded-full">Testuje se</span>
@@ -887,7 +900,7 @@ export default function Admin() {
                   </div>
                   {abStats.length > 1 && (
                     <p className="text-foreground/30 text-xs mt-2">
-                      Tip: Jakmile má vítěz &gt;100 zobrazení a &gt;2× vyšší CVR, zvažte deaktivaci slabších variant.
+                      Tip: CTA button test se automaticky zamkne po 200 zobrazeních. Headline test: jakmile má vítěz &gt;2× vyšší CVR, zvažte deaktivaci slabsších variant.
                     </p>
                   )}
                 </div>

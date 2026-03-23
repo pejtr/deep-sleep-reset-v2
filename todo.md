@@ -323,3 +323,8 @@
 - [ ] Replace 3 headline variants with high-converting copy + add 4th fear-of-loss variant
 - [ ] Add CTA button copy A/B test (3 text variants)
 - [ ] Auto-lock winner after 200 impressions
+
+## Phase 31: CTA A/B Test + Auto-Lock Winner
+- [x] CTA button A/B test (3 variants: "Yes — I Want to Sleep Like This" / "Fix My Sleep Tonight — $5" / "Start My 7-Night Reset") tracked in ab_events
+- [x] Auto-lock winner after 200 impressions (CTA) — stop testing, serve winner only
+- [x] Admin dashboard: CTA variants labeled, auto-lock status badge (Vítěz zamceno / Poražen)

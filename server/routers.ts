@@ -290,7 +290,7 @@ Extract:
   ab: router({
     trackEvent: publicProcedure
       .input(z.object({
-        variant: z.enum(["quiz", "chatbot", "social", "btn_amber", "btn_green", "btn_blue", "price_5", "price_7"]),
+        variant: z.enum(["quiz", "chatbot", "social", "btn_amber", "btn_green", "btn_blue", "price_5", "price_7", "cta_a", "cta_b", "cta_c"]),
         eventType: z.enum(["impression", "conversion"]),
         sessionId: z.string().max(64),
         email: z.string().email().optional(),
@@ -315,6 +315,32 @@ Extract:
       .query(async () => {
         return getAbStats();
       }),
+
+    /**
+     * Returns the winning CTA variant if any variant has reached 200 impressions.
+     * The winner is the variant with the highest conversion rate (CVR).
+     * Returns null if no variant has reached the threshold yet.
+     */
+    getCTAWinner: publicProcedure.query(async () => {
+      const stats = await getAbStats();
+      const ctaStats = stats.filter(s =>
+        s.variant === "cta_a" || s.variant === "cta_b" || s.variant === "cta_c"
+      );
+
+      const AUTO_LOCK_THRESHOLD = 200;
+      const hasEnoughData = ctaStats.some(s => s.impressions >= AUTO_LOCK_THRESHOLD);
+
+      if (!hasEnoughData) return { winner: null, stats: ctaStats, threshold: AUTO_LOCK_THRESHOLD };
+
+      // Find the variant with the highest CVR
+      const winner = ctaStats.reduce((best, current) => {
+        const bestCvr = parseFloat(best.cvr);
+        const currentCvr = parseFloat(current.cvr);
+        return currentCvr > bestCvr ? current : best;
+      });
+
+      return { winner: winner.variant, stats: ctaStats, threshold: AUTO_LOCK_THRESHOLD };
+    }),
   }),
 
   // Quiz score history
