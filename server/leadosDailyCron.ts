@@ -60,7 +60,7 @@ export async function runLeadOSDailyCron(): Promise<void> {
 
     // Aggregate completed orders for yesterday
     const [revenueRow] = await db
-      .select({ total: sql<number>`COALESCE(SUM(amount_cents), 0)` })
+      .select({ total: sql<number>`COALESCE(SUM(${orders.amountCents}), 0)` })
       .from(orders)
       .where(
         and(

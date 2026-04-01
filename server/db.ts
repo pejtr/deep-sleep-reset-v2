@@ -184,7 +184,7 @@ export async function getAdminStats() {
   const last30days = new Date(today.getTime() - 29 * 24 * 60 * 60 * 1000);
 
   const [totalRevenue] = await db
-    .select({ total: sql<number>`COALESCE(SUM(amount_cents), 0)` })
+    .select({ total: sql<number>`COALESCE(SUM(${orders.amountCents}), 0)` })
     .from(orders)
     .where(eq(orders.status, "completed"));
 
@@ -194,19 +194,19 @@ export async function getAdminStats() {
     .where(eq(orders.status, "completed"));
 
   const [todayRevenue] = await db
-    .select({ total: sql<number>`COALESCE(SUM(amount_cents), 0)` })
+    .select({ total: sql<number>`COALESCE(SUM(${orders.amountCents}), 0)` })
     .from(orders)
-    .where(sql`status = 'completed' AND created_at >= ${today}`);
+    .where(and(eq(orders.status, "completed"), gte(orders.createdAt, today)));
 
   const [last7Revenue] = await db
-    .select({ total: sql<number>`COALESCE(SUM(amount_cents), 0)` })
+    .select({ total: sql<number>`COALESCE(SUM(${orders.amountCents}), 0)` })
     .from(orders)
-    .where(sql`status = 'completed' AND created_at >= ${last7days}`);
+    .where(and(eq(orders.status, "completed"), gte(orders.createdAt, last7days)));
 
   const [last30Revenue] = await db
-    .select({ total: sql<number>`COALESCE(SUM(amount_cents), 0)` })
+    .select({ total: sql<number>`COALESCE(SUM(${orders.amountCents}), 0)` })
     .from(orders)
-    .where(sql`status = 'completed' AND created_at >= ${last30days}`);
+    .where(and(eq(orders.status, "completed"), gte(orders.createdAt, last30days)));
 
   const [totalLeads] = await db
     .select({ cnt: count() })
@@ -249,7 +249,7 @@ export async function getFunnelStats() {
     .select({
       productKey: orders.productKey,
       cnt: count(),
-      totalCents: sql<number>`COALESCE(SUM(amount_cents), 0)`,
+      totalCents: sql<number>`COALESCE(SUM(${orders.amountCents}), 0)`,
     })
     .from(orders)
     .where(eq(orders.status, "completed"))
@@ -605,22 +605,22 @@ export async function getDailyRevenue() {
   if (!db) return [];
 
   const last30days = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+  const last30daysStr = last30days.toISOString().slice(0, 19).replace('T', ' ');
 
-  const result = await db
-    .select({
-      date: sql<string>`DATE(created_at)`,
-      totalCents: sql<number>`COALESCE(SUM(amount_cents), 0)`,
-      orderCount: count(),
-    })
-    .from(orders)
-    .where(sql`status = 'completed' AND created_at >= ${last30days}`)
-    .groupBy(sql`DATE(created_at)`)
-    .orderBy(sql`DATE(created_at)`);
+  // Use raw SQL to avoid MySQL ONLY_FULL_GROUP_BY issues with DATE() in GROUP BY
+  const result = await db.execute(
+    sql`SELECT DATE(createdAt) as date, COALESCE(SUM(amountCents), 0) as totalCents, COUNT(*) as orderCount
+        FROM orders
+        WHERE status = 'completed' AND createdAt >= ${last30daysStr}
+        GROUP BY DATE(createdAt)
+        ORDER BY DATE(createdAt)`
+  ) as any;
 
-  return result.map(r => ({
-    date: String(r.date),
-    totalCents: Number(r.totalCents),
-    orderCount: Number(r.orderCount),
+  const rows = Array.isArray(result) ? (Array.isArray(result[0]) ? result[0] : result) : [];
+  return rows.map((r: any) => ({
+    date: String(r.date ?? r.DATE ?? ''),
+    totalCents: Number(r.totalCents ?? r.TOTALCENTS ?? 0),
+    orderCount: Number(r.orderCount ?? r.ORDERCOUNT ?? 0),
   }));
 }
 

@@ -142,9 +142,9 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
   // 5. Send celebratory admin notification email with cumulative revenue
   try {
     const [totalRevRow] = await db
-      .select({ total: sql<number>`COALESCE(SUM(amount_cents), 0)` })
-      .from(orders)
-      .where(eq(orders.status, "completed"));
+      .select({ total: sql<number>`COALESCE(SUM(${orders.amountCents}), 0)` })
+    .from(orders)
+    .where(eq(orders.status, "completed"));
     const [totalOrdRow] = await db
       .select({ cnt: sql<number>`COUNT(*)` })
       .from(orders)
