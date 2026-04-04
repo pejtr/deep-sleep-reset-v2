@@ -6,8 +6,9 @@ import {
   Instagram, Calendar, BarChart2, Settings, Play, RefreshCw,
   CheckCircle, XCircle, Clock, Zap, TrendingUp, Eye, Heart,
   MessageCircle, Bookmark, ChevronDown, ChevronUp, Loader2, Plus,
-  FlaskConical, Hash, Repeat2, Trophy, ArrowUpRight, Bot, Copy, ExternalLink, Moon
+  FlaskConical, Hash, Repeat2, Trophy, ArrowUpRight, Bot, Copy, ExternalLink, Moon, LineChart as LineChartIcon
 } from "lucide-react";
+import AdminLunaTracker from "./AdminLunaTracker";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -36,7 +37,7 @@ function formatDate(d: Date | string) {
 export default function AdminInstagram() {
   const { user, loading } = useAuth();
   const [, navigate] = useLocation();
-  const [activeTab, setActiveTab] = useState<"calendar" | "analytics" | "abtests" | "hashtags" | "reposts" | "settings" | "luna">("calendar");
+  const [activeTab, setActiveTab] = useState<"calendar" | "analytics" | "abtests" | "hashtags" | "reposts" | "settings" | "luna" | "tracker">("calendar");
   const [expandedPost, setExpandedPost] = useState<number | null>(null);
   const [generating, setGenerating] = useState(false);
   const [newPostType, setNewPostType] = useState<"post" | "story">("post");
@@ -267,7 +268,7 @@ export default function AdminInstagram() {
 
         {/* Tabs */}
         <div className="flex flex-wrap gap-1 mb-6 bg-white/5 rounded-lg p-1 w-fit">
-          {(["calendar", "analytics", "abtests", "hashtags", "reposts", "settings", "luna"] as const).map(tab => (
+          {(["calendar", "analytics", "abtests", "hashtags", "reposts", "settings", "luna", "tracker"] as const).map(tab => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
@@ -284,7 +285,8 @@ export default function AdminInstagram() {
               {tab === "reposts" && <Repeat2 className="w-3.5 h-3.5 inline mr-1.5" />}
               {tab === "settings" && <Settings className="w-3.5 h-3.5 inline mr-1.5" />}
               {tab === "luna" && <Bot className="w-3.5 h-3.5 inline mr-1.5" />}
-              {tab === "abtests" ? "A/B Tests" : tab === "hashtags" ? "Hashtags" : tab === "reposts" ? "Reposts" : tab === "luna" ? "Luna Bot" : tab}
+              {tab === "tracker" && <LineChartIcon className="w-3.5 h-3.5 inline mr-1.5" />}
+              {tab === "abtests" ? "A/B Tests" : tab === "hashtags" ? "Hashtags" : tab === "reposts" ? "Reposts" : tab === "luna" ? "Luna Bot" : tab === "tracker" ? "Performance" : tab}
             </button>
           ))}
         </div>
@@ -782,6 +784,11 @@ export default function AdminInstagram() {
               </CardContent>
             </Card>
           </div>
+        )}
+
+        {/* Performance Tracker Tab */}
+        {activeTab === "tracker" && (
+          <AdminLunaTracker />
         )}
 
         {/* Luna Bot Tab */}

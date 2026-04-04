@@ -11,6 +11,7 @@ import { igDmAutoResponderRouter } from "./routers/igDmAutoResponder";
 import { emailSequenceRouter } from "./routers/emailSequence";
 import { testimonialsRouter } from "./routers/testimonials";
 import { blogRouter } from "./routers/blog";
+import { lunaTrackerRouter } from "./routers/lunaTracker";
 import { fireMetaLead, fireMetaInitiateCheckout } from "./meta-capi";
 
 const productKeySchema = z.enum(["frontEnd", "frontEnd7", "exitDiscount", "upsell1", "upsell2", "upsell3", "chronotypeReport"]);
@@ -22,6 +23,7 @@ export const appRouter = router({
   emailSequence: emailSequenceRouter,
   testimonials: testimonialsRouter,
   blog: blogRouter,
+  luna: lunaTrackerRouter,
   auth: router({
     me: publicProcedure.query(opts => opts.ctx.user),
     logout: publicProcedure.mutation(({ ctx }) => {

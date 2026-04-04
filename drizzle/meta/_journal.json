@@ -141,6 +141,13 @@
       "when": 1774225847821,
       "tag": "0019_slow_shaman",
       "breakpoints": true
+    },
+    {
+      "idx": 20,
+      "version": "5",
+      "when": 1775345444713,
+      "tag": "0020_natural_harpoon",
+      "breakpoints": true
     }
   ]
 }

@@ -688,3 +688,112 @@ export const chronotypeResults = mysqlTable("chronotype_results", {
 });
 export type ChronotypeResult = typeof chronotypeResults.$inferSelect;
 export type InsertChronotypeResult = typeof chronotypeResults.$inferInsert;
+
+/**
+ * Luna Post Tracker — manual + auto performance tracking for Luna's Instagram posts.
+ * Captures all key metrics needed to evaluate content ROI and optimise the funnel.
+ * Metrics can be entered manually by admin or auto-synced from Instagram Graph API.
+ */
+export const lunaPostTracker = mysqlTable("luna_post_tracker", {
+  id: int("id").autoincrement().primaryKey(),
+  /** Optional link to ig_scheduled_posts.id if post was AI-generated */
+  scheduledPostId: int("scheduledPostId"),
+  /** Instagram post ID (from IG API after publishing) */
+  igPostId: varchar("igPostId", { length: 128 }),
+  /** Instagram permalink URL */
+  igPermalink: text("igPermalink"),
+  /** Content format */
+  format: mysqlEnum("format", ["reel", "carousel", "post", "story", "live"]).notNull(),
+  /** Content topic / hook summary (max 255 chars) */
+  topic: varchar("topic", { length: 255 }).notNull(),
+  /** Caption used (first 500 chars) */
+  caption: text("caption"),
+  /** Thumbnail / cover image CDN URL */
+  thumbnailUrl: text("thumbnailUrl"),
+  /** Date the post was published (UTC) */
+  publishedAt: timestamp("publishedAt").notNull(),
+  /** Week number (1-52) for grouping */
+  weekNumber: int("weekNumber"),
+  /** Content pillar: education | emotion | promotion | social_proof | entertainment */
+  pillar: mysqlEnum("pillar", ["education", "emotion", "promotion", "social_proof", "entertainment"]).default("education").notNull(),
+  /** CTA type used in the post */
+  ctaType: mysqlEnum("ctaType", ["dm_keyword", "link_in_bio", "comment", "save", "share", "none"]).default("link_in_bio").notNull(),
+  /** CTA keyword if dm_keyword type (e.g. "3AM", "SLEEP") */
+  ctaKeyword: varchar("ctaKeyword", { length: 64 }),
+
+  // ── Reach & Visibility ──────────────────────────────────────────────────────
+  /** Total unique accounts reached */
+  reach: int("reach").default(0).notNull(),
+  /** Total impressions (including repeat views) */
+  impressions: int("impressions").default(0).notNull(),
+  /** Reel/video play count */
+  plays: int("plays").default(0),
+  /** Average watch time in seconds (for Reels) */
+  avgWatchTimeSec: int("avgWatchTimeSec"),
+  /** Watch-through rate % (watched to end / plays * 100) */
+  watchThroughRate: int("watchThroughRate").default(0),
+
+  // ── Engagement ──────────────────────────────────────────────────────────────
+  likes: int("likes").default(0).notNull(),
+  comments: int("comments").default(0).notNull(),
+  saves: int("saves").default(0).notNull(),
+  shares: int("shares").default(0).notNull(),
+  /** Engagement rate = (likes+comments+saves+shares) / reach * 100, stored as integer (×100 for precision) */
+  engagementRateBp: int("engagementRateBp").default(0).notNull(),
+
+  // ── Conversion Metrics ──────────────────────────────────────────────────────
+  /** Profile visits driven by this post */
+  profileVisits: int("profileVisits").default(0).notNull(),
+  /** Link in bio clicks attributed to this post */
+  linkClicks: int("linkClicks").default(0).notNull(),
+  /** DMs received after this post (manual count or keyword-triggered) */
+  dmsReceived: int("dmsReceived").default(0).notNull(),
+  /** DMs that converted to a purchase (tracked via order timestamps) */
+  dmConversions: int("dmConversions").default(0).notNull(),
+  /** Revenue attributed to this post in cents */
+  attributedRevenueCents: int("attributedRevenueCents").default(0).notNull(),
+
+  // ── Follower Impact ─────────────────────────────────────────────────────────
+  /** New followers gained on the day of posting */
+  newFollowers: int("newFollowers").default(0).notNull(),
+  /** Unfollows on the day of posting */
+  unfollows: int("unfollows").default(0),
+
+  // ── AI Scoring ──────────────────────────────────────────────────────────────
+  /** Composite virality score 0-100 calculated by AI */
+  viralityScore: int("viralityScore").default(0),
+  /** AI-generated insight about this post's performance */
+  aiInsight: text("aiInsight"),
+  /** Whether this post qualifies for reposting (score ≥ 70) */
+  repostCandidate: int("repostCandidate").default(0).notNull(),
+
+  /** Data source: manual entry or api sync */
+  dataSource: mysqlEnum("dataSource", ["manual", "api_sync"]).default("manual").notNull(),
+  /** Last time metrics were synced from IG API */
+  lastSyncedAt: timestamp("lastSyncedAt"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type LunaPostTracker = typeof lunaPostTracker.$inferSelect;
+export type InsertLunaPostTracker = typeof lunaPostTracker.$inferInsert;
+
+/**
+ * Luna Follower Snapshots — daily follower count snapshots for growth tracking.
+ * One row per day. Used to render the follower growth chart.
+ */
+export const lunaFollowerSnapshots = mysqlTable("luna_follower_snapshots", {
+  id: int("id").autoincrement().primaryKey(),
+  /** Follower count at time of snapshot */
+  followerCount: int("followerCount").notNull(),
+  /** Following count */
+  followingCount: int("followingCount").default(0).notNull(),
+  /** Total posts published at time of snapshot */
+  totalPosts: int("totalPosts").default(0).notNull(),
+  /** Date of snapshot (YYYY-MM-DD stored as timestamp at midnight UTC) */
+  snapshotDate: timestamp("snapshotDate").notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type LunaFollowerSnapshot = typeof lunaFollowerSnapshots.$inferSelect;
+export type InsertLunaFollowerSnapshot = typeof lunaFollowerSnapshots.$inferInsert;

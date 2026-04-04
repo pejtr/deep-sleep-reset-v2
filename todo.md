@@ -335,3 +335,18 @@
 - [x] Scheduled daily summary cron job (midnight UTC) — aggregate daily sales and POST to LeadOS
 - [x] LeadOS reporting helper (server/leadosReporter.ts) with retry logic (3 retries, exponential backoff)
 - [x] Vitest tests: 8 tests passing (payload validation, retry logic, zero-order edge case, skip outside midnight window)
+
+## Phase 30: Luna AI Persona + Content Performance Tracker [COMPLETED]
+- [x] Generate Luna visual identity (profile photo, Reel covers, Highlight icons)
+- [x] Create LUNA_PERSONA.md (backstory, voice, DM scripts, content pillars)
+- [x] Create INSTAGRAM_SETUP_GUIDE.md (account setup, 30-day content calendar)
+- [x] Add Luna Bot tab to Instagram Autopilot admin (assets, DM scripts, setup checklist)
+- [x] DB: lunaPostTracker table (reach, impressions, engagement, link clicks, DMs, revenue, virality score)
+- [x] DB: lunaFollowerSnapshots table (follower growth history)
+- [x] tRPC: luna.tracker.* (list, get, create, update, delete, kpis, trends, topPosts, formatBreakdown, pillarBreakdown, scorePost, csvExport)
+- [x] tRPC: luna.follower.* (addSnapshot, history)
+- [x] AdminLunaTracker page: KPI cards, trend charts, radar chart, pillar breakdown, top posts, full post table
+- [x] Add/Edit post modal with all metrics, AI scoring button (Gemini insight)
+- [x] Follower snapshot modal + growth chart
+- [x] CSV export with all metrics
+- [x] Performance tab in Instagram Autopilot admin
