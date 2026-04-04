@@ -6,7 +6,7 @@ import {
   Instagram, Calendar, BarChart2, Settings, Play, RefreshCw,
   CheckCircle, XCircle, Clock, Zap, TrendingUp, Eye, Heart,
   MessageCircle, Bookmark, ChevronDown, ChevronUp, Loader2, Plus,
-  FlaskConical, Hash, Repeat2, Trophy, ArrowUpRight
+  FlaskConical, Hash, Repeat2, Trophy, ArrowUpRight, Bot, Copy, ExternalLink, Moon
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -36,7 +36,7 @@ function formatDate(d: Date | string) {
 export default function AdminInstagram() {
   const { user, loading } = useAuth();
   const [, navigate] = useLocation();
-  const [activeTab, setActiveTab] = useState<"calendar" | "analytics" | "abtests" | "hashtags" | "reposts" | "settings">("calendar");
+  const [activeTab, setActiveTab] = useState<"calendar" | "analytics" | "abtests" | "hashtags" | "reposts" | "settings" | "luna">("calendar");
   const [expandedPost, setExpandedPost] = useState<number | null>(null);
   const [generating, setGenerating] = useState(false);
   const [newPostType, setNewPostType] = useState<"post" | "story">("post");
@@ -267,7 +267,7 @@ export default function AdminInstagram() {
 
         {/* Tabs */}
         <div className="flex flex-wrap gap-1 mb-6 bg-white/5 rounded-lg p-1 w-fit">
-          {(["calendar", "analytics", "abtests", "hashtags", "reposts", "settings"] as const).map(tab => (
+          {(["calendar", "analytics", "abtests", "hashtags", "reposts", "settings", "luna"] as const).map(tab => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
@@ -283,7 +283,8 @@ export default function AdminInstagram() {
               {tab === "hashtags" && <Hash className="w-3.5 h-3.5 inline mr-1.5" />}
               {tab === "reposts" && <Repeat2 className="w-3.5 h-3.5 inline mr-1.5" />}
               {tab === "settings" && <Settings className="w-3.5 h-3.5 inline mr-1.5" />}
-              {tab === "abtests" ? "A/B Tests" : tab === "hashtags" ? "Hashtags" : tab === "reposts" ? "Reposts" : tab}
+              {tab === "luna" && <Bot className="w-3.5 h-3.5 inline mr-1.5" />}
+              {tab === "abtests" ? "A/B Tests" : tab === "hashtags" ? "Hashtags" : tab === "reposts" ? "Reposts" : tab === "luna" ? "Luna Bot" : tab}
             </button>
           ))}
         </div>
@@ -776,6 +777,237 @@ export default function AdminInstagram() {
                     }`}>
                       {t.label}
                     </span>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
+
+        {/* Luna Bot Tab */}
+        {activeTab === "luna" && (
+          <div className="space-y-6">
+            {/* Luna Identity Card */}
+            <div className="grid md:grid-cols-3 gap-4">
+              <Card className="bg-gradient-to-br from-purple-900/40 to-pink-900/30 border-purple-500/30">
+                <CardContent className="p-5 flex gap-4 items-start">
+                  <img
+                    src="https://d2xsxph8kpxj0f.cloudfront.net/310419663032296198/RrG9k2uFQkqVyNWK8WEbxj/luna-profile-main-GinrBkQvqnNy8QT5oDqZcQ.png"
+                    alt="Luna"
+                    className="w-16 h-16 rounded-full object-cover border-2 border-purple-400/50 shrink-0"
+                  />
+                  <div>
+                    <h3 className="font-semibold text-white text-sm">Luna | Sleep Coach 🌙</h3>
+                    <p className="text-xs text-purple-300 mt-0.5">@luna.sleep.reset</p>
+                    <p className="text-xs text-white/50 mt-2 leading-relaxed">AI-powered wellness persona for Deep Sleep Reset. Engages followers, answers DMs, and converts to sales.</p>
+                    <div className="flex gap-2 mt-3">
+                      <span className="text-xs bg-green-500/20 text-green-400 border border-green-500/30 px-2 py-0.5 rounded-full">🤖 AI Disclosed</span>
+                      <span className="text-xs bg-purple-500/20 text-purple-300 border border-purple-500/30 px-2 py-0.5 rounded-full">CBT-I Niche</span>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="bg-white/5 border-white/10">
+                <CardContent className="p-5">
+                  <p className="text-xs text-white/40 uppercase tracking-wider mb-3">Funnel</p>
+                  <div className="space-y-2 text-sm">
+                    {[
+                      { step: "1", label: "Reel/Post hooks attention", color: "text-blue-400" },
+                      { step: "2", label: "Comment CTA → DM trigger", color: "text-purple-400" },
+                      { step: "3", label: "Luna bot qualifies in DM", color: "text-pink-400" },
+                      { step: "4", label: "Link sent → $5 purchase", color: "text-amber-400" },
+                    ].map(({ step, label, color }) => (
+                      <div key={step} className="flex items-center gap-2">
+                        <span className={`w-5 h-5 rounded-full bg-white/10 flex items-center justify-center text-xs font-bold ${color}`}>{step}</span>
+                        <span className="text-white/70 text-xs">{label}</span>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="bg-white/5 border-white/10">
+                <CardContent className="p-5">
+                  <p className="text-xs text-white/40 uppercase tracking-wider mb-3">Quick Links</p>
+                  <div className="space-y-2">
+                    <a href="https://deep-sleep-reset.com" target="_blank" rel="noreferrer"
+                      className="flex items-center gap-2 text-xs text-white/60 hover:text-white transition-colors">
+                      <ExternalLink className="w-3.5 h-3.5" /> deep-sleep-reset.com
+                    </a>
+                    <button
+                      onClick={() => { navigator.clipboard.writeText("https://deep-sleep-reset.com"); toast.success("Link copied!"); }}
+                      className="flex items-center gap-2 text-xs text-white/60 hover:text-white transition-colors">
+                      <Copy className="w-3.5 h-3.5" /> Copy product link
+                    </button>
+                    <button
+                      onClick={() => { navigator.clipboard.writeText("Helping you sleep like you used to 🌙\nCBT-I based • Science-backed • Actually works\n🤖 AI-powered coach\n↓ Free 7-night sleep reset"); toast.success("Bio copied!"); }}
+                      className="flex items-center gap-2 text-xs text-white/60 hover:text-white transition-colors">
+                      <Copy className="w-3.5 h-3.5" /> Copy Instagram bio
+                    </button>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Visual Assets */}
+            <Card className="bg-white/5 border-white/10">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-white text-sm flex items-center gap-2">
+                  <Moon className="w-4 h-4 text-amber-400" /> Luna Visual Assets
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                  {[
+                    { label: "Profile Photo", url: "https://d2xsxph8kpxj0f.cloudfront.net/310419663032296198/RrG9k2uFQkqVyNWK8WEbxj/luna-profile-main-GinrBkQvqnNy8QT5oDqZcQ.png", aspect: "aspect-square" },
+                    { label: "Reel Cover — 3AM", url: "https://d2xsxph8kpxj0f.cloudfront.net/310419663032296198/RrG9k2uFQkqVyNWK8WEbxj/luna-reel-cover-1-6ji7Nq7qo4ehbRcE9QRorT.png", aspect: "aspect-[9/16]" },
+                    { label: "Post — Sleeping", url: "https://d2xsxph8kpxj0f.cloudfront.net/310419663032296198/RrG9k2uFQkqVyNWK8WEbxj/luna-post-1-PoZHnJxumQsAj2SB5UR3wZ.png", aspect: "aspect-[4/5]" },
+                    { label: "Carousel Slide 1", url: "https://d2xsxph8kpxj0f.cloudfront.net/310419663032296198/RrG9k2uFQkqVyNWK8WEbxj/luna-carousel-1-bUEwE6CxM7sCeyDLBiezoF.png", aspect: "aspect-[4/5]" },
+                  ].map(({ label, url, aspect }) => (
+                    <div key={label} className="space-y-1.5">
+                      <div className={`${aspect} rounded-lg overflow-hidden bg-white/5 border border-white/10`}>
+                        <img src={url} alt={label} className="w-full h-full object-cover" />
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <p className="text-xs text-white/50">{label}</p>
+                        <button onClick={() => { navigator.clipboard.writeText(url); toast.success("URL copied!"); }}
+                          className="text-white/30 hover:text-white/70 transition-colors">
+                          <Copy className="w-3 h-3" />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <div className="mt-3 pt-3 border-t border-white/10 flex gap-3">
+                  <div className="flex items-center gap-2">
+                    <img src="https://d2xsxph8kpxj0f.cloudfront.net/310419663032296198/RrG9k2uFQkqVyNWK8WEbxj/luna-highlight-sleep-HrUKpkwFU7wYgbXHNYskSp.png" alt="Sleep Tips" className="w-8 h-8 rounded-full object-cover" />
+                    <span className="text-xs text-white/50">Sleep Tips Highlight</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <img src="https://d2xsxph8kpxj0f.cloudfront.net/310419663032296198/RrG9k2uFQkqVyNWK8WEbxj/luna-highlight-routine-iFcVcLcgFbHjNBJVSbzPsU.png" alt="Night Routine" className="w-8 h-8 rounded-full object-cover" />
+                    <span className="text-xs text-white/50">Night Routine Highlight</span>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* DM Scripts */}
+            <Card className="bg-white/5 border-white/10">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-white text-sm flex items-center gap-2">
+                  <MessageCircle className="w-4 h-4 text-purple-400" /> DM Scripts (Copy & Paste)
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                {[
+                  {
+                    trigger: 'Keyword: "3AM"',
+                    script: `Hey! 👋 I saw you're dealing with the 3AM wake-up thing — I know exactly how awful that is.\n\nThe reason it happens is actually a cortisol spike that your body triggers right around that time. It's not random — your nervous system is stuck in a stress loop.\n\nI put together a 7-night protocol specifically for this. It's based on the same CBT-I method sleep clinics charge $800 for — but I made it accessible for $5.\n\nWant me to send you the link? It's helped a lot of people break the 3AM cycle for good. 🌙`,
+                  },
+                  {
+                    trigger: 'Keyword: "help" / "can\'t sleep"',
+                    script: `Hey, I'm really glad you reached out 💙\n\nFirst — you're not broken, and this isn't permanent. Sleep problems are almost always fixable with the right approach.\n\nCan I ask — is it falling asleep that's the problem, or staying asleep? Or both?\n\n(I ask because the fix is slightly different depending on which one it is)`,
+                  },
+                  {
+                    trigger: 'Keyword: "price" / "how much"',
+                    script: `It's $5 🙂\n\nI know that sounds almost too cheap for something that actually works — but I wanted to make it accessible to everyone. Sleep problems affect millions of people who can't afford $800 sleep clinics.\n\nThe full protocol is at: https://deep-sleep-reset.com\n\n30-day money-back guarantee. No risk. 💙`,
+                  },
+                  {
+                    trigger: 'Generic fallback',
+                    script: `Hey! Thanks for reaching out 🌙\n\nI'm Luna — I help people fix their sleep using the same CBT-I techniques that sleep clinics use (but without the $800 price tag).\n\nWhat's going on with your sleep? I'd love to help if I can.`,
+                  },
+                ].map(({ trigger, script }) => (
+                  <div key={trigger} className="bg-white/5 rounded-lg p-3 border border-white/10">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-xs font-medium text-purple-300">{trigger}</span>
+                      <button
+                        onClick={() => { navigator.clipboard.writeText(script); toast.success("Script copied!"); }}
+                        className="text-xs text-white/40 hover:text-white flex items-center gap-1 transition-colors">
+                        <Copy className="w-3 h-3" /> Copy
+                      </button>
+                    </div>
+                    <p className="text-xs text-white/60 leading-relaxed whitespace-pre-line line-clamp-3">{script}</p>
+                  </div>
+                ))}
+                <div className="pt-2 border-t border-white/10">
+                  <p className="text-xs text-white/30">For automated DM responses, configure these scripts in the DM Auto-Responder →</p>
+                  <button
+                    onClick={() => window.location.href = "/admin/dm-autoresponder"}
+                    className="mt-2 text-xs text-purple-400 hover:text-purple-300 flex items-center gap-1 transition-colors">
+                    <MessageCircle className="w-3.5 h-3.5" /> Open DM Auto-Responder
+                  </button>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Content Calendar Week 1 */}
+            <Card className="bg-white/5 border-white/10">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-white text-sm flex items-center gap-2">
+                  <Calendar className="w-4 h-4 text-blue-400" /> Week 1 Launch Content Plan
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-2">
+                  {[
+                    { day: "Mon", format: "Reel", hook: "Why you wake up at 3AM (science explained)", cta: "DM me '3AM' if this is you", color: "text-blue-400" },
+                    { day: "Tue", format: "Carousel", hook: "5 Reasons You Can't Sleep (And How to Fix Each One)", cta: "Comment which one is you 👇", color: "text-purple-400" },
+                    { day: "Wed", format: "Story Poll", hook: "How long to fall asleep?", cta: "DM me if 30+ min", color: "text-pink-400" },
+                    { day: "Thu", format: "Post", hook: "I tried melatonin for 6 months. Here's the truth.", cta: "Real fix in bio 🌙", color: "text-amber-400" },
+                    { day: "Fri", format: "Reel", hook: "4-7-8 breathing — try this tonight", cta: "DM me how it went", color: "text-green-400" },
+                    { day: "Sat", format: "Story", hook: "My night routine (honest version)", cta: "Link in bio for full system", color: "text-cyan-400" },
+                    { day: "Sun", format: "Carousel", hook: "The 7-night sleep reset — what each night does", cta: "Full system at link in bio ☕", color: "text-rose-400" },
+                  ].map(({ day, format, hook, cta, color }) => (
+                    <div key={day} className="flex items-start gap-3 p-2.5 rounded-lg bg-white/5 border border-white/10">
+                      <span className={`text-xs font-bold w-8 shrink-0 ${color}`}>{day}</span>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-0.5">
+                          <span className="text-xs bg-white/10 text-white/60 px-1.5 py-0.5 rounded">{format}</span>
+                          <span className="text-xs text-white/80 truncate">{hook}</span>
+                        </div>
+                        <p className="text-xs text-white/40">CTA: {cta}</p>
+                      </div>
+                      <button
+                        onClick={() => { navigator.clipboard.writeText(`${format}: ${hook}\nCTA: ${cta}`); toast.success("Copied!"); }}
+                        className="text-white/20 hover:text-white/60 transition-colors shrink-0">
+                        <Copy className="w-3 h-3" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Instagram Setup Checklist */}
+            <Card className="bg-white/5 border-white/10">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-white text-sm flex items-center gap-2">
+                  <CheckCircle className="w-4 h-4 text-green-400" /> Instagram Setup Checklist
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-2">
+                  {[
+                    { label: "Create new Instagram account (fresh device/browser)", done: false },
+                    { label: "Convert to Creator account (Settings → Account)", done: false },
+                    { label: "Upload Luna profile photo", done: false },
+                    { label: "Set name: Luna | Sleep Coach 🌙", done: false },
+                    { label: "Set bio with AI disclosure + product link", done: false },
+                    { label: "Set link in bio: https://deep-sleep-reset.com", done: false },
+                    { label: "Create 5 Story Highlights (Sleep Tips, Night Routine, Results, FAQ, Get It)", done: false },
+                    { label: "Complete 14-day warmup (2 Stories/day, no product link for first 7 days)", done: false },
+                    { label: "Set up ManyChat or DM Auto-Responder for keyword triggers", done: false },
+                    { label: "Post Week 1 content calendar", done: false },
+                  ].map(({ label, done }) => (
+                    <div key={label} className="flex items-start gap-2.5 text-xs">
+                      <div className={`w-4 h-4 rounded border shrink-0 mt-0.5 flex items-center justify-center ${
+                        done ? "bg-green-500/20 border-green-500/50" : "border-white/20"
+                      }`}>
+                        {done && <CheckCircle className="w-3 h-3 text-green-400" />}
+                      </div>
+                      <span className={done ? "text-white/40 line-through" : "text-white/70"}>{label}</span>
+                    </div>
                   ))}
                 </div>
               </CardContent>
