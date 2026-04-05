@@ -23,6 +23,7 @@ import {
   Trophy,
 } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { FunnelProgressBar } from "@/components/FunnelProgressBar";
 
 function FadeIn({ children, className = "", delay = 0 }: { children: React.ReactNode; className?: string; delay?: number }) {
   const ref = useRef(null);
@@ -68,26 +69,7 @@ export default function Upsell2() {
 
   return (
     <div className="min-h-screen bg-background text-foreground overflow-x-hidden">
-      {/* Progress bar at top */}
-      <div className="fixed top-0 left-0 right-0 z-50 bg-background/90 backdrop-blur-md border-b border-border/30">
-        <div className="max-w-3xl mx-auto px-4 py-3 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Moon className="w-4 h-4 text-amber" />
-            <span className="font-[var(--font-display)] text-sm text-amber">{t.common.brandName}</span>
-          </div>
-          <div className="flex items-center gap-2 text-xs text-foreground/40">
-            <span className="text-amber font-medium">{u.step}</span>
-            <span>/</span>
-            <span>{u.stepOf}</span>
-            <span className="text-foreground/20 mx-1">|</span>
-            <span>{u.finalStep}</span>
-          </div>
-        </div>
-        {/* Progress indicator — full bar on step 2 */}
-        <div className="h-0.5 bg-border/20">
-          <div className="h-full w-full bg-amber/60 rounded-r-full" />
-        </div>
-      </div>
+      <FunnelProgressBar step="upsell2" />
 
       {/* ===== HERO / HEADLINE ===== */}
       <section className="pt-24 pb-12 relative">

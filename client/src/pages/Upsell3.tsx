@@ -7,6 +7,7 @@
  */
 
 import { useRef } from "react";
+import { FunnelProgressBar } from "@/components/FunnelProgressBar";
 import { motion, useInView } from "framer-motion";
 import CountdownTimer from "@/components/CountdownTimer";
 import { openCheckout } from "@/lib/checkout";
@@ -83,26 +84,7 @@ const TESTIMONIALS = [
 export default function Upsell3() {
   return (
     <div className="min-h-screen bg-background text-foreground overflow-x-hidden">
-      {/* Progress bar */}
-      <div className="fixed top-0 left-0 right-0 z-50 bg-background/90 backdrop-blur-md border-b border-border/30">
-        <div className="max-w-3xl mx-auto px-4 py-3 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Moon className="w-4 h-4 text-amber" />
-            <span className="font-[var(--font-display)] text-sm text-amber">Deep Sleep Reset</span>
-          </div>
-          <div className="flex items-center gap-2 text-xs text-foreground/40">
-            <span className="text-amber font-medium">Step 3</span>
-            <span>/</span>
-            <span>Step 3 of 3</span>
-            <span className="text-foreground/20 mx-1">|</span>
-            <span>Final Upgrade</span>
-          </div>
-        </div>
-        {/* Progress indicator — 75% complete */}
-        <div className="h-0.5 bg-border/20">
-          <div className="h-full w-3/4 bg-amber/60 rounded-r-full" />
-        </div>
-      </div>
+      <FunnelProgressBar step="upsell3" />
 
       {/* ===== HERO ===== */}
       <section className="pt-24 pb-12 relative">

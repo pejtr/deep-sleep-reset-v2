@@ -350,3 +350,8 @@
 - [x] Follower snapshot modal + growth chart
 - [x] CSV export with all metrics
 - [x] Performance tab in Instagram Autopilot admin
+
+## Phase 31: GuruGo Funnel Improvements [COMPLETED]
+- [x] FunnelProgressBar component — sticky top bar "Don't close — complete your order" with % progress
+- [x] Integrate progress bar into all funnel steps: Home (5%) → /order (35%) → Upsell1 (65%) → Upsell2 (85%) → ThankYou (100%)
+- [x] Pre-checkout "Wait!" popup — swipeable add-ons carousel, live total, email capture, before Stripe redirect

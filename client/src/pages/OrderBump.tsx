@@ -17,6 +17,7 @@ import { openBundleCheckout, openCheckout, type ProductKey } from "@/lib/checkou
 import { Link, useSearch } from "wouter";
 import { trackEvent } from "@/components/MetaPixel";
 import ReturningCustomerBanner from "@/components/ReturningCustomerBanner";
+import { FunnelProgressBar } from "@/components/FunnelProgressBar";
 import { getButtonColorVariant, BUTTON_VARIANTS, type ButtonColorVariant } from "@/lib/ab-button";
 import { getPriceVariant, PRICE_VARIANTS, type PriceVariant } from "@/lib/ab-price";
 import { getSessionId } from "@/lib/ab-hooks";
@@ -138,6 +139,7 @@ export default function OrderBump() {
 
   return (
     <div className="min-h-screen bg-background text-foreground overflow-x-hidden">
+      <FunnelProgressBar step="order" />
       {/* Header */}
       <header className="border-b border-border/20 py-4 px-4">
         <div className="max-w-3xl mx-auto flex items-center justify-between">

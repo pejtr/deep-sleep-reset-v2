@@ -25,6 +25,7 @@ import {
 import { trackEvent } from "@/components/MetaPixel";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { openCheckout } from "@/lib/checkout";
+import { FunnelProgressBar } from "@/components/FunnelProgressBar";
 
 const stepIcons = [Mail, Download, Moon];
 
@@ -97,6 +98,7 @@ export default function ThankYou() {
 
   return (
     <div className="min-h-screen bg-background text-foreground overflow-x-hidden">
+      <FunnelProgressBar step="thankyou" />
       {/* Header */}
       <header className="border-b border-border/20 bg-background/90 backdrop-blur-md">
         <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-center">
