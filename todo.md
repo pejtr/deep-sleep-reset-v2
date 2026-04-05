@@ -360,3 +360,6 @@
 - [x] Integrate StickyUpsellBar into Upsell3 (Advanced Sleep Mastery Protocol $19)
 - [x] PreCheckoutPopup: swipeable add-ons carousel, live total counter, email capture, Stripe integration
 - [x] Integrate PreCheckoutPopup into Home.tsx (shown before Stripe checkout)
+
+## Bug Fix: Admin key prop warning
+- [x] Fix missing React key prop in Admin component (list rendering without unique key)

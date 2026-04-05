@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { getLoginUrl } from "@/const";
@@ -497,9 +497,8 @@ export default function Admin() {
                   </thead>
                   <tbody>
                     {orders.map((o) => (
-                      <>
+                      <React.Fragment key={o.id}>
                         <tr
-                          key={o.id}
                           className="border-b border-border/10 hover:bg-card/20 cursor-pointer transition-colors"
                           onClick={() =>
                             setExpandedOrder(expandedOrder === o.id ? null : o.id)
@@ -545,7 +544,7 @@ export default function Admin() {
                             </td>
                           </tr>
                         )}
-                      </>
+                      </React.Fragment>
                     ))}
                   </tbody>
                 </table>
