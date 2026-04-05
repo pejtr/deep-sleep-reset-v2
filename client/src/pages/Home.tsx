@@ -8,7 +8,6 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import SeoHead from "@/components/SeoHead";
-import { FunnelProgressBar } from "@/components/FunnelProgressBar";
 import { motion, useInView } from "framer-motion";
 import { getVariant } from "@/lib/ab-test";
 import { getCTAVariant, getCTAText, lockCTAWinner, CTA_VARIANTS, type CTAVariant } from "@/lib/ab-cta";
@@ -21,7 +20,7 @@ import UrgencyTimer from "@/components/UrgencyTimer";
 import ChatbotTeaserHook from "@/components/ChatbotTeaserHook";
 import SocialProofWallHook from "@/components/SocialProofWallHook";
 import ExitIntentPopup from "@/components/ExitIntentPopup";
-import { PreCheckoutPopup } from "@/components/PreCheckoutPopup";
+import FunnelProgressBar from "@/components/FunnelProgressBar";
 import { getHookVariant, getSessionId } from "@/lib/ab-hooks";
 import { trpc } from "@/lib/trpc";
 import {
@@ -274,7 +273,6 @@ export default function Home() {
   const variant = useMemo(() => getVariant(), []);
   const headline = t.hero.variants[variant];
   const [scrollY, setScrollY] = useState(0);
-  const [showPreCheckout, setShowPreCheckout] = useState(false);
   const [, navigate] = useLocation();
   const hookVariant = useMemo(() => getHookVariant(), []);
   const [chatOpen, setChatOpen] = useState(false);
@@ -350,8 +348,7 @@ export default function Home() {
       eventType: "conversion",
       sessionId,
     });
-    // Show pre-checkout popup instead of navigating directly
-    setShowPreCheckout(true);
+    navigate(localePath("/order"));
   };
 
   const scrollToOffer = () => {
@@ -428,7 +425,7 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-background text-foreground overflow-x-hidden">
-      <FunnelProgressBar step="landing" />
+      <FunnelProgressBar step="home" />
       <SeoHead
         title="Deep Sleep Reset: Fix Insomnia in 7 Nights — CBT-I Protocol"
         description="Science-backed 7-night CBT-I protocol to fix insomnia and fall asleep faster. No pills, no apps. Trusted by 10,000+ people. Just $5. 30-day guarantee."
@@ -436,7 +433,7 @@ export default function Home() {
         schemas={homeSchemas}
       />
       {/* ===== HEADER ===== */}
-      <header className="fixed top-[42px] left-0 right-0 z-50 transition-all duration-500"
+      <header className="fixed top-[29px] left-0 right-0 z-50 transition-all duration-500"
         style={{
           backgroundColor: scrollY > 80 ? "oklch(0.12 0.025 260 / 0.95)" : "transparent",
           backdropFilter: scrollY > 80 ? "blur(12px)" : "none",
@@ -1066,13 +1063,6 @@ export default function Home() {
 
       {/* ===== EXIT INTENT POPUP ===== */}
       <ExitIntentPopup />
-
-      {/* ===== PRE-CHECKOUT POPUP ===== */}
-      <PreCheckoutPopup
-        isOpen={showPreCheckout}
-        onClose={() => setShowPreCheckout(false)}
-        abVariant={ctaVariant}
-      />
 
       {/* ===== FOOTER ===== */}
       <footer className="py-12 border-t border-border/20">

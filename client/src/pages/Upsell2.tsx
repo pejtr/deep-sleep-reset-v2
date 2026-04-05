@@ -5,10 +5,12 @@
  * i18n: All strings from useLanguage()
  */
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { motion, useInView } from "framer-motion";
 import CountdownTimer from "@/components/CountdownTimer";
 import { openCheckout } from "@/lib/checkout";
+import FunnelProgressBar from "@/components/FunnelProgressBar";
+import StickyUpsellBar from "@/components/StickyUpsellBar";
 import { Link } from "wouter";
 import { trackEvent } from "@/components/MetaPixel";
 import {
@@ -23,7 +25,6 @@ import {
   Trophy,
 } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { FunnelProgressBar } from "@/components/FunnelProgressBar";
 
 function FadeIn({ children, className = "", delay = 0 }: { children: React.ReactNode; className?: string; delay?: number }) {
   const ref = useRef(null);
@@ -48,6 +49,7 @@ export default function Upsell2() {
   const { t, localePath } = useLanguage();
   const u = t.upsell2;
   const hasFiredPurchase = useRef(false);
+  const [barAccepted, setBarAccepted] = useState(false);
 
   // Fire Purchase event for upsell1 ($10 Anxiety Dissolve Audio Pack)
   // This page is reached after accepting upsell1 — check URL param
@@ -206,6 +208,25 @@ export default function Upsell2() {
           </FadeIn>
         </div>
       </section>
+
+      {/* ===== STICKY BOTTOM CTA BAR ===== */}
+      {!barAccepted && (
+        <StickyUpsellBar
+          productName="The Sleep Optimizer Toolkit"
+          price="$10"
+          originalPrice="$47"
+          ctaLabel="Yes, Add to My Program"
+          declineLabel="I decline this offer — skip this upgrade"
+          onAccept={() => {
+            setBarAccepted(true);
+            openCheckout("upsell2");
+          }}
+          onDecline={() => {
+            setBarAccepted(true);
+            window.location.href = localePath("/upsell-3");
+          }}
+        />
+      )}
 
       {/* ===== FOOTER ===== */}
       <footer className="py-10 border-t border-border/20">

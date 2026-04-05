@@ -6,11 +6,12 @@
  * One-time offer format with 15-min countdown
  */
 
-import { useRef } from "react";
-import { FunnelProgressBar } from "@/components/FunnelProgressBar";
+import { useRef, useState } from "react";
 import { motion, useInView } from "framer-motion";
 import CountdownTimer from "@/components/CountdownTimer";
 import { openCheckout } from "@/lib/checkout";
+import FunnelProgressBar from "@/components/FunnelProgressBar";
+import StickyUpsellBar from "@/components/StickyUpsellBar";
 import { Link } from "wouter";
 import {
   Moon,
@@ -82,6 +83,8 @@ const TESTIMONIALS = [
 ];
 
 export default function Upsell3() {
+  const [barAccepted, setBarAccepted] = useState(false);
+
   return (
     <div className="min-h-screen bg-background text-foreground overflow-x-hidden">
       <FunnelProgressBar step="upsell3" />
@@ -252,6 +255,25 @@ export default function Upsell3() {
           </FadeIn>
         </div>
       </section>
+
+      {/* ===== STICKY BOTTOM CTA BAR ===== */}
+      {!barAccepted && (
+        <StickyUpsellBar
+          productName="Advanced Sleep Mastery Protocol"
+          price="$19"
+          originalPrice="$357"
+          ctaLabel="Yes — I Want to Master My Sleep"
+          declineLabel="I decline this offer — skip this upgrade"
+          onAccept={() => {
+            setBarAccepted(true);
+            openCheckout("upsell3");
+          }}
+          onDecline={() => {
+            setBarAccepted(true);
+            window.location.href = "/thank-you?value=25&product=Complete+Bundle";
+          }}
+        />
+      )}
 
       {/* ===== FOOTER ===== */}
       <footer className="py-10 border-t border-border/20">

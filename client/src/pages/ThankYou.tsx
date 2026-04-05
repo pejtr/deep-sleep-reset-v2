@@ -25,7 +25,7 @@ import {
 import { trackEvent } from "@/components/MetaPixel";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { openCheckout } from "@/lib/checkout";
-import { FunnelProgressBar } from "@/components/FunnelProgressBar";
+import FunnelProgressBar from "@/components/FunnelProgressBar";
 
 const stepIcons = [Mail, Download, Moon];
 

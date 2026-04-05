@@ -17,7 +17,7 @@ import { openBundleCheckout, openCheckout, type ProductKey } from "@/lib/checkou
 import { Link, useSearch } from "wouter";
 import { trackEvent } from "@/components/MetaPixel";
 import ReturningCustomerBanner from "@/components/ReturningCustomerBanner";
-import { FunnelProgressBar } from "@/components/FunnelProgressBar";
+import FunnelProgressBar from "@/components/FunnelProgressBar";
 import { getButtonColorVariant, BUTTON_VARIANTS, type ButtonColorVariant } from "@/lib/ab-button";
 import { getPriceVariant, PRICE_VARIANTS, type PriceVariant } from "@/lib/ab-price";
 import { getSessionId } from "@/lib/ab-hooks";

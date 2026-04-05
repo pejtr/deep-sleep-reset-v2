@@ -351,7 +351,12 @@
 - [x] CSV export with all metrics
 - [x] Performance tab in Instagram Autopilot admin
 
-## Phase 31: GuruGo Funnel Improvements [COMPLETED]
-- [x] FunnelProgressBar component — sticky top bar "Don't close — complete your order" with % progress
-- [x] Integrate progress bar into all funnel steps: Home (5%) → /order (35%) → Upsell1 (65%) → Upsell2 (85%) → ThankYou (100%)
-- [x] Pre-checkout "Wait!" popup — swipeable add-ons carousel, live total, email capture, before Stripe redirect
+## Phase 31: GuruGo Funnel Redesign [COMPLETED]
+- [x] FunnelProgressBar component: sticky top bar, step-based progress (5% Home → 35% Order → 65% Upsell1 → 85% Upsell2 → 92% Upsell3 → 100% ThankYou)
+- [x] Integrate FunnelProgressBar into all 6 funnel pages (Home, OrderBump, Upsell1, Upsell2, Upsell3, ThankYou)
+- [x] StickyUpsellBar component: GuruGo-style sticky bottom CTA bar (shows after 3s or 300px scroll)
+- [x] Integrate StickyUpsellBar into Upsell1 (Anxiety Dissolve Audio Pack $10)
+- [x] Integrate StickyUpsellBar into Upsell2 (Sleep Optimizer Toolkit $10)
+- [x] Integrate StickyUpsellBar into Upsell3 (Advanced Sleep Mastery Protocol $19)
+- [x] PreCheckoutPopup: swipeable add-ons carousel, live total counter, email capture, Stripe integration
+- [x] Integrate PreCheckoutPopup into Home.tsx (shown before Stripe checkout)
