@@ -7,6 +7,8 @@ import { registerOAuthRoutes } from "./oauth";
 import { appRouter } from "../routers";
 import { createContext } from "./context";
 import { serveStatic, setupVite } from "./vite";
+import funnelRoutes from "../funnelRoutes";
+import { startEmailScheduler } from "../emailScheduler";
 
 function isPortAvailable(port: number): Promise<boolean> {
   return new Promise(resolve => {
@@ -30,11 +32,16 @@ async function findAvailablePort(startPort: number = 3000): Promise<number> {
 async function startServer() {
   const app = express();
   const server = createServer(app);
-  // Configure body parser with larger size limit for file uploads
+  // ⚠️ Stripe webhook MUST use raw body BEFORE express.json()
+  // This ensures Stripe signature verification works correctly
+  app.use("/api/stripe/webhook", express.raw({ type: "application/json" }));
+  // Configure body parser for all other routes
   app.use(express.json({ limit: "50mb" }));
   app.use(express.urlencoded({ limit: "50mb", extended: true }));
   // OAuth callback under /api/oauth/callback
   registerOAuthRoutes(app);
+  // Funnel API routes (all other /api/* routes)
+  app.use("/api", funnelRoutes);
   // tRPC API
   app.use(
     "/api/trpc",
@@ -59,6 +66,8 @@ async function startServer() {
 
   server.listen(port, () => {
     console.log(`Server running on http://localhost:${port}/`);
+    // Start autonomous email scheduler (7-day follow-up sequence)
+    startEmailScheduler();
   });
 }
 

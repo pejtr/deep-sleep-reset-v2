@@ -1,5 +1,27 @@
 {
   "version": "7",
   "dialect": "mysql",
-  "entries": []
+  "entries": [
+    {
+      "idx": 0,
+      "version": "5",
+      "when": 1775984525978,
+      "tag": "0000_smart_deathstrike",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "5",
+      "when": 1775985176988,
+      "tag": "0001_charming_reavers",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1775993307446,
+      "tag": "0002_woozy_sentinels",
+      "breakpoints": true
+    }
+  ]
 }
