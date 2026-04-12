@@ -6,24 +6,24 @@ interface ExitIntentPopupProps {
 
 const MESSAGES: Record<string, { headline: string; sub: string; cta: string }> = {
   A: {
-    headline: "Počkej! Tvůj výsledek tě čeká.",
-    sub: "Zjisti proč vstáváš vyčerpaný — bezplatný test za 60 sekund.",
-    cta: "Zjistit svůj spánkový typ →",
+    headline: "Wait! Your result is ready.",
+    sub: "Find out why you wake up exhausted — free quiz in 60 seconds.",
+    cta: "Discover My Sleep Type →",
   },
   B: {
-    headline: "Ještě jedna věc před odchodem...",
-    sub: "73 % lidí s problémy se spánkem dělá jednu konkrétní chybu. Zjisti, jestli ji děláš taky.",
-    cta: "Spustit bezplatný test →",
+    headline: "One more thing before you go...",
+    sub: "73% of people with sleep problems make one specific mistake. Find out if you do too.",
+    cta: "Start Free Quiz →",
   },
   C: {
-    headline: "Tvůj chronotyp tě čeká.",
-    sub: "60 sekund. Žádná registrace. Personalizovaný plán zdarma.",
-    cta: "Odhalit svůj chronotyp →",
+    headline: "Your chronotype is waiting.",
+    sub: "60 seconds. No registration. Personalized plan — free.",
+    cta: "Reveal My Chronotype →",
   },
   D: {
-    headline: "Neztrať tuto šanci.",
-    sub: "Přestaň bojovat s nespavostí. Začni spát podle své biologie — test je zdarma.",
-    cta: "Spustit bezplatný test →",
+    headline: "Don't lose this chance.",
+    sub: "Stop fighting your sleep. Start sleeping with your biology — the quiz is free.",
+    cta: "Start Free Quiz →",
   },
 };
 
@@ -44,7 +44,7 @@ export default function ExitIntentPopup({ ctaVariant, onClose, onCTA }: ExitInte
         <button
           onClick={onClose}
           className="absolute top-3 right-3 w-8 h-8 rounded-full bg-[oklch(0.2_0.03_265)] flex items-center justify-center text-[oklch(0.6_0.04_265)] hover:text-white hover:bg-[oklch(0.3_0.04_265)] transition-all text-lg font-bold"
-          aria-label="Zavřít"
+          aria-label="Close"
         >
           ×
         </button>
@@ -65,7 +65,7 @@ export default function ExitIntentPopup({ ctaVariant, onClose, onCTA }: ExitInte
             onClick={onClose}
             className="mt-3 text-xs text-[oklch(0.4_0.03_265)] hover:text-[oklch(0.6_0.04_265)] transition-colors"
           >
-            Ne, chci dál špatně spát
+            No thanks, I'll keep sleeping poorly
           </button>
         </div>
       </div>

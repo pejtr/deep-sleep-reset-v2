@@ -94,50 +94,50 @@ export async function sendPurchaseConfirmation({
     <div style="text-align:center;margin-bottom:32px;">
       <div style="font-size:48px;margin-bottom:8px;">🌙</div>
       <h1 style="color:#fff;font-size:24px;margin:0;font-weight:800;">Deep Sleep Reset</h1>
-      <p style="color:#8b7fa8;margin:8px 0 0;">Tvůj personalizovaný spánkový systém</p>
+      <p style="color:#8b7fa8;margin:8px 0 0;">Your personalized sleep system</p>
     </div>
 
     <!-- Success banner -->
     <div style="background:linear-gradient(135deg,#2d1b69,#1a0f3a);border:1px solid #4a3080;border-radius:16px;padding:24px;text-align:center;margin-bottom:24px;">
       <div style="font-size:36px;margin-bottom:8px;">✅</div>
-      <h2 style="color:#fff;margin:0 0 8px;font-size:20px;">Platba potvrzena!</h2>
-      <p style="color:#a89bc8;margin:0;font-size:14px;">Objednávka zpracována · $${amount.toFixed(2)} USD</p>
+      <h2 style="color:#fff;margin:0 0 8px;font-size:20px;">Payment confirmed!</h2>
+      <p style="color:#a89bc8;margin:0;font-size:14px;">Order processed · $${amount.toFixed(2)} USD</p>
     </div>
 
     <!-- Chronotype badge -->
     <div style="background:#1a1230;border:1px solid #2d2050;border-radius:12px;padding:16px;text-align:center;margin-bottom:24px;">
-      <p style="color:#8b7fa8;margin:0 0 4px;font-size:12px;text-transform:uppercase;letter-spacing:1px;">Tvůj chronotyp</p>
+      <p style="color:#8b7fa8;margin:0 0 4px;font-size:12px;text-transform:uppercase;letter-spacing:1px;">Your chronotype</p>
       <p style="color:#c4a8ff;font-size:24px;font-weight:800;margin:0;">${chronotypeName}</p>
     </div>
 
     <!-- Download section -->
     <div style="background:#1a1230;border:1px solid #2d2050;border-radius:16px;padding:24px;margin-bottom:24px;">
-      <h3 style="color:#fff;margin:0 0 16px;font-size:16px;">📥 Tvoje materiály ke stažení</h3>
+      <h3 style="color:#fff;margin:0 0 16px;font-size:16px;">📥 Your download materials</h3>
       
       <div style="background:#0d0b1a;border:1px solid #2d2050;border-radius:10px;padding:16px;margin-bottom:12px;">
         <p style="color:#c4a8ff;font-weight:700;margin:0 0 4px;font-size:14px;">📄 ${download.name}</p>
-        <p style="color:#6b5f8a;margin:0 0 12px;font-size:12px;">Personalizovaný protokol pro ${chronotypeName}</p>
+        <p style="color:#6b5f8a;margin:0 0 12px;font-size:12px;">Personalized protocol for ${chronotypeName}</p>
         <a href="${download.url}" style="display:inline-block;background:linear-gradient(135deg,#7c3aed,#5b21b6);color:#fff;text-decoration:none;padding:10px 20px;border-radius:8px;font-size:13px;font-weight:700;">
-          ⬇️ Stáhnout PDF
+          ⬇️ Download PDF
         </a>
       </div>
     </div>
 
     <!-- 7-day preview -->
     <div style="background:linear-gradient(135deg,#1a0f3a,#0d0b1a);border:1px solid #4a3080;border-radius:16px;padding:24px;margin-bottom:24px;">
-      <h3 style="color:#fff;margin:0 0 12px;font-size:16px;">🚀 Jak začít dnes večer</h3>
+      <h3 style="color:#fff;margin:0 0 12px;font-size:16px;">🚀 How to start tonight</h3>
       <ol style="color:#a89bc8;margin:0;padding-left:20px;font-size:14px;line-height:1.8;">
-        <li>Stáhni si svůj personalizovaný plán výše</li>
-        <li>Přečti si Noc 1 protokol (5 minut)</li>
-        <li>Nastav si budík na čas doporučený pro tvůj chronotyp</li>
-        <li>Sleduj svůj Sleep Score každé ráno</li>
+        <li>Download your personalized plan above</li>
+        <li>Read the Night 1 protocol (5 minutes)</li>
+        <li>Set your alarm to the time recommended for your chronotype</li>
+        <li>Track your Sleep Score every morning</li>
       </ol>
     </div>
 
     <!-- Support -->
     <div style="text-align:center;margin-bottom:24px;">
       <p style="color:#6b5f8a;font-size:13px;margin:0;">
-        Otázky? Odpovídám na <a href="mailto:petr.matej@gmail.com" style="color:#c4a8ff;">petr.matej@gmail.com</a>
+        Questions? Reply to <a href="mailto:petr.matej@gmail.com" style="color:#c4a8ff;">petr.matej@gmail.com</a>
       </p>
     </div>
 
@@ -165,86 +165,86 @@ export async function sendPurchaseConfirmation({
 const EMAIL_SEQUENCE = [
   {
     day: 1,
-    subject: "🌙 Noc 1: Tvůj chronotyp a první krok ke hlubokému spánku",
-    preview: "Dnes večer uděláš jednu věc, která změní tvůj spánek navždy.",
+    subject: "🌙 Night 1: Your chronotype and the first step to deep sleep",
+    preview: "Tonight you'll do one thing that will change your sleep forever.",
     content: (chronotype: string) => `
-      <h2 style="color:#fff;">Noc 1: Nastav svůj biologický alarm</h2>
-      <p style="color:#a89bc8;">Ahoj,</p>
-      <p style="color:#a89bc8;">Gratulujeme k prvnímu kroku! Dnes večer tě čeká jedna jednoduchá, ale mocná technika.</p>
-      <p style="color:#a89bc8;">Jako <strong style="color:#c4a8ff;">${CHRONOTYPE_NAMES[chronotype] || "Medvěd 🐻"}</strong> potřebuješ přesně vědět, kdy tvoje tělo chce spát. A dnes večer to zjistíš.</p>
+      <h2 style="color:#fff;">Night 1: Set Your Biological Alarm</h2>
+      <p style="color:#a89bc8;">Hey,</p>
+      <p style="color:#a89bc8;">Congrats on taking the first step! Tonight you have one simple but powerful technique waiting for you.</p>
+      <p style="color:#a89bc8;">As a <strong style="color:#c4a8ff;">${CHRONOTYPE_NAMES[chronotype] || "Bear 🐻"}</strong>, you need to know exactly when your body wants to sleep. Tonight you'll find out.</p>
       <div style="background:#1a1230;border-left:4px solid #7c3aed;padding:16px;border-radius:0 8px 8px 0;margin:16px 0;">
-        <p style="color:#c4a8ff;font-weight:700;margin:0 0 8px;">Dnešní úkol (5 minut):</p>
-        <p style="color:#a89bc8;margin:0;">2 hodiny před plánovaným spánkem ztlum všechna světla na minimum a odlož telefon. Toto jediné cvičení spustí produkci melatoninu a přirozeně tě připraví na spánek.</p>
+        <p style="color:#c4a8ff;font-weight:700;margin:0 0 8px;">Tonight's task (5 minutes):</p>
+        <p style="color:#a89bc8;margin:0;">2 hours before your planned sleep time, dim all lights to minimum and put your phone down. This single exercise triggers melatonin production and naturally prepares you for sleep.</p>
       </div>
-      <p style="color:#a89bc8;">Zítra ti pošlu Noc 2 — jak eliminovat spánkové "krádeže".</p>
-      <p style="color:#a89bc8;">Spi dobře 🌙</p>
+      <p style="color:#a89bc8;">Tomorrow I'll send you Night 2 — how to eliminate sleep "thieves".</p>
+      <p style="color:#a89bc8;">Sleep well 🌙</p>
     `,
   },
   {
     day: 2,
-    subject: "🌙 Noc 2: Eliminuj spánkové krádeže (tohle tě překvapí)",
-    preview: "Jedna věc, kterou děláš každý večer, krade ti hodiny hlubokého spánku.",
+    subject: "🌙 Night 2: Eliminate sleep thieves (this will surprise you)",
+    preview: "One thing you do every evening is stealing hours of deep sleep from you.",
     content: (chronotype: string) => `
-      <h2 style="color:#fff;">Noc 2: Spánkové krádeže</h2>
-      <p style="color:#a89bc8;">Jak šla Noc 1? Dnes jdeme hlouběji.</p>
-      <p style="color:#a89bc8;">Největší spánkový zloděj pro <strong style="color:#c4a8ff;">${CHRONOTYPE_NAMES[chronotype] || "Medvěd 🐻"}</strong> je kofein. Ale ne ten ranní — ten odpolední.</p>
+      <h2 style="color:#fff;">Night 2: Sleep Thieves</h2>
+      <p style="color:#a89bc8;">How did Night 1 go? Tonight we go deeper.</p>
+      <p style="color:#a89bc8;">The biggest sleep thief for <strong style="color:#c4a8ff;">${CHRONOTYPE_NAMES[chronotype] || "Bear 🐻"}</strong> is caffeine. Not the morning coffee — the afternoon one.</p>
       <div style="background:#1a1230;border-left:4px solid #7c3aed;padding:16px;border-radius:0 8px 8px 0;margin:16px 0;">
-        <p style="color:#c4a8ff;font-weight:700;margin:0 0 8px;">Dnešní úkol:</p>
-        <p style="color:#a89bc8;margin:0;">Nastav si kofeinový cutoff na 13:00. Kofein má poločas rozpadu 5–7 hodin — šálek ve 15:00 znamená, že v 22:00 máš stále polovinu kofeinu v krvi. Dnes večer vyzkoušej techniku 4-7-8 dýchání při usínání.</p>
+        <p style="color:#c4a8ff;font-weight:700;margin:0 0 8px;">Tonight's task:</p>
+        <p style="color:#a89bc8;margin:0;">Set your caffeine cutoff to 1pm. Caffeine has a half-life of 5–7 hours — a cup at 3pm means you still have half the caffeine in your blood at 10pm. Tonight try the 4-7-8 breathing technique when falling asleep.</p>
       </div>
     `,
   },
   {
     day: 3,
-    subject: "🌙 Noc 3: Spánková jeskyně — optimalizuj prostředí za 10 minut",
-    preview: "Malá změna v ložnici = dramatické zlepšení kvality spánku.",
+    subject: "🌙 Night 3: Sleep cave — optimize your environment in 10 minutes",
+    preview: "A small change in your bedroom = dramatic improvement in sleep quality.",
     content: (_chronotype: string) => `
-      <h2 style="color:#fff;">Noc 3: Optimalizuj prostředí</h2>
-      <p style="color:#a89bc8;">Dnes se zaměříme na tvoji ložnici. Malé změny, velký dopad.</p>
+      <h2 style="color:#fff;">Night 3: Optimize Your Environment</h2>
+      <p style="color:#a89bc8;">Tonight we focus on your bedroom. Small changes, big impact.</p>
       <div style="background:#1a1230;border-left:4px solid #7c3aed;padding:16px;border-radius:0 8px 8px 0;margin:16px 0;">
-        <p style="color:#c4a8ff;font-weight:700;margin:0 0 8px;">Checklist pro dnes večer:</p>
+        <p style="color:#c4a8ff;font-weight:700;margin:0 0 8px;">Tonight's checklist:</p>
         <ul style="color:#a89bc8;margin:0;padding-left:20px;">
-          <li>Zakryj všechny LED kontrolky a standby světla</li>
-          <li>Sniž teplotu na 17–19°C</li>
-          <li>Telefon nabíjej mimo ložnici</li>
+          <li>Cover all LED indicator lights and standby lights</li>
+          <li>Lower temperature to 63–66°F (17–19°C)</li>
+          <li>Charge your phone outside the bedroom</li>
         </ul>
       </div>
     `,
   },
   {
     day: 5,
-    subject: "🌙 Den 5: Jak spíš? + Bonus tip pro hluboký spánek",
-    preview: "Jeden doplněk, který dramaticky zlepší tvůj spánek (vědecky ověřeno).",
+    subject: "🌙 Day 5: How are you sleeping? + Bonus tip for deep sleep",
+    preview: "One supplement that dramatically improves your sleep (scientifically proven).",
     content: (_chronotype: string) => `
-      <h2 style="color:#fff;">Den 5: Magnesium — tajná zbraň spánku</h2>
-      <p style="color:#a89bc8;">Jak ti jde 7-Night Reset? Dnes ti dám jeden konkrétní tip, který funguje pro 80% lidí.</p>
-      <p style="color:#a89bc8;"><strong style="color:#c4a8ff;">Magnesium glycinát</strong> — 200–400mg hodinu před spaním. Magnesium je kofaktor pro relaxaci nervového systému a svalů. Většina lidí má jeho deficit.</p>
-      <p style="color:#a89bc8;">Kde koupit: lékárna, iHerb, nebo Rohlik.cz. Cena: 200–400 Kč za 2 měsíce zásoby.</p>
+      <h2 style="color:#fff;">Day 5: Magnesium — The Secret Weapon of Sleep</h2>
+      <p style="color:#a89bc8;">How is the 7-Night Reset going? Today I'll give you one specific tip that works for 80% of people.</p>
+      <p style="color:#a89bc8;"><strong style="color:#c4a8ff;">Magnesium glycinate</strong> — 200–400mg one hour before bed. Magnesium is a cofactor for nervous system and muscle relaxation. Most people are deficient.</p>
+      <p style="color:#a89bc8;">Where to buy: any pharmacy or iHerb. Cost: ~$15–25 for a 2-month supply.</p>
       <div style="background:#1a1230;border:1px solid #2d2050;border-radius:12px;padding:16px;margin:16px 0;text-align:center;">
-        <p style="color:#c4a8ff;font-weight:700;margin:0 0 8px;">Chceš jít hlouběji?</p>
-        <p style="color:#a89bc8;margin:0 0 12px;font-size:14px;">30-Day Sleep Transformation Program ti dá kompletní systém pro trvalou změnu spánku.</p>
+        <p style="color:#c4a8ff;font-weight:700;margin:0 0 8px;">Want to go deeper?</p>
+        <p style="color:#a89bc8;margin:0 0 12px;font-size:14px;">The 30-Day Sleep Transformation Program gives you the complete system for lasting sleep change.</p>
         <a href="https://deepsleep.manus.space/upsell/1" style="display:inline-block;background:linear-gradient(135deg,#7c3aed,#5b21b6);color:#fff;text-decoration:none;padding:10px 24px;border-radius:8px;font-size:13px;font-weight:700;">
-          Zobrazit program →
+          View Program →
         </a>
       </div>
     `,
   },
   {
     day: 7,
-    subject: "🎉 Den 7: Jak se cítíš? + Tvůj celoživotní spánkový plán",
-    preview: "Gratulujeme k dokončení 7-Night Reset! Zde je tvůj další krok.",
+    subject: "🎉 Day 7: How do you feel? + Your lifelong sleep plan",
+    preview: "Congratulations on completing the 7-Night Reset! Here is your next step.",
     content: (chronotype: string) => `
-      <h2 style="color:#fff;">🎉 Dokončil jsi 7-Night Reset!</h2>
-      <p style="color:#a89bc8;">Gratulujeme! Dokončení 7-denního protokolu tě zařazuje do top 5% lidí, kteří skutečně pracují na kvalitě svého spánku.</p>
-      <p style="color:#a89bc8;">Jako <strong style="color:#c4a8ff;">${CHRONOTYPE_NAMES[chronotype] || "Medvěd 🐻"}</strong> máš nyní základní nástroje. Ale skutečná transformace spánku trvá 21–30 dní.</p>
+      <h2 style="color:#fff;">🎉 You Completed the 7-Night Reset!</h2>
+      <p style="color:#a89bc8;">Congratulations! Completing the 7-day protocol puts you in the top 5% of people who actually work on their sleep quality.</p>
+      <p style="color:#a89bc8;">As a <strong style="color:#c4a8ff;">${CHRONOTYPE_NAMES[chronotype] || "Bear 🐻"}</strong> you now have the foundational tools. But real sleep transformation takes 21–30 days.</p>
       <div style="background:linear-gradient(135deg,#2d1b69,#1a0f3a);border:1px solid #4a3080;border-radius:16px;padding:24px;margin:16px 0;text-align:center;">
         <p style="color:#c4a8ff;font-size:18px;font-weight:800;margin:0 0 8px;">30-Day Sleep Transformation</p>
-        <p style="color:#a89bc8;margin:0 0 16px;font-size:14px;">Kompletní systém pro trvalou změnu spánku — jen $7</p>
+        <p style="color:#a89bc8;margin:0 0 16px;font-size:14px;">Complete system for lasting sleep change — only $7</p>
         <a href="https://deepsleep.manus.space/upsell/1" style="display:inline-block;background:linear-gradient(135deg,#7c3aed,#5b21b6);color:#fff;text-decoration:none;padding:12px 28px;border-radius:8px;font-size:14px;font-weight:700;">
-          Chci pokračovat →
+          Continue My Journey →
         </a>
       </div>
-      <p style="color:#6b5f8a;font-size:13px;">Toto je poslední email z naší 7-denní sekvence. Spi dobře! 🌙</p>
+      <p style="color:#6b5f8a;font-size:13px;">This is the last email in our 7-day sequence. Sleep well! 🌙</p>
     `,
   },
 ];
@@ -278,18 +278,18 @@ export async function sendSequenceEmail({
     
     <div style="text-align:center;margin-bottom:24px;">
       <div style="font-size:36px;margin-bottom:4px;">🌙</div>
-      <p style="color:#8b7fa8;margin:0;font-size:12px;text-transform:uppercase;letter-spacing:1px;">Deep Sleep Reset · Den ${day}</p>
+      <p style="color:#8b7fa8;margin:0;font-size:12px;text-transform:uppercase;letter-spacing:1px;">Deep Sleep Reset · Day ${day}</p>
     </div>
 
     <div style="background:#1a1230;border:1px solid #2d2050;border-radius:16px;padding:28px;margin-bottom:24px;">
-      <p style="color:#8b7fa8;margin:0 0 16px;font-size:13px;">Ahoj ${displayName} (${chronotypeName}),</p>
+      <p style="color:#8b7fa8;margin:0 0 16px;font-size:13px;">Hey ${displayName} (${chronotypeName}),</p>
       ${emailData.content(chronotype)}
     </div>
 
     <div style="text-align:center;border-top:1px solid #1a1230;padding-top:20px;">
       <p style="color:#4a3f6b;font-size:11px;margin:0;">
         Deep Sleep Reset © 2026 🌙<br>
-        <a href="#" style="color:#4a3f6b;">Odhlásit se</a>
+        <a href="#" style="color:#4a3f6b;">Unsubscribe</a>
       </p>
     </div>
   </div>

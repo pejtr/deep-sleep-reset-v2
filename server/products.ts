@@ -5,7 +5,7 @@ export const FUNNEL_PRODUCTS = {
   tripwire: {
     key: "tripwire",
     name: "7-Night Deep Sleep Reset",
-    description: "Personalizovaný 7-denní spánkový protokol pro tvůj chronotyp",
+    description: "Personalized 7-night sleep protocol for your chronotype",
     price: 100, // $1.00
     displayPrice: "$1",
     originalPrice: "$27",
@@ -16,7 +16,7 @@ export const FUNNEL_PRODUCTS = {
   oto1: {
     key: "oto1",
     name: "30-Day Sleep Transformation",
-    description: "Kompletní 30-denní program pro trvalou změnu spánku",
+    description: "Complete 30-day program for lasting sleep transformation",
     price: 700, // $7.00
     displayPrice: "$7",
     originalPrice: "$47",
@@ -27,7 +27,7 @@ export const FUNNEL_PRODUCTS = {
   oto2: {
     key: "oto2",
     name: "Chronotype Audio Mastery Pack",
-    description: "4 audio session pro rychlé usnutí a hluboký spánek",
+    description: "4 audio sessions for fast sleep onset and deep sleep",
     price: 1700, // $17.00
     displayPrice: "$17",
     originalPrice: "$67",
@@ -38,7 +38,7 @@ export const FUNNEL_PRODUCTS = {
   oto3: {
     key: "oto3",
     name: "Deep Sleep Toolkit",
-    description: "Kompletní toolkit — deník, tracker, recepty, supplement guide",
+    description: "Complete toolkit — journal, tracker, recipes, supplement guide",
     price: 2700, // $27.00
     displayPrice: "$27",
     originalPrice: "$97",

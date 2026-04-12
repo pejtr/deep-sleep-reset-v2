@@ -579,6 +579,115 @@
   background: oklch(0.13 0.028 265);
 }
 
+/* ─── Amber / Gold Tokens ──────────────────────────────────────────────────── */
+:root {
+  --gold: oklch(0.78 0.18 65);
+  --gold-dim: oklch(0.65 0.16 65);
+  --gold-glow: oklch(0.78 0.18 65 / 0.35);
+  --night-deep: oklch(0.07 0.025 255);
+  --night-mid: oklch(0.10 0.025 260);
+}
+
+/* ─── Hero Photo Background ─────────────────────────────────────────────────── */
+.hero-photo {
+  background-image:
+    linear-gradient(to bottom,
+      oklch(0.06 0.02 255 / 0.35) 0%,
+      oklch(0.07 0.02 255 / 0.55) 40%,
+      oklch(0.07 0.02 255 / 0.85) 75%,
+      oklch(0.07 0.02 255 / 1.00) 100%
+    ),
+    url('https://d2xsxph8kpxj0f.cloudfront.net/89740521/oMP8CH8vmujDrxr428gHAC/hero-night-sky_4a345d70.jpg');
+  background-size: cover;
+  background-position: center 30%;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+}
+
+/* ─── Golden CTA Button ─────────────────────────────────────────────────────── */
+.cta-gold {
+  position: relative;
+  background: linear-gradient(135deg, oklch(0.78 0.18 65), oklch(0.68 0.20 55));
+  color: oklch(0.10 0.02 265);
+  box-shadow: 0 4px 28px oklch(0.78 0.18 65 / 0.45), 0 1px 0 oklch(1 0 0 / 0.25) inset;
+  transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
+  font-weight: 800;
+}
+
+.cta-gold::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, oklch(1 0 0 / 0.12) 0%, transparent 50%);
+  border-radius: inherit;
+}
+
+.cta-gold:hover {
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 8px 44px oklch(0.78 0.18 65 / 0.6), 0 1px 0 oklch(1 0 0 / 0.25) inset;
+}
+
+.cta-gold:active {
+  transform: translateY(0) scale(0.99);
+}
+
+.cta-gold.cta-shimmer::after {
+  background: linear-gradient(
+    105deg,
+    transparent 40%,
+    oklch(1 0 0 / 0.25) 50%,
+    transparent 60%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 2.5s linear infinite;
+}
+
+/* ─── Gold Gradient Text ────────────────────────────────────────────────────── */
+.text-gold {
+  color: oklch(0.82 0.16 65);
+}
+
+.text-gradient-gold {
+  background: linear-gradient(135deg, oklch(0.88 0.14 65), oklch(0.78 0.20 55), oklch(0.85 0.16 70));
+  background-size: 200% 200%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: gradient-shift 4s ease infinite;
+}
+
+/* ─── Top Progress Bar ──────────────────────────────────────────────────────── */
+.top-progress-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  height: 3px;
+  background: oklch(0.15 0.03 265 / 0.6);
+}
+
+.top-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, oklch(0.78 0.18 65), oklch(0.88 0.14 65));
+  transition: width 0.3s ease;
+  box-shadow: 0 0 8px oklch(0.78 0.18 65 / 0.6);
+}
+
+/* ─── Top Nav Bar ───────────────────────────────────────────────────────────── */
+.top-nav {
+  position: fixed;
+  top: 3px;
+  left: 0;
+  right: 0;
+  z-index: 99;
+  background: oklch(0.08 0.02 265 / 0.75);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid oklch(0.78 0.18 65 / 0.12);
+}
+
 /* ─── Floating Orbs ─────────────────────────────────────────────────────────── */
 .orb {
   position: absolute;

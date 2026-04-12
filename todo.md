@@ -137,17 +137,17 @@ FB/IG Post → Landing Page (Hero + Quiz) → Quiz Výsledek + CTA
 - [x] Error handling pro optimization_history writes — try/catch s console.error (ne silent)
 
 ## Kliken 3.0 + AI Content Generátor
-- [ ] Kliken 3.0 scripty pro 3 Reels (timing, text overlay, voiceover, CTA)
+- [x] Kliken 3.0 scripty pro 3 Reels (timing, text overlay, voiceover, CTA) — viz contentCron.ts reel_script type
 - [x] AI content generátor endpoint (/api/admin/generate-content) — LLM generuje Reels scripty, captions, hashtags
 - [x] Admin dashboard — Content Generator tab s formulářem a výstupem
-- [ ] Automatické denní generování 3 postů (cron job 6am)
-- [ ] Content history — uložení vygenerovaného obsahu do DB
+- [x] Automatické denní generování 3 postů (cron job 6am) — contentCron.ts + scheduleDailyContentGeneration()
+- [x] Content history — uložení vygenerovaného obsahu do DB — content_history tabulka + /api/admin/content-history
 
 ## Premium Subscription Program (Klein + Hormozi)
 - [x] Navrhnout Premium program strukturu (tiers, ceny, obsah, identity)
 - [x] Stripe recurring subscription ($9.99/měsíc nebo $27/měsíc)
-- [ ] Member area — chráněné stránky pro předplatitele
-- [ ] Měsíční nový obsah (Sleep Protocol updates, nové audio, nové guides)
+- [x] Member area — chráněné stránky pro předplatitele — /members (Members.tsx)
+- [x] Měsíční nový obsah (Sleep Protocol updates, nové audio, nové guides) — member_content tabulka + Members.tsx content library
 - [x] Komunita identita — "Sleep Optimizers" brand
 - [x] Upgrade CTA v ThankYou stránce a email sekvenci
 - [x] Admin dashboard — subscription metrics (MRR, churn, LTV)
@@ -174,3 +174,12 @@ FB/IG Post → Landing Page (Hero + Quiz) → Quiz Výsledek + CTA
 - [x] Vitest testy pro contentCron (scheduling, DB persistence, error handling) — 9 testů v content.test.ts
 - [x] Member area: Members.tsx s content library, tier badges, upgrade CTA
 - [x] Admin Content Generator: zobrazit historii vygenerovaného obsahu z DB
+
+## Jazykové opravy
+- [x] Opravit všechny české texty v notifikacích, toast zprávách a server hlášeních na angličtinu
+
+## Design Redesign — Originální Estetika
+- [x] Home.tsx — noční nebe hero background, zlatá amber typografie, serif Playfair Display
+- [x] index.css — amber/gold tokeny, hero-photo třída, progress bar styl, cta-gold
+- [x] Navigace — minimalistická s progress barem nahoře (jako originál) + scarcity ticker
+- [x] Hero — fullscreen s noční oblohou, zlatý CTA button (cta-gold)

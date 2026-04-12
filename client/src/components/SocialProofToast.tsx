@@ -1,16 +1,16 @@
 import { useEffect, useState, useRef } from "react";
 
 const NOTIFICATIONS = [
-  { name: "Markéta", city: "Praha", action: "právě dokončila test", emoji: "🧠" },
-  { name: "Tomáš", city: "Brno", action: "koupil Sleep Reset za $1", emoji: "🌙" },
-  { name: "Lucie", city: "Ostrava", action: "zjistila, že je Wolf chronotyp", emoji: "🐺" },
-  { name: "Pavel", city: "Plzeň", action: "spí hlouběji po 7 nocích", emoji: "😴" },
-  { name: "Jana", city: "Liberec", action: "právě dokončila test", emoji: "🧠" },
-  { name: "Martin", city: "Olomouc", action: "koupil Sleep Reset za $1", emoji: "🌙" },
-  { name: "Eva", city: "České Budějovice", action: "zjistila, že je Lion chronotyp", emoji: "🦁" },
-  { name: "Petr", city: "Hradec Králové", action: "koupil Sleep Reset za $1", emoji: "🌙" },
-  { name: "Tereza", city: "Pardubice", action: "spí hlouběji po 7 nocích", emoji: "😴" },
-  { name: "Ondřej", city: "Zlín", action: "zjistil, že je Bear chronotyp", emoji: "🐻" },
+  { name: "Sarah M.", city: "Austin, TX", action: "just completed the quiz", emoji: "🧠" },
+  { name: "James K.", city: "London, UK", action: "bought Sleep Reset for $1", emoji: "🌙" },
+  { name: "Lucie V.", city: "Prague, CZ", action: "discovered she's a Wolf chronotype", emoji: "🐺" },
+  { name: "Marcus T.", city: "Toronto, CA", action: "sleeping deeper after 7 nights", emoji: "😴" },
+  { name: "Emma L.", city: "Sydney, AU", action: "just completed the quiz", emoji: "🧠" },
+  { name: "David W.", city: "New York, US", action: "bought Sleep Reset for $1", emoji: "🌙" },
+  { name: "Priya R.", city: "Mumbai, IN", action: "discovered she's a Lion chronotype", emoji: "🦁" },
+  { name: "Alex B.", city: "Berlin, DE", action: "bought Sleep Reset for $1", emoji: "🌙" },
+  { name: "Aisha M.", city: "Lagos, NG", action: "sleeping deeper after 7 nights", emoji: "😴" },
+  { name: "Tom H.", city: "Amsterdam, NL", action: "discovered he's a Bear chronotype", emoji: "🐻" },
 ];
 
 export default function SocialProofToast() {
@@ -59,10 +59,10 @@ export default function SocialProofToast() {
         <div className="text-2xl flex-shrink-0">{current.emoji}</div>
         <div>
           <p className="text-xs text-white leading-snug">
-            <span className="font-bold">{current.name}</span> z {current.city}{" "}
+            <span className="font-bold">{current.name}</span> from {current.city}{" "}
             <span className="text-[oklch(0.7_0.04_265)]">{current.action}</span>
           </p>
-          <p className="text-[10px] text-[oklch(0.45_0.04_265)] mt-0.5">před chvílí</p>
+          <p className="text-[10px] text-[oklch(0.45_0.04_265)] mt-0.5">just now</p>
         </div>
       </div>
     </div>
