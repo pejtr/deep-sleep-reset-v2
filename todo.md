@@ -86,3 +86,40 @@ FB/IG Post → Landing Page (Hero + Quiz) → Quiz Výsledek + CTA
 - [x] Potvrzovací email po nákupu s download linkem
 - [x] 7-denní email sekvence (dny 1, 2, 3, 5, 7)
 - [x] Upsell follow-up email (den 5 a 7 sekvence)
+
+## Nové funkce (přidáno)
+- [ ] Sekce uživatelských recenzí a hodnocení na Home stránce
+- [ ] Real-time analytický panel pro admina (klíčové metriky)
+- [ ] Email popup pro sběr kontaktů (exit-intent + timed)
+- [ ] Přeložit celý funnel do angličtiny (Home, Quiz, QuizResult, Order, Upsell 1-3, ThankYou)
+- [ ] Přeložit email sekvenci a potvrzovací emaily do angličtiny
+- [ ] Aktualizovat OG tagy pro anglický trh
+- [ ] Přidat low-tier tržní optimalizaci (mobilní, pomalé připojení)
+
+## Behaviorální psychologie & Neuro-marketing
+- [ ] Přeložit celý funnel do angličtiny (Home, Quiz, QuizResult, Order, Upsell1-3, ThankYou, emaily)
+- [ ] Cialdini principy: Scarcity, Social Proof, Authority, Reciprocity, Commitment na každé stránce
+- [ ] Loss aversion framing na Order stránce ("Don't lose another night of sleep")
+- [ ] Anchoring na upsell stránkách (původní cena přeškrtnutá)
+- [ ] Progress bias v quizu (completion effect — "You're 80% done!")
+- [ ] Micro-commitments sekvence (quiz → email → platba)
+- [ ] Fear of Missing Out (FOMO) na Order stránce
+- [ ] Sekce recenzí s photo avatary a verified badge
+- [ ] Email lead capture popup (timed 8s + exit-intent)
+
+## Heat Mapy & Behavior Analytics
+- [ ] Click tracking na každý element (button, link, chronotype card)
+- [ ] Scroll depth tracking (25%, 50%, 75%, 100%)
+- [ ] Rage click detection
+- [ ] Session time tracking per page
+- [ ] Funnel drop-off tracking (kde lidé odcházejí)
+- [ ] Heat mapa vizualizace v Admin dashboardu
+- [ ] Behavior analytics panel v Admin (click density, scroll heatmap)
+
+## Autonomní noční AI analyzátor (půlnoc)
+- [ ] Cron job každou půlnoc (00:00)
+- [ ] Sbírá data: konverze, A/B výsledky, drop-off body, revenue
+- [ ] AI (LLM) analyzuje data a generuje insights
+- [ ] Automaticky aktualizuje A/B varianty (vítěz dostane 70% traffic)
+- [ ] Generuje denní report a posílá notifikaci vlastníkovi
+- [ ] Ukládá historii optimalizací do DB

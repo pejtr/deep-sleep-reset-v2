@@ -467,4 +467,59 @@ router.get("/downloads", async (req: Request, res: Response) => {
   }
 });
 
+// ─── Behavior Tracking (heat map & funnel analytics) ────────────────────────
+router.post("/behavior/track", async (req: Request, res: Response) => {
+  try {
+    const { event, page, product, result } = req.body;
+    const db = await getDb();
+    if (db) {
+      await db.execute(
+        sql`INSERT IGNORE INTO behavior_events (event_type, page, product, result, created_at) VALUES (${event || 'unknown'}, ${page || 'unknown'}, ${product || null}, ${result || null}, NOW())`
+      ).catch(() => {}); // Table may not exist yet
+    }
+    res.json({ ok: true });
+  } catch {
+    res.json({ ok: true }); // Never fail the client
+  }
+});
+
+// ─── Leads Capture (email popup) ─────────────────────────────────────────────
+router.post("/leads/capture", async (req: Request, res: Response) => {
+  try {
+    const { email, source } = req.body;
+    if (!email || !email.includes("@")) {
+      return res.status(400).json({ error: "Invalid email" });
+    }
+    const db = await getDb();
+    if (db) {
+      await db.insert(emailLeads).values({
+        email: email.toLowerCase().trim(),
+        source: source || "popup",
+        chronotype: null,
+      }).catch(() => {}); // Ignore duplicate
+    }
+    // Add to Brevo
+    await addBrevoContact({ email, name: undefined, chronotype: undefined, product: undefined }).catch(() => {});
+    res.json({ ok: true });
+  } catch {
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
+// ─── Nightly AI Analysis (called by scheduler at midnight) ───────────────────
+router.post("/admin/nightly-analysis", async (req: Request, res: Response) => {
+  const authHeader = req.headers["x-internal-key"];
+  if (authHeader !== process.env.JWT_SECRET) {
+    return res.status(403).json({ error: "Forbidden" });
+  }
+  try {
+    const { runNightlyAnalysis } = await import("./nightlyAnalyzer.js");
+    const report = await runNightlyAnalysis();
+    res.json({ ok: true, report });
+  } catch (err) {
+    console.error("[Nightly Analysis] Failed:", err);
+    res.status(500).json({ error: "Analysis failed" });
+  }
+});
+
 export default router;

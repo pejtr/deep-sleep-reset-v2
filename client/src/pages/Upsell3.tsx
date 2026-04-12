@@ -1,21 +1,32 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useLocation } from "wouter";
+import { toast } from "sonner";
 
 export default function Upsell3() {
   const [, setLocation] = useLocation();
   const [loading, setLoading] = useState(false);
+  const [chronotype, setChronotype] = useState("bear");
+
+  useEffect(() => {
+    const r = sessionStorage.getItem("dsr_quiz_result") || "bear";
+    setChronotype(r);
+    fetch("/api/behavior/track", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ event: "page_view", page: "upsell3", ts: Date.now() }) }).catch(() => {});
+  }, []);
 
   const handleAccept = async () => {
     setLoading(true);
     try {
-      const res = await fetch("/api/orders/upsell", {
+      fetch("/api/behavior/track", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ event: "upsell_accept", page: "upsell3", product: "oto3", ts: Date.now() }) }).catch(() => {});
+      const res = await fetch("/api/orders/create", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ upsell: "oto3", price: 27 }),
+        body: JSON.stringify({ productId: "oto3", chronotype }),
       });
       const data = await res.json();
       if (data.url) {
-        window.location.href = data.url;
+        window.open(data.url, "_blank");
+        toast.success("Redirecting to checkout...");
+        setTimeout(() => setLocation("/thank-you"), 1500);
       } else {
         setLocation("/thank-you");
       }
@@ -26,36 +37,38 @@ export default function Upsell3() {
     }
   };
 
-  const handleDecline = () => setLocation("/thank-you");
+  const handleDecline = () => {
+    fetch("/api/behavior/track", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ event: "upsell_decline", page: "upsell3", product: "oto3", ts: Date.now() }) }).catch(() => {});
+    setLocation("/thank-you");
+  };
 
   return (
     <div className="min-h-screen stars-bg px-4 py-10">
       <div className="max-w-md mx-auto text-center">
         <div className="text-5xl mb-4 animate-float">🧰</div>
         <h1 className="text-2xl md:text-3xl font-black text-white mb-3 leading-tight">
-          Kompletní Deep Sleep Toolkit
+          Complete Your Sleep Transformation — Full Toolkit
         </h1>
         <p className="text-[oklch(0.65_0.04_265)] mb-6 text-sm">
-          Vše, co potřebuješ pro dokonalý spánek na jednom místě.
-          Spánkový deník, habit tracker, recepty a bonusové materiály.
+          Everything you need for perfect sleep in one place — sleep journal, habit tracker, recipe book, supplement guide, and bonus materials.
         </p>
 
         <div className="bg-[oklch(0.12_0.025_265)] border border-[oklch(0.72_0.18_45/0.5)] rounded-2xl p-6 mb-6 text-left">
           <div className="text-center mb-4">
             <span className="px-3 py-1 rounded-full bg-[oklch(0.72_0.18_45/0.2)] border border-[oklch(0.72_0.18_45/0.4)] text-[oklch(0.85_0.15_45)] text-xs font-bold">
-              NEJLEPŠÍ HODNOTA
+              BEST VALUE
             </span>
           </div>
 
           <ul className="space-y-2 text-sm text-[oklch(0.75_0.03_265)] mb-5">
             {[
-              "📔 Spánkový deník (90 dní, printable PDF)",
-              "📊 Habit Tracker — spánek, stres, energie",
-              "🥗 Sleep-Boosting Recipe Book (27 receptů)",
-              "💊 Supplement Guide — co funguje a co ne",
-              "📱 App doporučení pro tracking spánku",
-              "🎁 Bonus: Sleep Environment Checklist",
-              "🎁 Bonus: Partner Sleep Guide",
+              "📔 90-Day Sleep Journal (printable PDF)",
+              "📊 Habit Tracker — sleep, stress, energy",
+              "🥗 Sleep-Boosting Recipe Book (27 recipes)",
+              "💊 Supplement Guide — what works, what doesn't",
+              "📱 Top sleep tracking app recommendations",
+              "🎁 Bonus: Sleep Environment Optimization Checklist",
+              "🎁 Bonus: Partner Sleep Alignment Guide",
             ].map((item, i) => (
               <li key={i} className="flex items-start gap-2">
                 <span className="text-[oklch(0.72_0.18_45)] mt-0.5">✓</span> {item}
@@ -67,7 +80,7 @@ export default function Upsell3() {
             <span className="price-original text-base">$97</span>
             <span className="text-3xl font-black text-white">$27</span>
             <span className="px-2 py-1 rounded-lg bg-[oklch(0.72_0.18_45/0.2)] border border-[oklch(0.72_0.18_45/0.4)] text-[oklch(0.85_0.15_45)] text-xs font-bold">
-              72% SLEVA
+              72% OFF
             </span>
           </div>
         </div>
@@ -77,18 +90,18 @@ export default function Upsell3() {
           disabled={loading}
           className="cta-shimmer w-full py-5 rounded-2xl font-black text-lg bg-gradient-to-r from-[oklch(0.72_0.18_45)] to-[oklch(0.65_0.22_280)] text-white hover:scale-[1.02] transition-transform disabled:opacity-70 shadow-2xl mb-3"
         >
-          {loading ? "Zpracovávám..." : "Ano! Chci Toolkit za $27 →"}
+          {loading ? "Processing..." : "Yes! Add the Full Toolkit — $27 →"}
         </button>
 
         <p className="text-xs text-[oklch(0.4_0.03_265)] mb-4">
-          🔒 Jeden klik · Okamžitý přístup
+          🔒 One click · Instant access
         </p>
 
         <button
           onClick={handleDecline}
           className="text-xs text-[oklch(0.4_0.03_265)] hover:text-[oklch(0.6_0.04_265)] transition-colors underline"
         >
-          Ne, děkuji — přejít na stažení
+          No thanks, I'll skip the toolkit
         </button>
       </div>
     </div>

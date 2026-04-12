@@ -9,6 +9,37 @@ import { createContext } from "./context";
 import { serveStatic, setupVite } from "./vite";
 import funnelRoutes from "../funnelRoutes";
 import { startEmailScheduler } from "../emailScheduler";
+import { ENV } from "./env";
+
+function scheduleNightlyAnalysis() {
+  const now = new Date();
+  // Calculate ms until next midnight
+  const nextMidnight = new Date(now);
+  nextMidnight.setHours(24, 0, 0, 0);
+  const msUntilMidnight = nextMidnight.getTime() - now.getTime();
+
+  setTimeout(async () => {
+    try {
+      console.log("[Nightly Analysis] Starting autonomous funnel analysis...");
+      const { runNightlyAnalysis } = await import("../nightlyAnalyzer.js");
+      const report = await runNightlyAnalysis();
+      console.log(`[Nightly Analysis] Complete. Revenue: $${report.metrics.totalRevenue.toFixed(2)}, Est. monthly: $${report.estimatedMonthlyRevenue.toFixed(0)}`);
+    } catch (err) {
+      console.error("[Nightly Analysis] Failed:", err);
+    }
+    // Schedule next run in 24 hours
+    setInterval(async () => {
+      try {
+        const { runNightlyAnalysis } = await import("../nightlyAnalyzer.js");
+        await runNightlyAnalysis();
+      } catch (err) {
+        console.error("[Nightly Analysis] Failed:", err);
+      }
+    }, 24 * 60 * 60 * 1000);
+  }, msUntilMidnight);
+
+  console.log(`[Nightly Analysis] Scheduled for midnight (in ${Math.round(msUntilMidnight / 1000 / 60)} minutes)`);
+}
 
 function isPortAvailable(port: number): Promise<boolean> {
   return new Promise(resolve => {
@@ -68,6 +99,8 @@ async function startServer() {
     console.log(`Server running on http://localhost:${port}/`);
     // Start autonomous email scheduler (7-day follow-up sequence)
     startEmailScheduler();
+    // Schedule nightly AI analysis at midnight every day
+    scheduleNightlyAnalysis();
   });
 }
 
