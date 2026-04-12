@@ -183,3 +183,12 @@ FB/IG Post → Landing Page (Hero + Quiz) → Quiz Výsledek + CTA
 - [x] index.css — amber/gold tokeny, hero-photo třída, progress bar styl, cta-gold
 - [x] Navigace — minimalistická s progress barem nahoře (jako originál) + scarcity ticker
 - [x] Hero — fullscreen s noční oblohou, zlatý CTA button (cta-gold)
+
+## A/B Test: Gold vs. Purple CTA Button
+- [x] Přidat cta_color variant do A/B test systému (gold / purple) — CTA_COLOR_VARIANTS v Home.tsx
+- [x] Rozšířit Home.tsx o purple CTA variantu s trackingem — všechna CTA tlačítka používají ctaColorVariant
+- [x] Přidat statistickou analýzu (konverzní poměr, winner card, progress bar) do Admin dashboardu
+- [x] Vitest testy pro A/B test logiku — 36 testů prochází
+
+## Bug Fix
+- [x] Opravit testimonial badge overflow — badge přesunut na vlastní řádek pod hvězdičkami, žádné překrývání

@@ -255,37 +255,155 @@ export default function Admin() {
 
         {/* A/B Tests Tab */}
         {activeTab === "abtests" && (
-          <div className="bg-[oklch(0.12_0.025_265)] border border-[oklch(0.22_0.03_265)] rounded-xl overflow-hidden">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-[oklch(0.22_0.03_265)]">
-                  {["Test", "Variant", "Impressions", "Clicks", "CTR", "Status"].map((h) => (
-                    <th key={h} className="text-left px-4 py-3 text-xs text-[oklch(0.5_0.04_265)] font-semibold uppercase">{h}</th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {(stats?.abTests || []).map((row, i) => (
-                  <tr key={i} className="border-b border-[oklch(0.18_0.03_265)] hover:bg-[oklch(0.14_0.025_265)]">
-                    <td className="px-4 py-3 text-[oklch(0.7_0.04_265)]">{row.testName}</td>
-                    <td className="px-4 py-3">
-                      <span className="px-2 py-0.5 rounded bg-[oklch(0.65_0.22_280/0.2)] text-[oklch(0.8_0.12_280)] text-xs font-bold">{row.variant}</span>
-                    </td>
-                    <td className="px-4 py-3 text-white font-mono">{row.impressions}</td>
-                    <td className="px-4 py-3 text-white font-mono">{row.clicks}</td>
-                    <td className="px-4 py-3 font-bold text-green-400">{row.ctr.toFixed(1)}%</td>
-                    <td className="px-4 py-3">
-                      <span className={`text-xs px-2 py-0.5 rounded-full ${row.impressions >= 100 ? "bg-green-500/20 text-green-400" : "bg-yellow-500/20 text-yellow-400"}`}>
-                        {row.impressions >= 100 ? "Significant" : "Collecting data"}
-                      </span>
-                    </td>
+          <div className="space-y-6">
+            {/* CTA Color A/B Test — Featured Card */}
+            {(() => {
+              const colorRows = (stats?.abTests || []).filter((r: { testName: string }) => r.testName === "cta_color");
+              const goldRow = colorRows.find((r: { variant: string }) => r.variant === "gold");
+              const purpleRow = colorRows.find((r: { variant: string }) => r.variant === "purple");
+              const totalImpressions = colorRows.reduce((s: number, r: { impressions: number }) => s + r.impressions, 0);
+              const winner = goldRow && purpleRow
+                ? goldRow.ctr > purpleRow.ctr ? "gold" : purpleRow.ctr > goldRow.ctr ? "purple" : null
+                : null;
+              const isSignificant = totalImpressions >= 100;
+              return (
+                <div className="bg-[oklch(0.12_0.025_265)] border border-[oklch(0.22_0.03_265)] rounded-xl p-5">
+                  <div className="flex items-center justify-between mb-4">
+                    <div>
+                      <h3 className="text-white font-bold text-base">CTA Color A/B Test</h3>
+                      <p className="text-xs text-[oklch(0.5_0.04_265)] mt-0.5">Gold button vs. Purple button — conversion rate comparison</p>
+                    </div>
+                    <span className={`text-xs px-3 py-1 rounded-full font-semibold ${
+                      isSignificant ? "bg-green-500/20 text-green-400" : "bg-yellow-500/20 text-yellow-400"
+                    }`}>
+                      {isSignificant ? (winner ? `Winner: ${winner.toUpperCase()}` : "No winner yet") : `Collecting data (${totalImpressions}/100)`}
+                    </span>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    {/* Gold variant */}
+                    <div className={`rounded-xl p-4 border ${
+                      winner === "gold" ? "border-[oklch(0.82_0.16_65/0.6)] bg-[oklch(0.82_0.16_65/0.08)]" : "border-[oklch(0.22_0.03_265)] bg-[oklch(0.10_0.02_265)]"
+                    }`}>
+                      <div className="flex items-center gap-2 mb-3">
+                        <div className="w-8 h-5 rounded" style={{ background: "linear-gradient(135deg, oklch(0.82 0.18 65), oklch(0.72 0.16 55))" }} />
+                        <span className="font-bold text-sm text-white">Gold</span>
+                        {winner === "gold" && <span className="text-xs bg-[oklch(0.82_0.16_65/0.25)] text-[oklch(0.82_0.16_65)] px-2 py-0.5 rounded-full font-bold">WINNER</span>}
+                      </div>
+                      <div className="space-y-1.5">
+                        <div className="flex justify-between text-xs">
+                          <span className="text-[oklch(0.5_0.04_265)]">Impressions</span>
+                          <span className="text-white font-mono">{goldRow?.impressions ?? 0}</span>
+                        </div>
+                        <div className="flex justify-between text-xs">
+                          <span className="text-[oklch(0.5_0.04_265)]">Clicks</span>
+                          <span className="text-white font-mono">{goldRow?.clicks ?? 0}</span>
+                        </div>
+                        <div className="flex justify-between text-xs">
+                          <span className="text-[oklch(0.5_0.04_265)]">CTR</span>
+                          <span className="font-bold text-lg text-[oklch(0.82_0.16_65)]">{goldRow ? goldRow.ctr.toFixed(1) : "0.0"}%</span>
+                        </div>
+                      </div>
+                      {goldRow && purpleRow && (
+                        <div className="mt-3">
+                          <div className="h-2 rounded-full bg-[oklch(0.18_0.03_265)] overflow-hidden">
+                            <div
+                              className="h-full rounded-full transition-all duration-700"
+                              style={{
+                                width: `${Math.max(goldRow.ctr, purpleRow.ctr) > 0 ? (goldRow.ctr / Math.max(goldRow.ctr, purpleRow.ctr)) * 100 : 0}%`,
+                                background: "linear-gradient(90deg, oklch(0.82 0.18 65), oklch(0.72 0.16 55))"
+                              }}
+                            />
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                    {/* Purple variant */}
+                    <div className={`rounded-xl p-4 border ${
+                      winner === "purple" ? "border-[oklch(0.65_0.22_280/0.6)] bg-[oklch(0.65_0.22_280/0.08)]" : "border-[oklch(0.22_0.03_265)] bg-[oklch(0.10_0.02_265)]"
+                    }`}>
+                      <div className="flex items-center gap-2 mb-3">
+                        <div className="w-8 h-5 rounded" style={{ background: "linear-gradient(135deg, oklch(0.65 0.22 280), oklch(0.55 0.22 290))" }} />
+                        <span className="font-bold text-sm text-white">Purple</span>
+                        {winner === "purple" && <span className="text-xs bg-[oklch(0.65_0.22_280/0.25)] text-[oklch(0.8_0.12_280)] px-2 py-0.5 rounded-full font-bold">WINNER</span>}
+                      </div>
+                      <div className="space-y-1.5">
+                        <div className="flex justify-between text-xs">
+                          <span className="text-[oklch(0.5_0.04_265)]">Impressions</span>
+                          <span className="text-white font-mono">{purpleRow?.impressions ?? 0}</span>
+                        </div>
+                        <div className="flex justify-between text-xs">
+                          <span className="text-[oklch(0.5_0.04_265)]">Clicks</span>
+                          <span className="text-white font-mono">{purpleRow?.clicks ?? 0}</span>
+                        </div>
+                        <div className="flex justify-between text-xs">
+                          <span className="text-[oklch(0.5_0.04_265)]">CTR</span>
+                          <span className="font-bold text-lg text-[oklch(0.8_0.12_280)]">{purpleRow ? purpleRow.ctr.toFixed(1) : "0.0"}%</span>
+                        </div>
+                      </div>
+                      {goldRow && purpleRow && (
+                        <div className="mt-3">
+                          <div className="h-2 rounded-full bg-[oklch(0.18_0.03_265)] overflow-hidden">
+                            <div
+                              className="h-full rounded-full transition-all duration-700"
+                              style={{
+                                width: `${Math.max(goldRow.ctr, purpleRow.ctr) > 0 ? (purpleRow.ctr / Math.max(goldRow.ctr, purpleRow.ctr)) * 100 : 0}%`,
+                                background: "linear-gradient(90deg, oklch(0.65 0.22 280), oklch(0.55 0.22 290))"
+                              }}
+                            />
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                  {!isSignificant && (
+                    <p className="mt-4 text-xs text-[oklch(0.45_0.04_265)] text-center">
+                      Need {100 - totalImpressions} more impressions for statistical significance. The nightly AI analyzer will automatically promote the winner to 70% traffic.
+                    </p>
+                  )}
+                </div>
+              );
+            })()}
+
+            {/* All A/B Tests Table */}
+            <div className="bg-[oklch(0.12_0.025_265)] border border-[oklch(0.22_0.03_265)] rounded-xl overflow-hidden">
+              <div className="px-4 py-3 border-b border-[oklch(0.22_0.03_265)]">
+                <h3 className="text-white font-semibold text-sm">All A/B Tests</h3>
+              </div>
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-[oklch(0.22_0.03_265)]">
+                    {["Test", "Variant", "Impressions", "Clicks", "CTR", "Status"].map((h) => (
+                      <th key={h} className="text-left px-4 py-3 text-xs text-[oklch(0.5_0.04_265)] font-semibold uppercase">{h}</th>
+                    ))}
                   </tr>
-                ))}
-                {(!stats?.abTests || stats.abTests.length === 0) && (
-                  <tr><td colSpan={6} className="px-4 py-8 text-center text-[oklch(0.4_0.03_265)]">No A/B test data yet</td></tr>
-                )}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {(stats?.abTests || []).map((row: { testName: string; variant: string; impressions: number; clicks: number; ctr: number }, i: number) => (
+                    <tr key={i} className="border-b border-[oklch(0.18_0.03_265)] hover:bg-[oklch(0.14_0.025_265)]">
+                      <td className="px-4 py-3 text-[oklch(0.7_0.04_265)]">{row.testName}</td>
+                      <td className="px-4 py-3">
+                        <span className={`px-2 py-0.5 rounded text-xs font-bold ${
+                          row.variant === "gold" ? "bg-[oklch(0.82_0.16_65/0.2)] text-[oklch(0.82_0.16_65)]" :
+                          row.variant === "purple" ? "bg-[oklch(0.65_0.22_280/0.2)] text-[oklch(0.8_0.12_280)]" :
+                          "bg-[oklch(0.65_0.22_280/0.2)] text-[oklch(0.8_0.12_280)]"
+                        }`}>{row.variant}</span>
+                      </td>
+                      <td className="px-4 py-3 text-white font-mono">{row.impressions}</td>
+                      <td className="px-4 py-3 text-white font-mono">{row.clicks}</td>
+                      <td className="px-4 py-3 font-bold text-green-400">{row.ctr.toFixed(1)}%</td>
+                      <td className="px-4 py-3">
+                        <span className={`text-xs px-2 py-0.5 rounded-full ${row.impressions >= 100 ? "bg-green-500/20 text-green-400" : "bg-yellow-500/20 text-yellow-400"}`}>
+                          {row.impressions >= 100 ? "Significant" : "Collecting data"}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                  {(!stats?.abTests || stats.abTests.length === 0) && (
+                    <tr><td colSpan={6} className="px-4 py-8 text-center text-[oklch(0.4_0.03_265)]">No A/B test data yet — data will appear as visitors interact with the site</td></tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
           </div>
         )}
 

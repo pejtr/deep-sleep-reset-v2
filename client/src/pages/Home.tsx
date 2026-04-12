@@ -47,6 +47,22 @@ const CTA_VARIANTS = [
   { id: "C", text: "Reveal My Chronotype →" },
 ];
 
+// ─── CTA Color A/B Test Variants ────────────────────────────────────────────
+const CTA_COLOR_VARIANTS = [
+  {
+    id: "gold",
+    label: "Gold",
+    className: "cta-gold cta-shimmer",
+    navClassName: "cta-gold cta-shimmer",
+  },
+  {
+    id: "purple",
+    label: "Purple",
+    className: "cta-purple cta-shimmer",
+    navClassName: "cta-purple cta-shimmer",
+  },
+];
+
 const SCARCITY_MESSAGES = [
   "⚡ 47 people took this quiz in the last hour",
   "🔥 This free quiz closes at midnight",
@@ -153,6 +169,7 @@ export default function Home() {
   const [showEmailPopup, setShowEmailPopup] = useState(false);
   const [scrollPct, setScrollPct] = useState(0);
   const [scrolled, setScrolled] = useState(false);
+  const [ctaColorVariant, setCtaColorVariant] = useState(CTA_COLOR_VARIANTS[0]);
   const [scarcityMsg] = useState(() => SCARCITY_MESSAGES[Math.floor(Math.random() * SCARCITY_MESSAGES.length)]);
   const exitShown = useRef(false);
   const emailPopupShown = useRef(false);
@@ -164,24 +181,31 @@ export default function Home() {
       .then((data) => {
         const headlineWeights: Record<string, number> = {};
         const ctaWeights: Record<string, number> = {};
+        const colorWeights: Record<string, number> = {};
         if (data.abWinners) {
           for (const w of data.abWinners) {
             if (w.testName === "headline") headlineWeights[w.winner] = w.weight;
             if (w.testName === "cta_button") ctaWeights[w.winner] = w.weight;
+            if (w.testName === "cta_color") colorWeights[w.winner] = w.weight;
           }
         }
         const hv = getOrSetVariant("dsr_headline_variant", HEADLINE_VARIANTS, headlineWeights);
         const cv = getOrSetVariant("dsr_cta_variant", CTA_VARIANTS, ctaWeights);
+        const ccv = getOrSetVariant("dsr_cta_color_variant", CTA_COLOR_VARIANTS, colorWeights);
         setHeadlineVariant(hv);
         setCtaVariant(cv);
+        setCtaColorVariant(ccv);
         fetch("/api/ab-test/track", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ testName: "headline", variant: hv.id, type: "impression" }) }).catch(() => {});
         fetch("/api/ab-test/track", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ testName: "cta_button", variant: cv.id, type: "impression" }) }).catch(() => {});
+        fetch("/api/ab-test/track", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ testName: "cta_color", variant: ccv.id, type: "impression" }) }).catch(() => {});
       })
       .catch(() => {
         const hv = getOrSetVariant("dsr_headline_variant", HEADLINE_VARIANTS);
         const cv = getOrSetVariant("dsr_cta_variant", CTA_VARIANTS);
+        const ccv = getOrSetVariant("dsr_cta_color_variant", CTA_COLOR_VARIANTS);
         setHeadlineVariant(hv);
         setCtaVariant(cv);
+        setCtaColorVariant(ccv);
       });
 
     fetch("/api/behavior/track", {
@@ -228,7 +252,8 @@ export default function Home() {
 
   const handleCTAClick = (source: string = "hero") => {
     fetch("/api/ab-test/track", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ testName: "cta_button", variant: ctaVariant.id, type: "click" }) }).catch(() => {});
-    fetch("/api/behavior/track", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ event: "cta_click", page: "home", source, ts: Date.now() }) }).catch(() => {});
+    fetch("/api/ab-test/track", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ testName: "cta_color", variant: ctaColorVariant.id, type: "click" }) }).catch(() => {});
+    fetch("/api/behavior/track", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ event: "cta_click", page: "home", source, cta_color: ctaColorVariant.id, ts: Date.now() }) }).catch(() => {});
     setLocation("/quiz");
   };
 
@@ -269,7 +294,7 @@ export default function Home() {
           </div>
           <button
             onClick={() => handleCTAClick("nav")}
-            className="cta-gold cta-shimmer px-5 py-2 rounded-lg text-sm font-bold"
+            className={`${ctaColorVariant.navClassName} px-5 py-2 rounded-lg text-sm font-bold`}
           >
             Change My Sleep — $5
           </button>
@@ -309,7 +334,7 @@ export default function Home() {
           <div className="animate-reveal stagger-3">
             <button
               onClick={() => handleCTAClick("hero_primary")}
-              className="cta-gold cta-shimmer inline-flex items-center justify-center gap-3 px-10 py-5 rounded-xl font-black text-lg md:text-xl"
+              className={`${ctaColorVariant.className} inline-flex items-center justify-center gap-3 px-10 py-5 rounded-xl font-black text-lg md:text-xl`}
             >
               {ctaVariant.text}
               <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
@@ -403,7 +428,7 @@ export default function Home() {
             </p>
             <button
               onClick={() => handleCTAClick("problem_section")}
-              className="cta-gold cta-shimmer inline-flex items-center gap-2 px-8 py-4 rounded-xl font-bold text-base"
+              className={`${ctaColorVariant.className} inline-flex items-center gap-2 px-8 py-4 rounded-xl font-bold text-base`}
             >
               Find My Chronotype Free →
             </button>
@@ -444,10 +469,10 @@ export default function Home() {
             ))}
           </div>
           <div className="text-center mt-10">
-            <button
-              onClick={() => handleCTAClick("chronotype_section")}
-              className="cta-gold cta-shimmer inline-flex items-center gap-2 px-8 py-4 rounded-xl font-bold text-base"
-            >
+          <button
+            onClick={() => handleCTAClick("chronotype_section")}
+            className={`${ctaColorVariant.className} inline-flex items-center gap-2 px-8 py-4 rounded-xl font-bold text-base`}
+          >
               Discover My Type Free →
             </button>
           </div>
@@ -501,17 +526,19 @@ export default function Home() {
           </p>
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
             {TESTIMONIALS.map((t, i) => (
-              <div key={i} className="glass-card glass-card-hover p-5 rounded-2xl flex flex-col relative overflow-hidden">
-                <div className="absolute top-3 right-3">
-                  <span className="badge-popular">{t.highlight}</span>
-                </div>
-                <div className="flex items-center gap-1 mb-3">
+              <div key={i} className="glass-card glass-card-hover p-5 rounded-2xl flex flex-col">
+                {/* Stars + Verified */}
+                <div className="flex items-center gap-1 mb-2">
                   {Array.from({ length: t.stars }).map((_, j) => (
                     <span key={j} className="text-[oklch(0.82_0.16_65)] text-sm">★</span>
                   ))}
                   {t.verified && (
                     <span className="ml-2 text-xs text-green-400 font-medium">✓ Verified</span>
                   )}
+                </div>
+                {/* Highlight badge — own line, no overflow */}
+                <div className="mb-3">
+                  <span className="badge-popular inline-block">{t.highlight}</span>
                 </div>
                 <p className="text-[oklch(0.8_0.03_265)] text-sm mb-4 italic flex-1 leading-relaxed">"{t.text}"</p>
                 <div className="flex items-center gap-3 pt-3 border-t border-[oklch(0.22_0.03_265)]">
@@ -573,7 +600,7 @@ export default function Home() {
 
           <button
             onClick={() => handleCTAClick("value_stack")}
-            className="cta-gold cta-shimmer w-full py-5 rounded-2xl font-black text-lg"
+            className={`${ctaColorVariant.className} w-full py-5 rounded-2xl font-black text-lg`}
           >
             Start Free Quiz → Get It For $5
           </button>
@@ -615,7 +642,7 @@ export default function Home() {
           </div>
           <button
             onClick={() => { handleElementClick("premium_teaser"); setLocation("/premium"); }}
-            className="cta-gold cta-shimmer inline-flex items-center gap-2 px-8 py-4 rounded-xl font-bold text-base"
+            className={`${ctaColorVariant.className} inline-flex items-center gap-2 px-8 py-4 rounded-xl font-bold text-base`}
           >
             Join Sleep Optimizers — From $9.99/mo →
           </button>
@@ -641,7 +668,7 @@ export default function Home() {
           </p>
           <button
             onClick={() => handleCTAClick("final_cta")}
-            className="cta-gold cta-shimmer inline-flex items-center justify-center gap-3 px-10 py-5 rounded-2xl font-black text-xl"
+            className={`${ctaColorVariant.className} inline-flex items-center justify-center gap-3 px-10 py-5 rounded-2xl font-black text-xl`}
           >
             <span className="text-2xl">✨</span>
             {ctaVariant.text}
@@ -680,7 +707,7 @@ export default function Home() {
         <div className="fixed bottom-0 left-0 right-0 z-50 p-3 bg-[oklch(0.07_0.025_255/0.97)] backdrop-blur-xl border-t border-[oklch(0.78_0.18_65/0.2)] md:hidden">
           <button
             onClick={() => handleCTAClick("sticky_mobile")}
-            className="cta-gold cta-shimmer w-full py-4 rounded-xl font-bold text-base"
+            className={`${ctaColorVariant.className} w-full py-4 rounded-xl font-bold text-base`}
           >
             {ctaVariant.text}
           </button>

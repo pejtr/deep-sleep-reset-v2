@@ -643,6 +643,45 @@
   animation: shimmer 2.5s linear infinite;
 }
 
+/* ─── Purple CTA Button (A/B test variant) ───────────────────────────────────────── */
+.cta-purple {
+  position: relative;
+  background: linear-gradient(135deg, oklch(0.65 0.22 280), oklch(0.55 0.22 290));
+  color: oklch(0.98 0.01 265);
+  box-shadow: 0 4px 28px oklch(0.65 0.22 280 / 0.45), 0 1px 0 oklch(1 0 0 / 0.2) inset;
+  transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
+  font-weight: 800;
+}
+
+.cta-purple::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, oklch(1 0 0 / 0.1) 0%, transparent 50%);
+  border-radius: inherit;
+}
+
+.cta-purple:hover {
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 8px 44px oklch(0.65 0.22 280 / 0.6), 0 1px 0 oklch(1 0 0 / 0.2) inset;
+}
+
+.cta-purple:active {
+  transform: translateY(0) scale(0.99);
+}
+
+.cta-purple.cta-shimmer::after {
+  background: linear-gradient(
+    105deg,
+    transparent 40%,
+    oklch(1 0 0 / 0.2) 50%,
+    transparent 60%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 2.5s linear infinite;
+}
+
 /* ─── Gold Gradient Text ────────────────────────────────────────────────────── */
 .text-gold {
   color: oklch(0.82 0.16 65);
