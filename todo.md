@@ -65,7 +65,7 @@ FB/IG Post → Landing Page (Hero + Quiz) → Quiz Výsledek + CTA
 
 ## SEO & Performance
 - [x] OG tags (FB/IG preview optimalizace)
-  - [ ] robots.txt + sitemap.xml
+  - [x] robots.txt + sitemap.xml (client/public/)
 - [x] Mobile-first, < 2s load time
 
 ## Testy
@@ -113,13 +113,25 @@ FB/IG Post → Landing Page (Hero + Quiz) → Quiz Výsledek + CTA
 - [x] Rage click detection (useBehaviorTracker.ts) ✓
 - [x] Session time tracking per page ✓
 - [x] Funnel drop-off tracking (behaviorEvents tabulka) ✓
-- [ ] Heat mapa vizualizace v Admin dashboardu
-- [ ] Behavior analytics panel v Admin (click density, scroll heatmap)
+- [x] Heat mapa vizualizace v Admin dashboardu (BehaviorAnalyticsPanel.tsx)
+- [x] Behavior analytics panel v Admin (BehaviorAnalyticsPanel.tsx — funnel drop-off, scroll depth, click heatmap, rage clicks)
 
 ## Autonomní noční AI analyzátor (půlnoc)
 - [x] Cron job každou půlnoc (scheduleNightlyAnalysis v index.ts) ✓
 - [x] Sbírá data: konverze, A/B výsledky, drop-off body, revenue ✓
 - [x] AI (LLM) analyzuje data a generuje insights (nightlyAnalyzer.ts) ✓
-- [ ] Automaticky aktualizuje A/B varianty (vítěz dostane 70% traffic)
+- [x] Automaticky aktualizuje A/B varianty (/api/ab-test/winner — vítěz dostane 70% traffic)
 - [x] Generuje denní report a posílá notifikaci vlastníkovi ✓
-- [ ] Ukládá historii optimalizací do DB
+- [x] Ukládá historii optimalizací do DB (optimizationHistory v behavior summary)
+
+## Opravy mezer (identifikováno systémem)
+- [x] A/B traffic allocation — ab_test_weights tabulka, 70/30 split, persist do DB
+- [x] Optimization history — optimization_history tabulka, write v ab-test/winner, read v behavior/summary
+- [x] Behavior summary — reálné dropoffByPage z behavior_events, abWinners a optimizationHistory z DB
+- [x] robots.txt + sitemap.xml (client/public/)
+
+## Finální opravy (systémem identifikované mezery 2)
+- [ ] Weighted variant selection — Home.tsx čte ab_test_weights z API a aplikuje 70/30 split
+- [ ] Testy pro /api/ab-test/winner persistence a /api/behavior/summary
+- [ ] True funnel drop-off percentages (step-to-step attrition, ne jen raw counts)
+- [ ] Error handling pro optimization_history writes (ne silent .catch(() => {}))

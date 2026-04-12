@@ -85,3 +85,26 @@ export const abTestEvents = mysqlTable("ab_test_events", {
   createdAt: timestamp("createdAt").defaultNow().notNull(),
 });
 export type AbTestEvent = typeof abTestEvents.$inferSelect;
+
+// A/B test weights — stores winner allocations (70/30 split)
+export const abTestWeights = mysqlTable("ab_test_weights", {
+  id: int("id").autoincrement().primaryKey(),
+  testName: varchar("testName", { length: 100 }).notNull(),
+  variant: varchar("variant", { length: 10 }).notNull(),
+  weight: int("weight").default(50).notNull(), // 0-100 percentage
+  isWinner: mysqlEnum("isWinner", ["yes", "no"]).default("no").notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+export type AbTestWeight = typeof abTestWeights.$inferSelect;
+
+// Optimization history — log of all auto-optimization actions
+export const optimizationHistoryTable = mysqlTable("optimization_history", {
+  id: int("id").autoincrement().primaryKey(),
+  action: text("action").notNull(),
+  testName: varchar("testName", { length: 100 }),
+  winner: varchar("winner", { length: 10 }),
+  confidence: int("confidence"),
+  impact: varchar("impact", { length: 100 }),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+export type OptimizationHistoryEntry = typeof optimizationHistoryTable.$inferSelect;

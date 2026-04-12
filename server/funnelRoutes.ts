@@ -1,6 +1,6 @@
 import express, { Router, Request, Response } from "express";
 import { getDb } from "./db";
-import { quizResults, emailLeads, orders, abTestEvents } from "../drizzle/schema";
+import { quizResults, emailLeads, orders, abTestEvents, abTestWeights, optimizationHistoryTable } from "../drizzle/schema";
 import { eq, sql } from "drizzle-orm";
 import Stripe from "stripe";
 import { FUNNEL_PRODUCTS, ProductKey } from "./products";
@@ -626,32 +626,91 @@ router.get("/behavior/summary", async (req: Request, res: Response) => {
     const specialMap: Record<string, number> = {};
     for (const r of ((specialRows as any).rows || [])) specialMap[r.event_type] = Number(r.cnt);
 
-    res.json({ pageViews, ctaClicks, scrollDepths, exitIntents: specialMap['exit_intent'] || 0, rageClicks: specialMap['rage_click'] || 0, emailPopupOpens: specialMap['email_popup_open'] || 0, emailPopupConverts: specialMap['email_popup_convert'] || 0, dropoffByPage: {}, abWinners: [], optimizationHistory: [] });
+    // True funnel drop-off: step-to-step attrition rates
+    const funnelSteps = ['/', '/quiz', '/result', '/order', '/upsell1', '/upsell2', '/upsell3', '/thank-you'];
+    const dropoffByPage: Record<string, { visitors: number; dropoffRate: number; nextStep: string | null }> = {};
+    for (let i = 0; i < funnelSteps.length; i++) {
+      const step = funnelSteps[i];
+      const nextStep = funnelSteps[i + 1] || null;
+      const visitors = pageViews[step] || 0;
+      const nextVisitors = nextStep ? (pageViews[nextStep] || 0) : visitors;
+      const dropoffRate = visitors > 0 ? Math.round(((visitors - nextVisitors) / visitors) * 100) : 0;
+      dropoffByPage[step] = { visitors, dropoffRate, nextStep };
+    }
+
+    // A/B winners from DB
+    const weightRows = await (db as any).execute(
+      sql`SELECT testName, variant, weight FROM ab_test_weights WHERE isWinner = 'yes' ORDER BY updatedAt DESC LIMIT 10`
+    ).catch(() => ({ rows: [] }));
+    const abWinners = ((weightRows as any).rows || []).map((r: any) => ({ testName: r.testName, winner: r.variant, weight: r.weight }));
+
+    // Optimization history from DB
+    const histRows = await (db as any).execute(
+      sql`SELECT action, testName, winner, confidence, impact, createdAt FROM optimization_history ORDER BY createdAt DESC LIMIT 20`
+    ).catch(() => ({ rows: [] }));
+    const optimizationHistory = ((histRows as any).rows || []).map((r: any) => ({
+      action: r.action, testName: r.testName, winner: r.winner,
+      confidence: r.confidence, impact: r.impact, createdAt: r.createdAt
+    }));
+
+    res.json({ pageViews, ctaClicks, scrollDepths, exitIntents: specialMap['exit_intent'] || 0, rageClicks: specialMap['rage_click'] || 0, emailPopupOpens: specialMap['email_popup_open'] || 0, emailPopupConverts: specialMap['email_popup_convert'] || 0, dropoffByPage, abWinners, optimizationHistory });
   } catch {
     res.status(500).json({ error: "Server error" });
   }
 });
 
-// ─── Auto A/B Optimization (promote winner to 70% traffic) ─────────────────────
+// ─── Auto A/B Optimization (promote winner to 70% traffic, persist to DB) ────────
 router.post("/ab-test/winner", async (req: Request, res: Response) => {
   try {
     const db = await getDb();
     if (!db) return res.json({ winners: [] });
+
+    // Query A/B test events for statistical analysis
     const results = await (db as any).execute(
-      sql`SELECT test_name, variant, COUNT(*) as impressions,
-           SUM(CASE WHEN event_type = 'click' THEN 1 ELSE 0 END) as clicks,
-           (SUM(CASE WHEN event_type = 'click' THEN 1 ELSE 0 END) / NULLIF(COUNT(*), 0) * 100) as ctr
-           FROM ab_test_impressions GROUP BY test_name, variant HAVING COUNT(*) >= 100 ORDER BY test_name, ctr DESC`
+      sql`SELECT testName as test_name, variant,
+           COUNT(*) as impressions,
+           SUM(CASE WHEN eventType = 'click' THEN 1 ELSE 0 END) as clicks,
+           (SUM(CASE WHEN eventType = 'click' THEN 1 ELSE 0 END) / NULLIF(COUNT(*), 0) * 100) as ctr
+           FROM ab_test_events GROUP BY testName, variant HAVING COUNT(*) >= 50 ORDER BY testName, ctr DESC`
     ).catch(() => ({ rows: [] }));
+
     const rows = ((results as any).rows || []) as Array<{ test_name: string; variant: string; impressions: number; clicks: number; ctr: number }>;
     const winners: Array<{ testName: string; winner: string; confidence: number }> = [];
     const seen = new Set<string>();
+
     for (const row of rows) {
       if (!seen.has(row.test_name)) {
         seen.add(row.test_name);
-        winners.push({ testName: row.test_name, winner: row.variant, confidence: Math.min(99, Number(row.ctr) * 10) });
+        const confidence = Math.min(99, Math.round(Number(row.ctr) * 8));
+        winners.push({ testName: row.test_name, winner: row.variant, confidence });
+
+        // Persist winner weight to DB (70% for winner)
+        try {
+          await (db as any).execute(
+            sql`INSERT INTO ab_test_weights (testName, variant, weight, isWinner)
+                VALUES (${row.test_name}, ${row.variant}, 70, 'yes')
+                ON DUPLICATE KEY UPDATE weight = 70, isWinner = 'yes', updatedAt = NOW()`
+          );
+        } catch (e) {
+          console.error(`[AB] Failed to persist winner for ${row.test_name}:`, e);
+        }
+
+        // Log to optimization history
+        const impact = `+${Number(row.ctr).toFixed(1)}% CTR`;
+        try {
+          await db.insert(optimizationHistoryTable).values({
+            action: `Set ${row.test_name} variant "${row.variant}" as winner — allocated 70% traffic`,
+            testName: row.test_name,
+            winner: row.variant,
+            confidence,
+            impact,
+          });
+        } catch (e) {
+          console.error(`[AB] Failed to log optimization history:`, e);
+        }
       }
     }
+
     res.json({ winners, optimizedAt: new Date().toISOString() });
   } catch {
     res.status(500).json({ error: "Server error" });

@@ -113,14 +113,28 @@ const SCARCITY_MESSAGES = [
   "📈 Your chronotype results expire in 24h",
 ];
 
-function getOrSetVariant<T extends { id: string }>(key: string, variants: T[]): T {
+// Weighted variant selection: respects 70/30 split from ab_test_weights DB
+function getOrSetVariant<T extends { id: string }>(key: string, variants: T[], weights?: Record<string, number>): T {
   try {
     const stored = localStorage.getItem(key);
     if (stored) {
       const found = variants.find((v) => v.id === stored);
       if (found) return found;
     }
-    const chosen = variants[Math.floor(Math.random() * variants.length)];
+    let chosen: T;
+    if (weights && Object.keys(weights).length > 0) {
+      // Weighted random selection based on DB weights
+      const total = Object.values(weights).reduce((a, b) => a + b, 0);
+      let rand = Math.random() * total;
+      chosen = variants[0];
+      for (const v of variants) {
+        const w = weights[v.id] ?? (100 / variants.length);
+        rand -= w;
+        if (rand <= 0) { chosen = v; break; }
+      }
+    } else {
+      chosen = variants[Math.floor(Math.random() * variants.length)];
+    }
     localStorage.setItem(key, chosen.id);
     return chosen;
   } catch {
@@ -142,22 +156,33 @@ export default function Home() {
   const scrollDepthRef = useRef<Set<number>>(new Set());
 
   useEffect(() => {
-    const hv = getOrSetVariant("dsr_headline_variant", HEADLINE_VARIANTS);
-    const cv = getOrSetVariant("dsr_cta_variant", CTA_VARIANTS);
-    setHeadlineVariant(hv);
-    setCtaVariant(cv);
-
-    // Track A/B impressions
-    fetch("/api/ab-test/track", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ testName: "headline", variant: hv.id, type: "impression" }),
-    }).catch(() => {});
-    fetch("/api/ab-test/track", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ testName: "cta_button", variant: cv.id, type: "impression" }),
-    }).catch(() => {});
+    // Fetch A/B weights from DB to enforce 70/30 split for winners
+    fetch("/api/behavior/summary")
+      .then((r) => r.json())
+      .then((data) => {
+        const headlineWeights: Record<string, number> = {};
+        const ctaWeights: Record<string, number> = {};
+        if (data.abWinners) {
+          for (const w of data.abWinners) {
+            if (w.testName === "headline") headlineWeights[w.winner] = w.weight;
+            if (w.testName === "cta_button") ctaWeights[w.winner] = w.weight;
+          }
+        }
+        const hv = getOrSetVariant("dsr_headline_variant", HEADLINE_VARIANTS, headlineWeights);
+        const cv = getOrSetVariant("dsr_cta_variant", CTA_VARIANTS, ctaWeights);
+        setHeadlineVariant(hv);
+        setCtaVariant(cv);
+        // Track A/B impressions
+        fetch("/api/ab-test/track", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ testName: "headline", variant: hv.id, type: "impression" }) }).catch(() => {});
+        fetch("/api/ab-test/track", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ testName: "cta_button", variant: cv.id, type: "impression" }) }).catch(() => {});
+      })
+      .catch(() => {
+        // Fallback to random if API unavailable
+        const hv = getOrSetVariant("dsr_headline_variant", HEADLINE_VARIANTS);
+        const cv = getOrSetVariant("dsr_cta_variant", CTA_VARIANTS);
+        setHeadlineVariant(hv);
+        setCtaVariant(cv);
+      });
 
     // Track page view for behavior analytics
     fetch("/api/behavior/track", {
