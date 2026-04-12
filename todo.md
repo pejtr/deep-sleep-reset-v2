@@ -138,19 +138,19 @@ FB/IG Post → Landing Page (Hero + Quiz) → Quiz Výsledek + CTA
 
 ## Kliken 3.0 + AI Content Generátor
 - [ ] Kliken 3.0 scripty pro 3 Reels (timing, text overlay, voiceover, CTA)
-- [ ] AI content generátor endpoint (/api/content/generate) — LLM generuje Reels scripty, captions, hashtags
-- [ ] Admin dashboard — Content Generator tab s formulářem a výstupem
+- [x] AI content generátor endpoint (/api/admin/generate-content) — LLM generuje Reels scripty, captions, hashtags
+- [x] Admin dashboard — Content Generator tab s formulářem a výstupem
 - [ ] Automatické denní generování 3 postů (cron job 6am)
 - [ ] Content history — uložení vygenerovaného obsahu do DB
 
 ## Premium Subscription Program (Klein + Hormozi)
-- [ ] Navrhnout Premium program strukturu (tiers, ceny, obsah, identity)
-- [ ] Stripe recurring subscription ($9.99/měsíc nebo $27/měsíc)
+- [x] Navrhnout Premium program strukturu (tiers, ceny, obsah, identity)
+- [x] Stripe recurring subscription ($9.99/měsíc nebo $27/měsíc)
 - [ ] Member area — chráněné stránky pro předplatitele
 - [ ] Měsíční nový obsah (Sleep Protocol updates, nové audio, nové guides)
-- [ ] Komunita identita — "Sleep Optimizers" brand
-- [ ] Upgrade CTA v ThankYou stránce a email sekvenci
-- [ ] Admin dashboard — subscription metrics (MRR, churn, LTV)
+- [x] Komunita identita — "Sleep Optimizers" brand
+- [x] Upgrade CTA v ThankYou stránce a email sekvenci
+- [x] Admin dashboard — subscription metrics (MRR, churn, LTV)
 
 ## Premium Redesign & Klein Princip (dokončeno)
 - [x] Premium redesign Home.tsx — Playfair Display, glassmorphism, premium hero, value stack
@@ -163,3 +163,14 @@ FB/IG Post → Landing Page (Hero + Quiz) → Quiz Výsledek + CTA
 - [x] Backend: /api/subscriptions/create — Stripe recurring subscription checkout
 - [x] App.tsx: /premium route přidána
 - [x] CSS: Premium utility classes (glass-card, cta-premium, subscription-card-pro, badge-popular, trust-badge, stars-premium, orb-gold, animate-reveal)
+
+## Kliken 3.0 Reels Scripty + Content Cron
+- [x] Kliken 3.0 scripty pro 3 Reels (timing, text overlay, voiceover, CTA) — implementováno v Content Generator (reel_script typ)
+- [x] Content history tabulka v DB + uložení vygenerovaného obsahu (contentHistory tabulka)
+- [x] Cron job 6am — automatické denní generování 3 postů (contentCron.ts)
+- [x] Member area /members — chráněná stránka pro předplatitele (Members.tsx)
+
+## Zbývající mezery (identifikováno)
+- [x] Vitest testy pro contentCron (scheduling, DB persistence, error handling) — 9 testů v content.test.ts
+- [x] Member area: Members.tsx s content library, tier badges, upgrade CTA
+- [x] Admin Content Generator: zobrazit historii vygenerovaného obsahu z DB

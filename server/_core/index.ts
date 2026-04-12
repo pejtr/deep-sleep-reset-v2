@@ -11,6 +11,37 @@ import funnelRoutes from "../funnelRoutes";
 import { startEmailScheduler } from "../emailScheduler";
 import { ENV } from "./env";
 
+function scheduleDailyContentGeneration() {
+  const now = new Date();
+  // Calculate ms until next 6am
+  const next6am = new Date(now);
+  next6am.setHours(6, 0, 0, 0);
+  if (next6am <= now) next6am.setDate(next6am.getDate() + 1);
+  const msUntil6am = next6am.getTime() - now.getTime();
+
+  setTimeout(async () => {
+    try {
+      console.log("[Content Cron] Generating daily 3 posts...");
+      const { generateDailyContent } = await import("../contentCron.js");
+      await generateDailyContent();
+      console.log("[Content Cron] Daily content generated.");
+    } catch (err) {
+      console.error("[Content Cron] Failed:", err);
+    }
+    // Schedule next run in 24 hours
+    setInterval(async () => {
+      try {
+        const { generateDailyContent } = await import("../contentCron.js");
+        await generateDailyContent();
+      } catch (err) {
+        console.error("[Content Cron] Failed:", err);
+      }
+    }, 24 * 60 * 60 * 1000);
+  }, msUntil6am);
+
+  console.log(`[Content Cron] Scheduled for 6am (in ${Math.round(msUntil6am / 1000 / 60)} minutes)`);
+}
+
 function scheduleNightlyAnalysis() {
   const now = new Date();
   // Calculate ms until next midnight
@@ -101,6 +132,8 @@ async function startServer() {
     startEmailScheduler();
     // Schedule nightly AI analysis at midnight every day
     scheduleNightlyAnalysis();
+    // Schedule daily content generation at 6am
+    scheduleDailyContentGeneration();
   });
 }
 

@@ -14,6 +14,7 @@ import Upsell3 from "./pages/Upsell3";
 import ThankYou from "./pages/ThankYou";
 import Admin from "./pages/Admin";
 import Premium from "./pages/Premium";
+import Members from "./pages/Members";
 
 function Router() {
   return (
@@ -28,6 +29,7 @@ function Router() {
       <Route path="/thank-you" component={ThankYou} />
       <Route path="/admin" component={Admin} />
       <Route path="/premium" component={Premium} />
+      <Route path="/members" component={Members} />
       <Route path="/404" component={NotFound} />
       <Route component={NotFound} />
     </Switch>

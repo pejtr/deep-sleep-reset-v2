@@ -29,6 +29,9 @@ export default function Admin() {
   const [statsLoading, setStatsLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<"overview" | "funnel" | "abtests" | "orders" | "behavior" | "subscriptions" | "content">("overview");
   const [runningAnalysis, setRunningAnalysis] = useState(false);
+  const [contentHistory, setContentHistory] = useState<Array<{id: number; contentType: string; prompt: string; content: string; generatedBy: string; createdAt: string}>>([]);
+  const [historyLoading, setHistoryLoading] = useState(false);
+  const [showHistory, setShowHistory] = useState(false);
   const [contentMessages, setContentMessages] = useState<Message[]>([
     { role: "system", content: "You are a sleep optimization content expert. Help create high-converting content for the Deep Sleep Reset funnel: email sequences, social media posts, ad copy, blog articles, and sales page copy. Always use Hormozi-style value stacking, loss aversion, and chronotype-specific personalization." },
     { role: "assistant", content: "👋 Welcome to the Content Generator!\n\nI can help you create:\n- **Email sequences** (welcome, nurture, re-engagement)\n- **Social media posts** (Instagram, Facebook, TikTok)\n- **Ad copy** (Facebook Ads, Google Ads)\n- **Blog articles** (SEO-optimized sleep content)\n- **Sales page copy** (Hormozi-style value stacks)\n\nWhat would you like to create today?" },
@@ -195,8 +198,7 @@ export default function Admin() {
           </div>
         )}
 
-        {/* Funnel Tab */}
-        {activeTab === "funnel" && (
+        {/* Funnel Tab */}        {activeTab === "content" && (
           <div className="space-y-4">
             <div className="bg-[oklch(0.12_0.025_265)] border border-[oklch(0.22_0.03_265)] rounded-xl p-5">
               <h3 className="font-bold text-white mb-4">Funnel Conversion Rates</h3>
@@ -395,10 +397,66 @@ export default function Admin() {
         {/* AI Content Generator Tab */}
         {activeTab === "content" && (
           <div className="space-y-4">
+          {/* Content History Panel */}
+          {showHistory && (
+            <div className="glass-card rounded-xl p-4 mb-4">
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="font-bold text-white text-sm">📚 Generated Content History</h3>
+                <button onClick={() => setShowHistory(false)} className="text-xs text-[oklch(0.5_0.04_265)] hover:text-white">× Close</button>
+              </div>
+              {historyLoading ? (
+                <div className="text-xs text-[oklch(0.5_0.04_265)]">Loading history...</div>
+              ) : contentHistory.length === 0 ? (
+                <div className="text-xs text-[oklch(0.5_0.04_265)]">No content generated yet. Use the generator below to create your first post!</div>
+              ) : (
+                <div className="space-y-2 max-h-64 overflow-y-auto">
+                  {contentHistory.map((item) => (
+                    <div key={item.id} className="bg-[oklch(0.12_0.025_265)] rounded-lg p-3">
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="text-[0.65rem] font-bold uppercase tracking-wider text-[oklch(0.65_0.22_280)]">{item.contentType.replace('_', ' ')}</span>
+                        <div className="flex items-center gap-2">
+                          <span className="text-[0.6rem] text-[oklch(0.4_0.03_265)]">{item.generatedBy === 'cron' ? '🤖 Auto' : '✍️ Manual'}</span>
+                          <span className="text-[0.6rem] text-[oklch(0.4_0.03_265)]">{new Date(item.createdAt).toLocaleDateString()}</span>
+                        </div>
+                      </div>
+                      <p className="text-xs text-[oklch(0.55_0.04_265)] line-clamp-2">{item.content.substring(0, 120)}...</p>
+                      <button
+                        onClick={() => {
+                          navigator.clipboard.writeText(item.content);
+                          toast.success('Copied to clipboard!');
+                        }}
+                        className="mt-1.5 text-[0.65rem] text-[oklch(0.65_0.22_280)] hover:text-[oklch(0.75_0.18_280)] transition-colors"
+                      >
+                        Copy full content →
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
             <div className="glass-card rounded-xl p-4">
-              <h3 className="font-bold text-white mb-2 flex items-center gap-2">
-                <span>🤖</span> AI Content Generator
-              </h3>
+              <div className="flex items-center justify-between mb-2">
+                <h3 className="font-bold text-white flex items-center gap-2">
+                  <span>🤖</span> AI Content Generator
+                </h3>
+                <button
+                  onClick={() => {
+                    if (!showHistory) {
+                      setHistoryLoading(true);
+                      fetch('/api/admin/content-history')
+                        .then(r => r.json())
+                        .then(d => setContentHistory(d.items || []))
+                        .catch(() => {})
+                        .finally(() => setHistoryLoading(false));
+                    }
+                    setShowHistory(!showHistory);
+                  }}
+                  className="text-xs px-3 py-1.5 rounded-lg bg-[oklch(0.65_0.22_280/0.15)] border border-[oklch(0.65_0.22_280/0.3)] text-[oklch(0.75_0.18_280)] hover:bg-[oklch(0.65_0.22_280/0.25)] transition-all"
+                >
+                  {showHistory ? 'Hide History' : '📚 View History'}
+                </button>
+              </div>
               <p className="text-xs text-[oklch(0.55_0.04_265)] mb-3">
                 Generate high-converting content for your funnel using Hormozi principles, chronotype personalization, and behavioral psychology triggers.
               </p>

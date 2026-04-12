@@ -8,6 +8,7 @@ import { PRODUCT_DOWNLOADS } from "../shared/products";
 import { sendPurchaseConfirmation, addBrevoContact } from "./emailService";
 import { scheduleEmailSequence } from "./emailScheduler";
 import { invokeLLM } from "./_core/llm";
+import { contentHistory } from "../drizzle/schema";
 
 const router = Router();
 
@@ -768,6 +769,29 @@ Content types you create:
 
     const response = await invokeLLM({ messages: llmMessages });
     const content = response.choices?.[0]?.message?.content || "Content generated!";
+
+    // Save to content_history DB
+    try {
+      const db = await getDb();
+      if (db) {
+        const contentTypeMap: Record<string, string> = {
+          email: "email", instagram: "instagram", facebook: "facebook",
+          tiktok: "tiktok", blog: "blog", ad: "ad_copy", reel: "reel_script",
+        };
+        const detectedType = Object.keys(contentTypeMap).find(k =>
+          (prompt || "").toLowerCase().includes(k)
+        );
+        await db.insert(contentHistory).values({
+          contentType: (contentTypeMap[detectedType || ""] || "email") as "reel_script" | "email" | "instagram" | "facebook" | "tiktok" | "blog" | "ad_copy",
+          prompt: (prompt || "").substring(0, 500),
+          content: (typeof content === 'string' ? content : JSON.stringify(content)).substring(0, 10000),
+          generatedBy: "manual",
+        });
+      }
+    } catch (dbErr) {
+      console.error("[Content Generator] DB save error:", dbErr);
+    }
+
     res.json({ content });
   } catch (err) {
     console.error("[Content Generator] Error:", err);
@@ -813,4 +837,23 @@ router.post("/subscriptions/create", async (req: Request, res: Response) => {
   }
 });
 
+// ─── Admin: Content History ────────────────────────────────────────────────────────────────────────────────
+router.get("/admin/content-history", async (req: Request, res: Response) => {
+  try {
+    const db = await getDb();
+    if (!db) return res.json({ items: [] });
+    const { desc } = await import("drizzle-orm");
+    const items = await db
+      .select()
+      .from(contentHistory)
+      .orderBy(desc(contentHistory.createdAt))
+      .limit(50);
+    res.json({ items });
+  } catch (err) {
+    console.error("[Content History] Error:", err);
+    res.status(500).json({ error: "Failed to fetch content history" });
+  }
+});
+
 export default router;
+

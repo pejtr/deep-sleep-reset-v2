@@ -142,3 +142,16 @@ export const memberContent = mysqlTable("member_content", {
 });
 export type MemberContent = typeof memberContent.$inferSelect;
 
+// Content history — AI-generated content for social media / email
+export const contentHistory = mysqlTable("content_history", {
+  id: int("id").autoincrement().primaryKey(),
+  contentType: mysqlEnum("contentType", ["reel_script", "email", "instagram", "facebook", "tiktok", "blog", "ad_copy"]).notNull(),
+  prompt: text("prompt").notNull(),
+  content: text("content").notNull(),
+  chronotype: mysqlEnum("chronotype", ["lion", "bear", "wolf", "dolphin"]),
+  generatedBy: mysqlEnum("generatedBy", ["manual", "cron"]).default("manual").notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+export type ContentHistory = typeof contentHistory.$inferSelect;
+export type InsertContentHistory = typeof contentHistory.$inferInsert;
+
