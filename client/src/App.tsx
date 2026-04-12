@@ -13,6 +13,7 @@ import Upsell2 from "./pages/Upsell2";
 import Upsell3 from "./pages/Upsell3";
 import ThankYou from "./pages/ThankYou";
 import Admin from "./pages/Admin";
+import Premium from "./pages/Premium";
 
 function Router() {
   return (
@@ -26,6 +27,7 @@ function Router() {
       <Route path="/upsell/3" component={Upsell3} />
       <Route path="/thank-you" component={ThankYou} />
       <Route path="/admin" component={Admin} />
+      <Route path="/premium" component={Premium} />
       <Route path="/404" component={NotFound} />
       <Route component={NotFound} />
     </Switch>

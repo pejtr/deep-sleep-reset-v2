@@ -49,3 +49,75 @@ export const FUNNEL_PRODUCTS = {
 } as const;
 
 export type ProductKey = keyof typeof FUNNEL_PRODUCTS;
+
+// Premium Subscription Tiers — Sleep Optimizers Community
+// Klein principle: identity-based brand, not just a product
+export const SUBSCRIPTION_TIERS = {
+  basic: {
+    key: "basic",
+    name: "Sleep Optimizer Basic",
+    tagline: "Start your sleep transformation",
+    price: 999, // $9.99/month
+    displayPrice: "$9.99",
+    originalPrice: "$47",
+    discountPercent: 79,
+    interval: "month" as const,
+    features: [
+      "Monthly Sleep Protocol Update (PDF)",
+      "Weekly Sleep Tips Email",
+      "Chronotype-specific meal timing guide",
+      "Access to Sleep Optimizer community",
+      "Cancel anytime",
+    ],
+    valueStack: "$97 value",
+    badge: null,
+    color: "blue",
+  },
+  pro: {
+    key: "pro",
+    name: "Sleep Optimizer Pro",
+    tagline: "The complete sleep system",
+    price: 2700, // $27/month
+    displayPrice: "$27",
+    originalPrice: "$275",
+    discountPercent: 90,
+    interval: "month" as const,
+    features: [
+      "Everything in Basic",
+      "Weekly AI Sleep Score Report",
+      "Monthly Live Q&A Recording",
+      "Exclusive Bonus Guides (2/month)",
+      "Private Sleep Optimizers Community",
+      "Priority email support",
+      "Early access to new protocols",
+    ],
+    valueStack: "$275 value",
+    badge: "MOST POPULAR",
+    color: "purple",
+  },
+  elite: {
+    key: "elite",
+    name: "Sleep Optimizer Elite",
+    tagline: "Maximum performance, maximum results",
+    price: 4700, // $47/month
+    displayPrice: "$47",
+    originalPrice: "$497",
+    discountPercent: 91,
+    interval: "month" as const,
+    features: [
+      "Everything in Pro",
+      "Personal Sleep Score Dashboard",
+      "Monthly 1-on-1 AI coaching session",
+      "VIP community badge & recognition",
+      "Lifetime access to all past protocols",
+      "First access to new products (free)",
+      "Quarterly deep-dive sleep audit",
+    ],
+    valueStack: "$497 value",
+    badge: "BEST VALUE",
+    color: "gold",
+  },
+} as const;
+
+export type SubscriptionTierKey = keyof typeof SUBSCRIPTION_TIERS;
+

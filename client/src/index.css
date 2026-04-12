@@ -4,7 +4,7 @@
 @custom-variant dark (&:is(.dark *));
 
 /* ─── Google Fonts ─────────────────────────────────────────────────────────── */
-@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,700;0,800;0,900;1,700;1,800&display=swap");
 
 @theme inline {
   --radius-sm: calc(var(--radius) - 4px);
@@ -309,4 +309,293 @@
 
 ::-webkit-scrollbar-thumb:hover {
   background: oklch(0.65 0.22 280 / 0.6);
+}
+
+/* ─── Premium Typography ────────────────────────────────────────────────────── */
+.font-display {
+  font-family: "Playfair Display", Georgia, serif;
+}
+
+.text-premium {
+  font-family: "Playfair Display", Georgia, serif;
+  font-style: italic;
+}
+
+/* ─── Premium Glassmorphism Cards ───────────────────────────────────────────── */
+.glass-card {
+  background: oklch(0.12 0.025 265 / 0.7);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid oklch(0.65 0.22 280 / 0.15);
+  box-shadow: 0 8px 32px oklch(0 0 0 / 0.3), inset 0 1px 0 oklch(1 0 0 / 0.05);
+}
+
+.glass-card-hover {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.glass-card-hover:hover {
+  background: oklch(0.14 0.03 265 / 0.8);
+  border-color: oklch(0.65 0.22 280 / 0.35);
+  box-shadow: 0 16px 48px oklch(0 0 0 / 0.4), 0 0 30px oklch(0.65 0.22 280 / 0.1), inset 0 1px 0 oklch(1 0 0 / 0.08);
+  transform: translateY(-2px);
+}
+
+/* ─── Premium Gradient Borders ──────────────────────────────────────────────── */
+.border-gradient {
+  position: relative;
+  border: none !important;
+}
+
+.border-gradient::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(135deg, oklch(0.65 0.22 280 / 0.6), oklch(0.55 0.22 290 / 0.2), oklch(0.65 0.22 280 / 0.4));
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
+/* ─── Premium Hero Gradient ─────────────────────────────────────────────────── */
+.hero-gradient {
+  background: 
+    radial-gradient(ellipse 80% 60% at 50% -20%, oklch(0.65 0.22 280 / 0.15) 0%, transparent 60%),
+    radial-gradient(ellipse 40% 40% at 80% 20%, oklch(0.55 0.22 290 / 0.08) 0%, transparent 50%),
+    radial-gradient(ellipse 60% 50% at 20% 80%, oklch(0.45 0.18 260 / 0.06) 0%, transparent 50%);
+}
+
+/* ─── Animated Gradient Text ────────────────────────────────────────────────── */
+@keyframes gradient-shift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.text-gradient-animated {
+  background: linear-gradient(135deg, oklch(0.85 0.15 280), oklch(0.75 0.22 290), oklch(0.8 0.18 260), oklch(0.85 0.15 280));
+  background-size: 300% 300%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: gradient-shift 4s ease infinite;
+}
+
+/* ─── Premium CTA Button ────────────────────────────────────────────────────── */
+.cta-premium {
+  position: relative;
+  background: linear-gradient(135deg, oklch(0.65 0.22 280), oklch(0.55 0.22 295));
+  box-shadow: 0 4px 24px oklch(0.65 0.22 280 / 0.4), 0 1px 0 oklch(1 0 0 / 0.2) inset;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
+}
+
+.cta-premium::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, oklch(1 0 0 / 0.1) 0%, transparent 50%);
+  border-radius: inherit;
+}
+
+.cta-premium:hover {
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 8px 40px oklch(0.65 0.22 280 / 0.6), 0 1px 0 oklch(1 0 0 / 0.2) inset;
+}
+
+.cta-premium:active {
+  transform: translateY(0) scale(0.99);
+}
+
+/* ─── Premium Section Divider ───────────────────────────────────────────────── */
+.section-divider {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, oklch(0.65 0.22 280 / 0.3), transparent);
+}
+
+/* ─── Glow Effects ──────────────────────────────────────────────────────────── */
+.glow-purple {
+  box-shadow: 0 0 30px oklch(0.65 0.22 280 / 0.3), 0 0 60px oklch(0.65 0.22 280 / 0.1);
+}
+
+.glow-gold {
+  box-shadow: 0 0 30px oklch(0.75 0.18 65 / 0.3), 0 0 60px oklch(0.75 0.18 65 / 0.1);
+}
+
+/* ─── Premium Badge ─────────────────────────────────────────────────────────── */
+.badge-premium {
+  background: linear-gradient(135deg, oklch(0.75 0.18 65 / 0.2), oklch(0.65 0.22 45 / 0.1));
+  border: 1px solid oklch(0.75 0.18 65 / 0.4);
+  color: oklch(0.85 0.15 65);
+  font-size: 0.65rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 0.2rem 0.6rem;
+  border-radius: 999px;
+}
+
+.badge-popular {
+  background: linear-gradient(135deg, oklch(0.65 0.22 280 / 0.3), oklch(0.55 0.22 290 / 0.2));
+  border: 1px solid oklch(0.65 0.22 280 / 0.5);
+  color: oklch(0.85 0.12 280);
+  font-size: 0.65rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 0.2rem 0.6rem;
+  border-radius: 999px;
+}
+
+/* ─── Subscription Card ─────────────────────────────────────────────────────── */
+.subscription-card-pro {
+  background: linear-gradient(145deg, oklch(0.13 0.03 265), oklch(0.11 0.025 265));
+  border: 1px solid oklch(0.65 0.22 280 / 0.4);
+  box-shadow: 0 0 0 1px oklch(0.65 0.22 280 / 0.1), 0 20px 60px oklch(0 0 0 / 0.4), 0 0 40px oklch(0.65 0.22 280 / 0.08);
+  position: relative;
+}
+
+.subscription-card-pro::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, oklch(0.65 0.22 280), oklch(0.55 0.22 295), oklch(0.65 0.22 280));
+  border-radius: 999px 999px 0 0;
+}
+
+.subscription-card-elite {
+  background: linear-gradient(145deg, oklch(0.14 0.03 60), oklch(0.11 0.025 265));
+  border: 1px solid oklch(0.75 0.18 65 / 0.35);
+  box-shadow: 0 0 0 1px oklch(0.75 0.18 65 / 0.1), 0 20px 60px oklch(0 0 0 / 0.4), 0 0 40px oklch(0.75 0.18 65 / 0.06);
+  position: relative;
+}
+
+.subscription-card-elite::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, oklch(0.75 0.18 65), oklch(0.85 0.15 55), oklch(0.75 0.18 65));
+  border-radius: 999px 999px 0 0;
+}
+
+/* ─── Parallax Depth ────────────────────────────────────────────────────────── */
+@keyframes parallax-float {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  33% { transform: translateY(-12px) rotate(1deg); }
+  66% { transform: translateY(-6px) rotate(-0.5deg); }
+}
+
+.animate-parallax {
+  animation: parallax-float 8s ease-in-out infinite;
+}
+
+/* ─── Stagger Animation ─────────────────────────────────────────────────────── */
+.stagger-1 { animation-delay: 0.1s; }
+.stagger-2 { animation-delay: 0.2s; }
+.stagger-3 { animation-delay: 0.3s; }
+.stagger-4 { animation-delay: 0.4s; }
+.stagger-5 { animation-delay: 0.5s; }
+
+/* ─── Reveal on Scroll ──────────────────────────────────────────────────────── */
+@keyframes reveal-up {
+  from { opacity: 0; transform: translateY(32px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-reveal {
+  animation: reveal-up 0.6s cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+
+/* ─── Number Counter Animation ──────────────────────────────────────────────── */
+@keyframes count-up {
+  from { opacity: 0; transform: translateY(8px) scale(0.9); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.animate-count {
+  animation: count-up 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+/* ─── Premium Stars ─────────────────────────────────────────────────────────── */
+.stars-premium {
+  background-color: oklch(0.07 0.02 265);
+  background-image:
+    radial-gradient(1px 1px at 10% 15%, oklch(0.95 0.02 265 / 0.8) 0%, transparent 100%),
+    radial-gradient(1.5px 1.5px at 25% 35%, oklch(0.9 0.05 280 / 0.6) 0%, transparent 100%),
+    radial-gradient(1px 1px at 40% 10%, oklch(0.95 0.02 265 / 0.7) 0%, transparent 100%),
+    radial-gradient(2px 2px at 55% 55%, oklch(0.85 0.08 280 / 0.5) 0%, transparent 100%),
+    radial-gradient(1px 1px at 70% 25%, oklch(0.95 0.02 265 / 0.6) 0%, transparent 100%),
+    radial-gradient(1.5px 1.5px at 85% 70%, oklch(0.9 0.05 280 / 0.4) 0%, transparent 100%),
+    radial-gradient(1px 1px at 15% 65%, oklch(0.95 0.02 265 / 0.5) 0%, transparent 100%),
+    radial-gradient(1px 1px at 30% 80%, oklch(0.9 0.02 265 / 0.4) 0%, transparent 100%),
+    radial-gradient(1.5px 1.5px at 45% 45%, oklch(0.85 0.08 280 / 0.6) 0%, transparent 100%),
+    radial-gradient(1px 1px at 60% 90%, oklch(0.95 0.02 265 / 0.3) 0%, transparent 100%),
+    radial-gradient(1px 1px at 75% 40%, oklch(0.9 0.02 265 / 0.5) 0%, transparent 100%),
+    radial-gradient(1px 1px at 90% 85%, oklch(0.95 0.02 265 / 0.4) 0%, transparent 100%),
+    radial-gradient(1px 1px at 5% 50%, oklch(0.9 0.02 265 / 0.6) 0%, transparent 100%),
+    radial-gradient(1.5px 1.5px at 95% 30%, oklch(0.85 0.08 280 / 0.5) 0%, transparent 100%),
+    radial-gradient(ellipse 70% 50% at 50% 0%, oklch(0.65 0.22 280 / 0.12) 0%, transparent 70%),
+    radial-gradient(ellipse 40% 30% at 80% 100%, oklch(0.55 0.18 260 / 0.06) 0%, transparent 60%);
+}
+
+/* ─── Trust Badges ──────────────────────────────────────────────────────────── */
+.trust-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.4rem 0.8rem;
+  border-radius: 999px;
+  background: oklch(0.12 0.025 265 / 0.8);
+  border: 1px solid oklch(0.65 0.22 280 / 0.2);
+  font-size: 0.75rem;
+  color: oklch(0.7 0.04 265);
+  backdrop-filter: blur(8px);
+}
+
+/* ─── Value Stack Item ──────────────────────────────────────────────────────── */
+.value-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.875rem 1rem;
+  border-radius: 0.75rem;
+  background: oklch(0.12 0.025 265);
+  border: 1px solid oklch(0.22 0.03 265);
+  transition: all 0.2s ease;
+}
+
+.value-item:hover {
+  border-color: oklch(0.65 0.22 280 / 0.3);
+  background: oklch(0.13 0.028 265);
+}
+
+/* ─── Floating Orbs ─────────────────────────────────────────────────────────── */
+.orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(60px);
+  pointer-events: none;
+  opacity: 0.15;
+}
+
+.orb-purple {
+  background: radial-gradient(circle, oklch(0.65 0.22 280), transparent);
+}
+
+.orb-blue {
+  background: radial-gradient(circle, oklch(0.55 0.18 250), transparent);
+}
+
+.orb-gold {
+  background: radial-gradient(circle, oklch(0.75 0.18 65), transparent);
 }

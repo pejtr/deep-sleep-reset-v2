@@ -135,3 +135,31 @@ FB/IG Post → Landing Page (Hero + Quiz) → Quiz Výsledek + CTA
 - [x] Testy pro /api/ab-test/winner persistence a /api/behavior/summary — analytics.test.ts (12 testů), 27/27 celkem
 - [x] True funnel drop-off percentages — dropoffByPage vrací { visitors, dropoffRate, nextStep } pro každý krok
 - [x] Error handling pro optimization_history writes — try/catch s console.error (ne silent)
+
+## Kliken 3.0 + AI Content Generátor
+- [ ] Kliken 3.0 scripty pro 3 Reels (timing, text overlay, voiceover, CTA)
+- [ ] AI content generátor endpoint (/api/content/generate) — LLM generuje Reels scripty, captions, hashtags
+- [ ] Admin dashboard — Content Generator tab s formulářem a výstupem
+- [ ] Automatické denní generování 3 postů (cron job 6am)
+- [ ] Content history — uložení vygenerovaného obsahu do DB
+
+## Premium Subscription Program (Klein + Hormozi)
+- [ ] Navrhnout Premium program strukturu (tiers, ceny, obsah, identity)
+- [ ] Stripe recurring subscription ($9.99/měsíc nebo $27/měsíc)
+- [ ] Member area — chráněné stránky pro předplatitele
+- [ ] Měsíční nový obsah (Sleep Protocol updates, nové audio, nové guides)
+- [ ] Komunita identita — "Sleep Optimizers" brand
+- [ ] Upgrade CTA v ThankYou stránce a email sekvenci
+- [ ] Admin dashboard — subscription metrics (MRR, churn, LTV)
+
+## Premium Redesign & Klein Princip (dokončeno)
+- [x] Premium redesign Home.tsx — Playfair Display, glassmorphism, premium hero, value stack
+- [x] Premium stránka /premium — Sleep Optimizers Community s Klein principem a Hormozi value stackem
+- [x] Premium redesign Order.tsx — glassmorphism cards, chronotype colors, value stack s cenami
+- [x] Premium redesign ThankYou.tsx — identity upsell, Premium teaser po 8s, premium feel
+- [x] Admin: Subscriptions tab — tier metrics, Klein identity metrics, MRR tracking
+- [x] Admin: AI Content Generator tab — Hormozi-style content, email/social/ad copy
+- [x] Backend: /api/admin/generate-content — LLM content generation endpoint
+- [x] Backend: /api/subscriptions/create — Stripe recurring subscription checkout
+- [x] App.tsx: /premium route přidána
+- [x] CSS: Premium utility classes (glass-card, cta-premium, subscription-card-pro, badge-popular, trust-badge, stars-premium, orb-gold, animate-reveal)

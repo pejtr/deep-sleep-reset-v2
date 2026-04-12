@@ -3,6 +3,7 @@ import { useAuth } from "@/_core/hooks/useAuth";
 import { useLocation } from "wouter";
 import { toast } from "sonner";
 import BehaviorAnalyticsPanel from "@/components/BehaviorAnalyticsPanel";
+import { AIChatBox, type Message } from "@/components/AIChatBox";
 
 interface Stats {
   totalRevenue: number;
@@ -26,8 +27,13 @@ export default function Admin() {
   const [, setLocation] = useLocation();
   const [stats, setStats] = useState<Stats | null>(null);
   const [statsLoading, setStatsLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<"overview" | "funnel" | "abtests" | "orders" | "behavior">("overview");
+  const [activeTab, setActiveTab] = useState<"overview" | "funnel" | "abtests" | "orders" | "behavior" | "subscriptions" | "content">("overview");
   const [runningAnalysis, setRunningAnalysis] = useState(false);
+  const [contentMessages, setContentMessages] = useState<Message[]>([
+    { role: "system", content: "You are a sleep optimization content expert. Help create high-converting content for the Deep Sleep Reset funnel: email sequences, social media posts, ad copy, blog articles, and sales page copy. Always use Hormozi-style value stacking, loss aversion, and chronotype-specific personalization." },
+    { role: "assistant", content: "👋 Welcome to the Content Generator!\n\nI can help you create:\n- **Email sequences** (welcome, nurture, re-engagement)\n- **Social media posts** (Instagram, Facebook, TikTok)\n- **Ad copy** (Facebook Ads, Google Ads)\n- **Blog articles** (SEO-optimized sleep content)\n- **Sales page copy** (Hormozi-style value stacks)\n\nWhat would you like to create today?" },
+  ]);
+  const [contentLoading, setContentLoading] = useState(false);
 
   useEffect(() => {
     if (!loading && (!user || user.role !== "admin")) {
@@ -84,6 +90,8 @@ export default function Admin() {
     { id: "abtests", label: "A/B Tests" },
     { id: "orders", label: "Orders" },
     { id: "behavior", label: "Behavior" },
+    { id: "subscriptions", label: "💎 Subscriptions" },
+    { id: "content", label: "🤖 AI Content" },
   ] as const;
 
   return (
@@ -322,6 +330,137 @@ export default function Admin() {
         {/* Behavior Tab */}
         {activeTab === "behavior" && (
           <BehaviorAnalyticsPanel onRunAnalysis={handleRunAnalysis} runningAnalysis={runningAnalysis} />
+        )}
+
+        {/* Subscriptions Tab */}
+        {activeTab === "subscriptions" && (
+          <div className="space-y-4">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-2">
+              {[
+                { label: "Active Subs", value: "—", icon: "👥", color: "text-purple-400", sub: "Loading..." },
+                { label: "MRR", value: "—", icon: "💎", color: "text-green-400", sub: "Monthly recurring" },
+                { label: "Churn Rate", value: "—", icon: "📉", color: "text-yellow-400", sub: "Last 30 days" },
+                { label: "LTV", value: "—", icon: "🏆", color: "text-blue-400", sub: "Avg lifetime value" },
+              ].map((item, i) => (
+                <div key={i} className="glass-card rounded-xl p-4">
+                  <div className="text-2xl mb-1">{item.icon}</div>
+                  <div className={`text-2xl font-black ${item.color}`}>{item.value}</div>
+                  <div className="text-xs text-white font-semibold">{item.label}</div>
+                  <div className="text-xs text-[oklch(0.45_0.04_265)]">{item.sub}</div>
+                </div>
+              ))}
+            </div>
+
+            <div className="glass-card rounded-xl p-5">
+              <h3 className="font-bold text-white mb-4 flex items-center gap-2">
+                <span>💎</span> Sleep Optimizers Tiers
+              </h3>
+              <div className="grid md:grid-cols-3 gap-3">
+                {[
+                  { name: "Basic", price: "$9.99/mo", color: "oklch(0.65 0.18 250)", desc: "Monthly guide + community" },
+                  { name: "Pro", price: "$27/mo", color: "oklch(0.65 0.22 280)", desc: "AI reports + Q&A + bonuses" },
+                  { name: "Elite", price: "$47/mo", color: "oklch(0.75 0.18 65)", desc: "Dashboard + coaching + VIP" },
+                ].map((tier) => (
+                  <div key={tier.name} className="p-4 rounded-xl bg-[oklch(0.13_0.025_265)] border border-[oklch(0.22_0.03_265)]">
+                    <div className="font-bold mb-1" style={{ color: tier.color }}>{tier.name}</div>
+                    <div className="text-xl font-black text-white mb-1">{tier.price}</div>
+                    <div className="text-xs text-[oklch(0.55_0.04_265)]">{tier.desc}</div>
+                    <div className="text-xs text-[oklch(0.45_0.04_265)] mt-2">0 active subscribers</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="glass-card rounded-xl p-5">
+              <h3 className="font-bold text-white mb-3 text-sm">📊 Klein Principle — Identity Metrics</h3>
+              <div className="grid grid-cols-2 gap-3 text-xs">
+                {[
+                  { metric: "Identity Adoption Rate", desc: "Users who self-identify as 'Sleep Optimizer'", value: "—" },
+                  { metric: "Community Engagement", desc: "Posts/comments per member/month", value: "—" },
+                  { metric: "Brand Advocacy", desc: "Members who referred others", value: "—" },
+                  { metric: "Retention Rate", desc: "Subscribers after 3 months", value: "—" },
+                ].map((item, i) => (
+                  <div key={i} className="p-3 rounded-lg bg-[oklch(0.12_0.025_265)] border border-[oklch(0.22_0.03_265)]">
+                    <p className="font-semibold text-white mb-0.5">{item.metric}</p>
+                    <p className="text-[oklch(0.5_0.04_265)] mb-1">{item.desc}</p>
+                    <p className="text-[oklch(0.65_0.22_280)] font-bold">{item.value}</p>
+                  </div>
+                ))}
+              </div>
+              <p className="text-xs text-[oklch(0.4_0.03_265)] mt-3">* Subscription system active — metrics will populate as members join</p>
+            </div>
+          </div>
+        )}
+
+        {/* AI Content Generator Tab */}
+        {activeTab === "content" && (
+          <div className="space-y-4">
+            <div className="glass-card rounded-xl p-4">
+              <h3 className="font-bold text-white mb-2 flex items-center gap-2">
+                <span>🤖</span> AI Content Generator
+              </h3>
+              <p className="text-xs text-[oklch(0.55_0.04_265)] mb-3">
+                Generate high-converting content for your funnel using Hormozi principles, chronotype personalization, and behavioral psychology triggers.
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {[
+                  "Email sequence for Wolf type",
+                  "Facebook ad for Bear chronotype",
+                  "Instagram post about sleep debt",
+                  "Blog: Why you wake up at 3am",
+                  "Upsell email after $1 purchase",
+                  "Re-engagement for churned subscribers",
+                ].map((prompt) => (
+                  <button
+                    key={prompt}
+                    onClick={() => {
+                      setContentMessages(prev => [...prev, { role: "user", content: prompt }]);
+                      setContentLoading(true);
+                      fetch("/api/admin/generate-content", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ prompt }),
+                      })
+                        .then(r => r.json())
+                        .then(d => {
+                          setContentMessages(prev => [...prev, { role: "assistant", content: d.content || "Content generated!" }]);
+                        })
+                        .catch(() => {
+                          setContentMessages(prev => [...prev, { role: "assistant", content: "Sorry, content generation failed. Please try again." }]);
+                        })
+                        .finally(() => setContentLoading(false));
+                    }}
+                    className="px-3 py-1.5 rounded-lg text-xs font-medium bg-[oklch(0.65_0.22_280/0.15)] border border-[oklch(0.65_0.22_280/0.3)] text-[oklch(0.75_0.18_280)] hover:bg-[oklch(0.65_0.22_280/0.25)] transition-all"
+                  >
+                    {prompt}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <AIChatBox
+              messages={contentMessages}
+              isLoading={contentLoading}
+              placeholder="Ask me to create email copy, ad scripts, blog posts, social content..."
+              height="500px"
+              onSendMessage={(msg: string) => {
+                setContentMessages(prev => [...prev, { role: "user", content: msg }]);
+                setContentLoading(true);
+                fetch("/api/admin/generate-content", {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({ prompt: msg }),
+                })
+                  .then(r => r.json())
+                  .then(d => {
+                    setContentMessages(prev => [...prev, { role: "assistant", content: d.content || "Content generated!" }]);
+                  })
+                  .catch(() => {
+                    setContentMessages(prev => [...prev, { role: "assistant", content: "Sorry, content generation failed. Please try again." }]);
+                  })
+                  .finally(() => setContentLoading(false));
+              }}
+            />
+          </div>
         )}
       </div>
     </div>

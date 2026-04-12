@@ -108,3 +108,37 @@ export const optimizationHistoryTable = mysqlTable("optimization_history", {
   createdAt: timestamp("createdAt").defaultNow().notNull(),
 });
 export type OptimizationHistoryEntry = typeof optimizationHistoryTable.$inferSelect;
+
+// Premium Subscriptions — Sleep Optimizers Community
+export const subscriptions = mysqlTable("subscriptions", {
+  id: int("id").autoincrement().primaryKey(),
+  email: varchar("email", { length: 320 }).notNull(),
+  stripeCustomerId: varchar("stripeCustomerId", { length: 256 }),
+  stripeSubscriptionId: varchar("stripeSubscriptionId", { length: 256 }),
+  tier: mysqlEnum("tier", ["basic", "pro", "elite"]).notNull(),
+  status: mysqlEnum("status", ["active", "canceled", "past_due", "trialing"]).default("active").notNull(),
+  currentPeriodStart: timestamp("currentPeriodStart"),
+  currentPeriodEnd: timestamp("currentPeriodEnd"),
+  canceledAt: timestamp("canceledAt"),
+  chronotype: mysqlEnum("chronotype", ["lion", "bear", "wolf", "dolphin"]),
+  source: varchar("source", { length: 50 }).default("funnel"), // funnel, email, organic
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+export type Subscription = typeof subscriptions.$inferSelect;
+export type InsertSubscription = typeof subscriptions.$inferInsert;
+
+// Member content — monthly exclusive content for subscribers
+export const memberContent = mysqlTable("member_content", {
+  id: int("id").autoincrement().primaryKey(),
+  title: varchar("title", { length: 256 }).notNull(),
+  description: text("description"),
+  contentType: mysqlEnum("contentType", ["guide", "audio", "video", "report", "bonus"]).notNull(),
+  tier: mysqlEnum("tier", ["basic", "pro", "elite"]).notNull(), // minimum tier required
+  downloadUrl: text("downloadUrl"),
+  month: varchar("month", { length: 7 }).notNull(), // YYYY-MM format
+  chronotype: mysqlEnum("chronotype", ["lion", "bear", "wolf", "dolphin"]), // null = all
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+export type MemberContent = typeof memberContent.$inferSelect;
+

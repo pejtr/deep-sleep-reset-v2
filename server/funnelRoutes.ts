@@ -7,6 +7,7 @@ import { FUNNEL_PRODUCTS, ProductKey } from "./products";
 import { PRODUCT_DOWNLOADS } from "../shared/products";
 import { sendPurchaseConfirmation, addBrevoContact } from "./emailService";
 import { scheduleEmailSequence } from "./emailScheduler";
+import { invokeLLM } from "./_core/llm";
 
 const router = Router();
 
@@ -730,6 +731,85 @@ router.post("/admin/nightly-analysis", async (req: Request, res: Response) => {
   } catch (err) {
     console.error("[Nightly Analysis] Failed:", err);
     res.status(500).json({ error: "Analysis failed" });
+  }
+});
+
+// ─── Admin: Generate Content ─────────────────────────────────────────────────
+router.post("/admin/generate-content", async (req: Request, res: Response) => {
+  try {
+    const { prompt, messages } = req.body;
+    if (!prompt && (!messages || messages.length === 0)) {
+      return res.status(400).json({ error: "Missing prompt" });
+    }
+
+    const systemPrompt = `You are a world-class sleep optimization content expert and direct-response copywriter.
+You specialize in creating high-converting content for the Deep Sleep Reset funnel.
+
+Always apply:
+- Hormozi-style value stacking (show massive value, then reveal low price)
+- Loss aversion framing (what they lose by NOT acting)
+- Chronotype personalization (Lion/Bear/Wolf/Dolphin)
+- Cialdini principles (social proof, scarcity, authority, reciprocity)
+- Specific numbers and results ("fell asleep in 8 min", "3x faster")
+- Pattern interrupts and curiosity gaps
+
+Content types you create:
+- Email sequences (subject lines + body)
+- Social media posts (Instagram, Facebook, TikTok)
+- Facebook/Google ad copy
+- Blog articles (SEO-optimized)
+- Sales page copy
+- Upsell scripts`;
+
+    const llmMessages = messages || [
+      { role: "system", content: systemPrompt },
+      { role: "user", content: prompt },
+    ];
+
+    const response = await invokeLLM({ messages: llmMessages });
+    const content = response.choices?.[0]?.message?.content || "Content generated!";
+    res.json({ content });
+  } catch (err) {
+    console.error("[Content Generator] Error:", err);
+    res.status(500).json({ error: "Content generation failed" });
+  }
+});
+
+// ─── Subscriptions: Create Checkout ──────────────────────────────────────────
+router.post("/subscriptions/create", async (req: Request, res: Response) => {
+  try {
+    if (!stripe) return res.status(503).json({ error: "Stripe not configured" });
+    const { tier } = req.body;
+    const SUBSCRIPTION_PRICES: Record<string, { price: number; name: string }> = {
+      basic: { price: 999, name: "Sleep Optimizer Basic" },
+      pro: { price: 2700, name: "Sleep Optimizer Pro" },
+      elite: { price: 4700, name: "Sleep Optimizer Elite" },
+    };
+    const product = SUBSCRIPTION_PRICES[tier];
+    if (!product) return res.status(400).json({ error: "Invalid tier" });
+
+    const baseUrl = getBaseUrl(req);
+    const session = await stripe.checkout.sessions.create({
+      payment_method_types: ["card"],
+      mode: "subscription",
+      line_items: [{
+        price_data: {
+          currency: "usd",
+          product_data: { name: product.name },
+          unit_amount: product.price,
+          recurring: { interval: "month" },
+        },
+        quantity: 1,
+      }],
+      allow_promotion_codes: true,
+      success_url: `${baseUrl}/thank-you?subscription=${tier}`,
+      cancel_url: `${baseUrl}/premium`,
+      metadata: { tier, product: "subscription" },
+    });
+    res.json({ url: session.url });
+  } catch (err) {
+    console.error("[Subscription] Error:", err);
+    res.status(500).json({ error: "Failed to create subscription" });
   }
 });
 
