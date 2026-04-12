@@ -24,10 +24,10 @@ const PRODUCT_DOWNLOADS: Record<string, { name: string; url: string }> = {
 };
 
 const CHRONOTYPE_NAMES: Record<string, string> = {
-  lion: "Lev 🦁",
-  bear: "Medvěd 🐻",
-  wolf: "Vlk 🐺",
-  dolphin: "Delfín 🐬",
+  lion: "Lion 🦁",
+  bear: "Bear 🐻",
+  wolf: "Wolf 🐺",
+  dolphin: "Dolphin 🐬",
 };
 
 async function brevoRequest(endpoint: string, body: object): Promise<boolean> {
@@ -76,16 +76,16 @@ export async function sendPurchaseConfirmation({
   amount: number;
 }): Promise<boolean> {
   const download = PRODUCT_DOWNLOADS[product] || PRODUCT_DOWNLOADS.tripwire;
-  const chronotypeName = chronotype ? CHRONOTYPE_NAMES[chronotype] || chronotype : "Medvěd 🐻";
-  const displayName = name || "příteli";
+  const chronotypeName = chronotype ? CHRONOTYPE_NAMES[chronotype] || chronotype : "Bear 🐻";
+  const displayName = name || "there";
 
   const htmlContent = `
 <!DOCTYPE html>
-<html lang="cs">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Tvoje materiály jsou připraveny</title>
+  <title>Your materials are ready</title>
 </head>
 <body style="margin:0;padding:0;background:#0d0b1a;font-family:Inter,Arial,sans-serif;color:#e8e6f0;">
   <div style="max-width:600px;margin:0 auto;padding:40px 20px;">
@@ -144,8 +144,8 @@ export async function sendPurchaseConfirmation({
     <!-- Footer -->
     <div style="text-align:center;border-top:1px solid #1a1230;padding-top:20px;">
       <p style="color:#4a3f6b;font-size:11px;margin:0;">
-        Deep Sleep Reset © 2026 · Spi dobře, žij lépe 🌙<br>
-        <a href="#" style="color:#4a3f6b;">Odhlásit se z emailů</a>
+        Deep Sleep Reset © 2026 · Sleep well, live better 🌙<br>
+        <a href="#" style="color:#4a3f6b;">Unsubscribe</a>
       </p>
     </div>
 
@@ -156,7 +156,7 @@ export async function sendPurchaseConfirmation({
   return brevoRequest("/smtp/email", {
     sender: SENDER,
     to: [{ email, name: displayName }],
-    subject: `✅ Tvoje materiály jsou připraveny — ${download.name}`,
+    subject: `✅ Your materials are ready — ${download.name}`,
     htmlContent,
   });
 }
@@ -263,12 +263,12 @@ export async function sendSequenceEmail({
   const emailData = EMAIL_SEQUENCE.find((e) => e.day === day);
   if (!emailData) return false;
 
-  const displayName = name || "příteli";
-  const chronotypeName = CHRONOTYPE_NAMES[chronotype] || "Medvěd 🐻";
+  const displayName = name || "there";
+  const chronotypeName = CHRONOTYPE_NAMES[chronotype] || "Bear 🐻";
 
   const htmlContent = `
 <!DOCTYPE html>
-<html lang="cs">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">

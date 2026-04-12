@@ -88,38 +88,38 @@ FB/IG Post → Landing Page (Hero + Quiz) → Quiz Výsledek + CTA
 - [x] Upsell follow-up email (den 5 a 7 sekvence)
 
 ## Nové funkce (přidáno)
-- [ ] Sekce uživatelských recenzí a hodnocení na Home stránce
-- [ ] Real-time analytický panel pro admina (klíčové metriky)
-- [ ] Email popup pro sběr kontaktů (exit-intent + timed)
-- [ ] Přeložit celý funnel do angličtiny (Home, Quiz, QuizResult, Order, Upsell 1-3, ThankYou)
-- [ ] Přeložit email sekvenci a potvrzovací emaily do angličtiny
-- [ ] Aktualizovat OG tagy pro anglický trh
-- [ ] Přidat low-tier tržní optimalizaci (mobilní, pomalé připojení)
+- [x] Sekce uživatelských recenzí a hodnocení na Home stránce (ReviewsSection.tsx — 6 recenzí)
+- [x] Real-time analytický panel pro admina (Admin.tsx — funnel, A/B, behavior, goal progress)
+- [x] Email popup pro sběr kontaktů (EmailCapturePopup.tsx — timed 8s + exit-intent)
+- [x] Přeložit celý funnel do angličtiny (Home, Quiz, QuizResult, Order, Upsell 1-3, ThankYou)
+- [ ] Přeložit emailService.ts do angličtiny
+- [x] Aktualizovat OG tagy pro anglický trh (index.html)
+- [x] Přidat low-tier tržní optimalizaci (mobile-first design, lazy loading)
 
 ## Behaviorální psychologie & Neuro-marketing
-- [ ] Přeložit celý funnel do angličtiny (Home, Quiz, QuizResult, Order, Upsell1-3, ThankYou, emaily)
-- [ ] Cialdini principy: Scarcity, Social Proof, Authority, Reciprocity, Commitment na každé stránce
-- [ ] Loss aversion framing na Order stránce ("Don't lose another night of sleep")
-- [ ] Anchoring na upsell stránkách (původní cena přeškrtnutá)
-- [ ] Progress bias v quizu (completion effect — "You're 80% done!")
-- [ ] Micro-commitments sekvence (quiz → email → platba)
-- [ ] Fear of Missing Out (FOMO) na Order stránce
-- [ ] Sekce recenzí s photo avatary a verified badge
-- [ ] Email lead capture popup (timed 8s + exit-intent)
+- [x] Přeložit celý funnel do angličtiny ✓
+- [x] Cialdini principy: Scarcity, Social Proof, Authority, Reciprocity, Commitment ✓
+- [x] Loss aversion framing na Order stránce ✓
+- [x] Anchoring na upsell stránkách (přeškrtnuté ceny) ✓
+- [x] Progress bias v quizu ("You're X% done!") ✓
+- [x] Micro-commitments sekvence (quiz → email popup → platba) ✓
+- [x] Fear of Missing Out (FOMO) na Order stránce ✓
+- [x] Sekce recenzí s avatary a verified badge (ReviewsSection.tsx) ✓
+- [x] Email lead capture popup (timed 8s + exit-intent) ✓
 
 ## Heat Mapy & Behavior Analytics
-- [ ] Click tracking na každý element (button, link, chronotype card)
-- [ ] Scroll depth tracking (25%, 50%, 75%, 100%)
+- [x] Click tracking na každý element (/api/behavior/track) ✓
+- [x] Scroll depth tracking (25%, 50%, 75%, 100%) ✓
 - [ ] Rage click detection
-- [ ] Session time tracking per page
-- [ ] Funnel drop-off tracking (kde lidé odcházejí)
+- [x] Session time tracking per page ✓
+- [x] Funnel drop-off tracking (behaviorEvents tabulka) ✓
 - [ ] Heat mapa vizualizace v Admin dashboardu
 - [ ] Behavior analytics panel v Admin (click density, scroll heatmap)
 
 ## Autonomní noční AI analyzátor (půlnoc)
-- [ ] Cron job každou půlnoc (00:00)
-- [ ] Sbírá data: konverze, A/B výsledky, drop-off body, revenue
-- [ ] AI (LLM) analyzuje data a generuje insights
+- [x] Cron job každou půlnoc (scheduleNightlyAnalysis v index.ts) ✓
+- [x] Sbírá data: konverze, A/B výsledky, drop-off body, revenue ✓
+- [x] AI (LLM) analyzuje data a generuje insights (nightlyAnalyzer.ts) ✓
 - [ ] Automaticky aktualizuje A/B varianty (vítěz dostane 70% traffic)
-- [ ] Generuje denní report a posílá notifikaci vlastníkovi
+- [x] Generuje denní report a posílá notifikaci vlastníkovi ✓
 - [ ] Ukládá historii optimalizací do DB

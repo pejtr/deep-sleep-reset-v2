@@ -470,16 +470,102 @@ router.get("/downloads", async (req: Request, res: Response) => {
 // ─── Behavior Tracking (heat map & funnel analytics) ────────────────────────
 router.post("/behavior/track", async (req: Request, res: Response) => {
   try {
-    const { event, page, product, result } = req.body;
+    const { event, page, product, element, depth, duration, x, y, ts, sessionId } = req.body;
     const db = await getDb();
     if (db) {
+      // Store rich metadata as JSON in result field for heat map analysis
+      const meta = JSON.stringify({ element, depth, duration, x, y, ts, sessionId });
       await db.execute(
-        sql`INSERT IGNORE INTO behavior_events (event_type, page, product, result, created_at) VALUES (${event || 'unknown'}, ${page || 'unknown'}, ${product || null}, ${result || null}, NOW())`
+        sql`INSERT INTO behavior_events (event_type, page, product, result, created_at) VALUES (${event || 'unknown'}, ${page || 'unknown'}, ${product || null}, ${meta}, NOW())`
       ).catch(() => {}); // Table may not exist yet
     }
     res.json({ ok: true });
   } catch {
     res.json({ ok: true }); // Never fail the client
+  }
+});
+
+// ─── Behavior Analytics (Admin heat map data) ──────────────────────────────
+router.get("/admin/behavior", async (req: Request, res: Response) => {
+  try {
+    const db = await getDb();
+    if (!db) return res.json({ events: [], summary: {} });
+
+    // Get last 7 days of behavior events
+    const events = await db.execute(
+      sql`SELECT event_type, page, COUNT(*) as count, MAX(created_at) as last_seen
+          FROM behavior_events
+          WHERE created_at > DATE_SUB(NOW(), INTERVAL 7 DAY)
+          GROUP BY event_type, page
+          ORDER BY count DESC
+          LIMIT 50`
+    ).catch(() => ({ rows: [] }));
+
+    // Rage clicks (same element clicked 3+ times in 2 seconds)
+    const rageClicks = await db.execute(
+      sql`SELECT page, COUNT(*) as count
+          FROM behavior_events
+          WHERE event_type = 'rage_click'
+          AND created_at > DATE_SUB(NOW(), INTERVAL 7 DAY)
+          GROUP BY page
+          ORDER BY count DESC`
+    ).catch(() => ({ rows: [] }));
+
+    // Scroll depth distribution
+    const scrollDepth = await db.execute(
+      sql`SELECT result, COUNT(*) as count
+          FROM behavior_events
+          WHERE event_type = 'scroll_depth'
+          AND created_at > DATE_SUB(NOW(), INTERVAL 7 DAY)
+          GROUP BY result
+          ORDER BY result ASC`
+    ).catch(() => ({ rows: [] }));
+
+    res.json({
+      events: (events as any).rows || [],
+      rageClicks: (rageClicks as any).rows || [],
+      scrollDepth: (scrollDepth as any).rows || [],
+    });
+  } catch (err) {
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
+// ─── Auto A/B Optimization (winner gets 70% traffic) ─────────────────────────
+router.get("/ab-test/winner", async (req: Request, res: Response) => {
+  try {
+    const db = await getDb();
+    if (!db) return res.json({ headline: 'D', cta: 'C' });
+
+    // Get click-through rates per variant (last 7 days)
+    const results = await db.execute(
+      sql`SELECT test_name, variant,
+              SUM(CASE WHEN event_type = 'click' THEN 1 ELSE 0 END) as clicks,
+              SUM(CASE WHEN event_type = 'impression' THEN 1 ELSE 0 END) as impressions,
+              ROUND(SUM(CASE WHEN event_type = 'click' THEN 1 ELSE 0 END) * 100.0 /
+                NULLIF(SUM(CASE WHEN event_type = 'impression' THEN 1 ELSE 0 END), 0), 2) as ctr
+          FROM ab_test_events
+          WHERE created_at > DATE_SUB(NOW(), INTERVAL 7 DAY)
+          GROUP BY test_name, variant
+          HAVING impressions >= 10
+          ORDER BY test_name, ctr DESC`
+    ).catch(() => ({ rows: [] }));
+
+    const rows = (results as any).rows || [];
+    const winners: Record<string, string> = {};
+    for (const row of rows) {
+      if (!winners[row.test_name]) {
+        winners[row.test_name] = row.variant; // First = highest CTR
+      }
+    }
+
+    res.json({
+      headline: winners['headline'] || null,
+      cta: winners['cta_button'] || null,
+      data: rows,
+    });
+  } catch (err) {
+    res.status(500).json({ error: "Server error" });
   }
 });
 
