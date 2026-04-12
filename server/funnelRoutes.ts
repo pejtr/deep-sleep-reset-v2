@@ -592,6 +592,72 @@ router.post("/leads/capture", async (req: Request, res: Response) => {
   }
 });
 
+// ─── Behavior Summary (heat map panel) ──────────────────────────────────
+router.get("/behavior/summary", async (req: Request, res: Response) => {
+  try {
+    const db = await getDb();
+    const empty = { pageViews: {}, ctaClicks: {}, scrollDepths: {}, exitIntents: 0, rageClicks: 0, emailPopupOpens: 0, emailPopupConverts: 0, dropoffByPage: {}, abWinners: [], optimizationHistory: [] };
+    if (!db) return res.json(empty);
+
+    const pvRows = await (db as any).execute(
+      sql`SELECT page, COUNT(*) as cnt FROM behavior_events WHERE event_type = 'page_view' GROUP BY page`
+    ).catch(() => ({ rows: [] }));
+    const pageViews: Record<string, number> = {};
+    for (const r of ((pvRows as any).rows || [])) pageViews[r.page] = Number(r.cnt);
+
+    const clickRows = await (db as any).execute(
+      sql`SELECT result, COUNT(*) as cnt FROM behavior_events WHERE event_type IN ('click','cta_click') GROUP BY result`
+    ).catch(() => ({ rows: [] }));
+    const ctaClicks: Record<string, number> = {};
+    for (const r of ((clickRows as any).rows || [])) if (r.result) ctaClicks[r.result] = Number(r.cnt);
+
+    const scrollRows = await (db as any).execute(
+      sql`SELECT page, result, COUNT(*) as cnt FROM behavior_events WHERE event_type = 'scroll_depth' GROUP BY page, result`
+    ).catch(() => ({ rows: [] }));
+    const scrollDepths: Record<string, Record<string, number>> = {};
+    for (const r of ((scrollRows as any).rows || [])) {
+      if (!scrollDepths[r.page]) scrollDepths[r.page] = {};
+      scrollDepths[r.page][r.result] = Number(r.cnt);
+    }
+
+    const specialRows = await (db as any).execute(
+      sql`SELECT event_type, COUNT(*) as cnt FROM behavior_events WHERE event_type IN ('exit_intent','rage_click','email_popup_open','email_popup_convert') GROUP BY event_type`
+    ).catch(() => ({ rows: [] }));
+    const specialMap: Record<string, number> = {};
+    for (const r of ((specialRows as any).rows || [])) specialMap[r.event_type] = Number(r.cnt);
+
+    res.json({ pageViews, ctaClicks, scrollDepths, exitIntents: specialMap['exit_intent'] || 0, rageClicks: specialMap['rage_click'] || 0, emailPopupOpens: specialMap['email_popup_open'] || 0, emailPopupConverts: specialMap['email_popup_convert'] || 0, dropoffByPage: {}, abWinners: [], optimizationHistory: [] });
+  } catch {
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
+// ─── Auto A/B Optimization (promote winner to 70% traffic) ─────────────────────
+router.post("/ab-test/winner", async (req: Request, res: Response) => {
+  try {
+    const db = await getDb();
+    if (!db) return res.json({ winners: [] });
+    const results = await (db as any).execute(
+      sql`SELECT test_name, variant, COUNT(*) as impressions,
+           SUM(CASE WHEN event_type = 'click' THEN 1 ELSE 0 END) as clicks,
+           (SUM(CASE WHEN event_type = 'click' THEN 1 ELSE 0 END) / NULLIF(COUNT(*), 0) * 100) as ctr
+           FROM ab_test_impressions GROUP BY test_name, variant HAVING COUNT(*) >= 100 ORDER BY test_name, ctr DESC`
+    ).catch(() => ({ rows: [] }));
+    const rows = ((results as any).rows || []) as Array<{ test_name: string; variant: string; impressions: number; clicks: number; ctr: number }>;
+    const winners: Array<{ testName: string; winner: string; confidence: number }> = [];
+    const seen = new Set<string>();
+    for (const row of rows) {
+      if (!seen.has(row.test_name)) {
+        seen.add(row.test_name);
+        winners.push({ testName: row.test_name, winner: row.variant, confidence: Math.min(99, Number(row.ctr) * 10) });
+      }
+    }
+    res.json({ winners, optimizedAt: new Date().toISOString() });
+  } catch {
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
 // ─── Nightly AI Analysis (called by scheduler at midnight) ───────────────────
 router.post("/admin/nightly-analysis", async (req: Request, res: Response) => {
   const authHeader = req.headers["x-internal-key"];

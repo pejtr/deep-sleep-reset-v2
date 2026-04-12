@@ -92,7 +92,7 @@ FB/IG Post → Landing Page (Hero + Quiz) → Quiz Výsledek + CTA
 - [x] Real-time analytický panel pro admina (Admin.tsx — funnel, A/B, behavior, goal progress)
 - [x] Email popup pro sběr kontaktů (EmailCapturePopup.tsx — timed 8s + exit-intent)
 - [x] Přeložit celý funnel do angličtiny (Home, Quiz, QuizResult, Order, Upsell 1-3, ThankYou)
-- [ ] Přeložit emailService.ts do angličtiny
+- [x] Přeložit emailService.ts do angličtiny ✓
 - [x] Aktualizovat OG tagy pro anglický trh (index.html)
 - [x] Přidat low-tier tržní optimalizaci (mobile-first design, lazy loading)
 
@@ -110,7 +110,7 @@ FB/IG Post → Landing Page (Hero + Quiz) → Quiz Výsledek + CTA
 ## Heat Mapy & Behavior Analytics
 - [x] Click tracking na každý element (/api/behavior/track) ✓
 - [x] Scroll depth tracking (25%, 50%, 75%, 100%) ✓
-- [ ] Rage click detection
+- [x] Rage click detection (useBehaviorTracker.ts) ✓
 - [x] Session time tracking per page ✓
 - [x] Funnel drop-off tracking (behaviorEvents tabulka) ✓
 - [ ] Heat mapa vizualizace v Admin dashboardu

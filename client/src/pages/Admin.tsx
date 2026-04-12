@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { useLocation } from "wouter";
 import { toast } from "sonner";
+import BehaviorAnalyticsPanel from "@/components/BehaviorAnalyticsPanel";
 
 interface Stats {
   totalRevenue: number;
@@ -320,45 +321,7 @@ export default function Admin() {
 
         {/* Behavior Tab */}
         {activeTab === "behavior" && (
-          <div className="space-y-4">
-            <div className="bg-[oklch(0.12_0.025_265)] border border-[oklch(0.22_0.03_265)] rounded-xl p-5">
-              <h3 className="font-bold text-white mb-3 text-sm">📊 Behavior Analytics</h3>
-              <p className="text-xs text-[oklch(0.5_0.04_265)] mb-4">
-                Tracking: page views, CTA clicks, quiz completions, upsell accepts/declines, email popup interactions, exit intent triggers.
-              </p>
-              <div className="grid grid-cols-2 gap-3">
-                {[
-                  { label: "Page Views", icon: "👁️", desc: "Tracked per page" },
-                  { label: "Click Heatmap", icon: "🖱️", desc: "CTA button tracking" },
-                  { label: "Scroll Depth", icon: "📜", desc: "Content engagement" },
-                  { label: "Drop-off Points", icon: "⚠️", desc: "Where users leave" },
-                ].map((item, i) => (
-                  <div key={i} className="p-3 rounded-xl bg-[oklch(0.14_0.025_265)] border border-[oklch(0.22_0.03_265)]">
-                    <div className="text-xl mb-1">{item.icon}</div>
-                    <p className="text-sm font-bold text-white">{item.label}</p>
-                    <p className="text-xs text-[oklch(0.5_0.04_265)]">{item.desc}</p>
-                  </div>
-                ))}
-              </div>
-              <p className="text-xs text-[oklch(0.4_0.03_265)] mt-4 text-center">
-                Full behavior data available after first 100 visitors
-              </p>
-            </div>
-
-            <div className="bg-[oklch(0.72_0.18_45/0.08)] border border-[oklch(0.72_0.18_45/0.2)] rounded-xl p-4">
-              <h3 className="font-bold text-white mb-2 text-sm">🌙 Nightly AI Analysis</h3>
-              <p className="text-xs text-[oklch(0.65_0.04_265)] mb-3">
-                Every midnight, the AI analyzes all funnel data and sends you a report with behavioral insights and conversion recommendations.
-              </p>
-              <button
-                onClick={handleRunAnalysis}
-                disabled={runningAnalysis}
-                className="w-full py-2.5 rounded-xl text-sm font-bold bg-gradient-to-r from-[oklch(0.72_0.18_45)] to-[oklch(0.65_0.22_280)] text-white hover:opacity-90 transition-all disabled:opacity-50"
-              >
-                {runningAnalysis ? "Running analysis..." : "Run Analysis Now →"}
-              </button>
-            </div>
-          </div>
+          <BehaviorAnalyticsPanel onRunAnalysis={handleRunAnalysis} runningAnalysis={runningAnalysis} />
         )}
       </div>
     </div>
