@@ -131,7 +131,7 @@ FB/IG Post → Landing Page (Hero + Quiz) → Quiz Výsledek + CTA
 - [x] robots.txt + sitemap.xml (client/public/)
 
 ## Finální opravy (systémem identifikované mezery 2)
-- [ ] Weighted variant selection — Home.tsx čte ab_test_weights z API a aplikuje 70/30 split
-- [ ] Testy pro /api/ab-test/winner persistence a /api/behavior/summary
-- [ ] True funnel drop-off percentages (step-to-step attrition, ne jen raw counts)
-- [ ] Error handling pro optimization_history writes (ne silent .catch(() => {}))
+- [x] Weighted variant selection — Home.tsx načítá ab_test_weights z /api/behavior/summary a aplikuje 70/30 split (getOrSetVariant s weights param)
+- [x] Testy pro /api/ab-test/winner persistence a /api/behavior/summary — analytics.test.ts (12 testů), 27/27 celkem
+- [x] True funnel drop-off percentages — dropoffByPage vrací { visitors, dropoffRate, nextStep } pro každý krok
+- [x] Error handling pro optimization_history writes — try/catch s console.error (ne silent)
