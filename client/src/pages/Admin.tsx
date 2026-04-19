@@ -1,4 +1,6 @@
 import React, { useState } from "react";
+import FunnelChecklist from "@/components/FunnelChecklist";
+import BreakEvenCalculator from "@/components/BreakEvenCalculator";
 import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { getLoginUrl } from "@/const";
@@ -119,7 +121,7 @@ function SectionHeader({ title, icon: Icon }: { title: string; icon: React.Eleme
 
 // ─── main component ───────────────────────────────────────────────────────────
 
-type Tab = "overview" | "orders" | "leads" | "chatbot" | "conversion" | "ads";
+type Tab = "overview" | "orders" | "leads" | "chatbot" | "conversion" | "ads" | "funnel";
 
 export default function Admin() {
   const { user, loading: authLoading } = useAuth();
@@ -209,6 +211,7 @@ export default function Admin() {
     { id: "chatbot", label: `Chatbot (${surveys.length})`, icon: MessageSquare },
     { id: "conversion", label: "Konverze", icon: Target },
     { id: "ads", label: "Ads KPI", icon: Activity },
+    { id: "funnel", label: "Funnel Health", icon: Target },
   ];
 
   return (
@@ -1094,6 +1097,22 @@ export default function Admin() {
                   </div>
                 </div>
               </div>
+            </div>
+          </div>
+        )}
+        {tab === "funnel" && (
+          <div className="space-y-8">
+            <SectionHeader title="Funnel Health &amp; CRO Checklist" icon={Target} />
+            <p className="text-foreground/50 text-sm">
+              Live status of all conversion elements in your funnel. Green = active, Yellow = needs attention, Red = missing.
+            </p>
+            <FunnelChecklist />
+            <div className="mt-8">
+              <SectionHeader title="Solo Ads ROI Calculator" icon={Activity} />
+              <p className="text-foreground/50 text-sm mb-4">
+                Calculate your break-even point before buying solo ad traffic. Adjust spend, CPC, and conversion rate.
+              </p>
+              <BreakEvenCalculator />
             </div>
           </div>
         )}

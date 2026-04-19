@@ -30,6 +30,9 @@ import Blog from "./pages/Blog";
 import BlogPost from "./pages/BlogPost";
 import AdminBlog from "./pages/AdminBlog";
 import ChronotypeQuiz from "./pages/ChronotypeQuiz";
+import Squeeze from "./pages/Squeeze";
+import Bridge from "./pages/Bridge";
+import Swipes from "./pages/Swipes";
 
 function Router() {
   // make sure to consider if you need authentication for certain routes
@@ -67,6 +70,9 @@ function Router() {
       <Route path={"/blog/:slug"} component={BlogPost} />
       <Route path={"/admin/blog"} component={AdminBlog} />
       <Route path={"/chronotype-quiz"} component={ChronotypeQuiz} />
+      <Route path={"/squeeze"} component={Squeeze} />
+      <Route path={"/bridge"} component={Bridge} />
+      <Route path={"/swipes"} component={Swipes} />
       <Route path={"/404"} component={NotFound} />
       <Route component={NotFound} />
     </Switch>
