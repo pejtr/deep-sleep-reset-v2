@@ -869,6 +869,8 @@ export default function Admin() {
                             cta_a: '🅰 CTA — "Yes — I Want to Sleep Like This"',
                             cta_b: '🅱 CTA — "Fix My Sleep Tonight — $5"',
                             cta_c: '🅲 CTA — "Start My 7-Night Reset"',
+                            squeeze_a: '🌙 Squeeze A — "3 Sleep Secrets"',
+                            squeeze_b: '🔬 Squeeze B — "The Chronotype Method"',
                           };
                           // CTA auto-lock: mark as locked if impressions >= 200 and it's the winner
                           const ctaVariants = ['cta_a', 'cta_b', 'cta_c'];
@@ -876,6 +878,12 @@ export default function Admin() {
                           const ctaRows = abStats.filter(r => ctaVariants.includes(r.variant));
                           const ctaAutoLocked = isCTAVariant && ctaRows.some(r => r.impressions >= 200);
                           const ctaWinner = ctaAutoLocked ? ctaRows.reduce((best, cur) => parseFloat(cur.cvr) > parseFloat(best.cvr) ? cur : best) : null;
+                          // Squeeze headline auto-lock: mark winner after 100 impressions per variant
+                          const squeezeVariants = ['squeeze_a', 'squeeze_b'];
+                          const isSqueezeVariant = squeezeVariants.includes(row.variant);
+                          const squeezeRows = abStats.filter(r => squeezeVariants.includes(r.variant));
+                          const squeezeAutoLocked = isSqueezeVariant && squeezeRows.some(r => r.impressions >= 100);
+                          const squeezeWinner = squeezeAutoLocked ? squeezeRows.reduce((best, cur) => parseFloat(cur.cvr) > parseFloat(best.cvr) ? cur : best) : null;
                           const variantLabel = VARIANT_LABELS[row.variant] ?? row.variant;
                           return (
                             <tr key={row.variant} className="border-b border-border/10 hover:bg-card/20">
@@ -887,6 +895,10 @@ export default function Admin() {
                                 {isCTAVariant && ctaAutoLocked && ctaWinner?.variant === row.variant ? (
                                   <span className="text-xs bg-amber/20 text-amber px-2 py-0.5 rounded-full">🏆 Vítěz (zamčeno)</span>
                                 ) : isCTAVariant && ctaAutoLocked ? (
+                                  <span className="text-xs bg-red-500/10 text-red-400/70 px-2 py-0.5 rounded-full">Poražen</span>
+                                ) : isSqueezeVariant && squeezeAutoLocked && squeezeWinner?.variant === row.variant ? (
+                                  <span className="text-xs bg-amber/20 text-amber px-2 py-0.5 rounded-full">🏆 Vítěz (zamčeno)</span>
+                                ) : isSqueezeVariant && squeezeAutoLocked ? (
                                   <span className="text-xs bg-red-500/10 text-red-400/70 px-2 py-0.5 rounded-full">Poražen</span>
                                 ) : isWinner ? (
                                   <span className="text-xs bg-amber/20 text-amber px-2 py-0.5 rounded-full">🏆 Vítěz</span>

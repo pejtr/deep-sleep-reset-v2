@@ -3,20 +3,86 @@
  * Solo Ads optimized: single opt-in, zero distractions, curiosity headline
  * Purpose: Capture email BEFORE sending to sales page
  * Design: Midnight Noir, minimal, high-contrast CTA
+ *
+ * A/B TEST — Headline:
+ *   squeeze_a → "3 Sleep Secrets" (curiosity / benefit frame)
+ *   squeeze_b → "The Chronotype Method" (science / authority frame)
+ *
+ * Assignment: 50/50 split, 24h TTL via localStorage
+ * Tracking: trpc.ab.trackEvent — impression on mount, conversion on form submit
  */
 
-import { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { trpc } from "@/lib/trpc";
 import { useLocation } from "wouter";
 import { motion } from "framer-motion";
-import { Moon, Lock, ArrowRight, CheckCircle } from "lucide-react";
+import { Moon, Lock, ArrowRight, CheckCircle, FlaskConical } from "lucide-react";
 import { trackEvent } from "@/components/MetaPixel";
+import { getSessionId } from "@/lib/ab-hooks";
 
-const BULLETS = [
-  "The #1 reason you can't fall asleep (it's not what you think)",
-  "The 4-minute technique that shuts off your racing mind",
-  "Why 8 hours still leaves you exhausted — and how to fix it tonight",
-];
+// ─── A/B Variant Config ──────────────────────────────────────────────────────
+
+type SqueezeVariant = "squeeze_a" | "squeeze_b";
+
+const SQUEEZE_AB_KEY = "dsr-squeeze-headline";
+const SQUEEZE_AB_TS_KEY = "dsr-squeeze-assigned-at";
+const TTL_MS = 24 * 60 * 60 * 1000; // 24 hours
+
+function getSqueezeVariant(): SqueezeVariant {
+  const stored = localStorage.getItem(SQUEEZE_AB_KEY) as SqueezeVariant | null;
+  const assignedAt = parseInt(localStorage.getItem(SQUEEZE_AB_TS_KEY) ?? "0", 10);
+  const isValid = stored && Date.now() - assignedAt < TTL_MS;
+  if (isValid && (stored === "squeeze_a" || stored === "squeeze_b")) return stored;
+
+  const variant: SqueezeVariant = Math.random() < 0.5 ? "squeeze_a" : "squeeze_b";
+  localStorage.setItem(SQUEEZE_AB_KEY, variant);
+  localStorage.setItem(SQUEEZE_AB_TS_KEY, Date.now().toString());
+  return variant;
+}
+
+const VARIANTS: Record<SqueezeVariant, {
+  badge: string;
+  headline: React.ReactNode;
+  subheadline: string;
+  bullets: string[];
+  cta: string;
+}> = {
+  squeeze_a: {
+    badge: "Free Instant Access",
+    headline: (
+      <>
+        Discover the{" "}
+        <span className="text-amber italic">3 Sleep Secrets</span> That
+        Fixed My Insomnia in 7 Nights
+      </>
+    ),
+    subheadline: "Enter your email below and I'll send you the exact protocol — free.",
+    bullets: [
+      "The #1 reason you can't fall asleep (it's not what you think)",
+      "The 4-minute technique that shuts off your racing mind",
+      "Why 8 hours still leaves you exhausted — and how to fix it tonight",
+    ],
+    cta: "Yes! Send Me the Free Protocol",
+  },
+  squeeze_b: {
+    badge: "Science-Backed Sleep Protocol",
+    headline: (
+      <>
+        <span className="text-amber italic">The Chronotype Method:</span>{" "}
+        Sleep Deeper by Working With Your Biology, Not Against It
+      </>
+    ),
+    subheadline: "Discover your sleep type and get a personalized protocol — free in 60 seconds.",
+    bullets: [
+      "Why generic sleep advice fails 3 out of 4 people (and what to do instead)",
+      "The chronotype mismatch that's keeping you awake — and how to fix it",
+      "A 7-night protocol built around your biology, not a one-size-fits-all schedule",
+    ],
+    cta: "Reveal My Chronotype & Get the Protocol",
+  },
+};
+
+// ─── Component ───────────────────────────────────────────────────────────────
 
 export default function Squeeze() {
   const [email, setEmail] = useState("");
@@ -24,11 +90,34 @@ export default function Squeeze() {
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState("");
   const [, navigate] = useLocation();
+  const [variant] = useState<SqueezeVariant>(() => getSqueezeVariant());
+  const [sessionId] = useState(() => getSessionId());
+
+  const v = VARIANTS[variant];
+
+  const trackAbEvent = trpc.ab.trackEvent.useMutation();
+
+  // Track impression on mount
+  useEffect(() => {
+    trackAbEvent.mutate({
+      variant,
+      eventType: "impression",
+      sessionId,
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const captureLead = trpc.leads.capture.useMutation({
     onSuccess: () => {
       setSubmitted(true);
-      trackEvent("Lead", { content_name: "squeeze_page", value: 0 });
+      // Track conversion (opt-in)
+      trackAbEvent.mutate({
+        variant,
+        eventType: "conversion",
+        sessionId,
+        email: email.trim(),
+      });
+      trackEvent("Lead", { content_name: `squeeze_${variant}`, value: 0 });
       setTimeout(() => {
         navigate("/order");
       }, 1800);
@@ -48,6 +137,7 @@ export default function Squeeze() {
     captureLead.mutate({
       email: email.trim(),
       source: "squeeze_page",
+      abVariant: variant,
     });
   };
 
@@ -94,24 +184,22 @@ export default function Squeeze() {
           </span>
         </div>
 
-        {/* Headline */}
+        {/* Headline — A/B tested */}
         <div className="text-center mb-8">
           <p className="text-amber/70 text-xs uppercase tracking-[0.3em] mb-3 font-medium">
-            Free Instant Access
+            {v.badge}
           </p>
           <h1 className="font-[var(--font-display)] text-3xl sm:text-4xl font-bold leading-tight mb-4">
-            Discover the{" "}
-            <span className="text-amber italic">3 Sleep Secrets</span> That
-            Fixed My Insomnia in 7 Nights
+            {v.headline}
           </h1>
           <p className="text-foreground/60 text-base leading-relaxed">
-            Enter your email below and I'll send you the exact protocol — free.
+            {v.subheadline}
           </p>
         </div>
 
         {/* Bullets */}
         <ul className="space-y-3 mb-8">
-          {BULLETS.map((b, i) => (
+          {v.bullets.map((b, i) => (
             <li key={i} className="flex items-start gap-3">
               <CheckCircle className="w-5 h-5 text-amber/70 shrink-0 mt-0.5" />
               <span className="text-foreground/75 text-sm leading-relaxed">{b}</span>
@@ -149,7 +237,7 @@ export default function Squeeze() {
                 "Sending..."
               ) : (
                 <>
-                  Yes! Send Me the Free Protocol
+                  {v.cta}
                   <ArrowRight className="w-5 h-5" />
                 </>
               )}
@@ -181,6 +269,14 @@ export default function Squeeze() {
           <span>🔒 SSL Secured</span>
           <span>✓ No spam ever</span>
         </div>
+
+        {/* A/B test indicator — dev only */}
+        {import.meta.env.DEV && (
+          <div className="mt-4 flex items-center justify-center gap-2 text-foreground/20 text-[10px]">
+            <FlaskConical className="w-3 h-3" />
+            <span>A/B: {variant === "squeeze_a" ? "Variant A — 3 Sleep Secrets" : "Variant B — Chronotype Method"}</span>
+          </div>
+        )}
       </motion.div>
     </div>
   );

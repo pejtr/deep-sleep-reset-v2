@@ -382,4 +382,11 @@
 - [x] Add BreakEvenCalculator below order bump section on /order page
 - [x] Add visual progress bar to /squeeze page
 - [x] Set up 7-day email follow-up sequence UI in admin panel
-- [ ] Push to GitHub (pending)
+- [x] Push to GitHub (pejtr/deep-sleep-reset-v2, main branch, forced update)
+
+## Phase 35: A/B Test Squeeze Page Headline
+- [x] Read Squeeze.tsx and AB test infrastructure
+- [x] Implement A/B headline variants: '3 Sleep Secrets' vs 'The Chronotype Method' with 24h session persistence
+- [x] Track view + opt-in events per variant
+- [x] Add A/B results to admin panel (CVR per variant, auto-lock after 100 impressions)
+- [x] TypeScript check, checkpoint, GitHub push

@@ -148,6 +148,13 @@
       "when": 1775345444713,
       "tag": "0020_natural_harpoon",
       "breakpoints": true
+    },
+    {
+      "idx": 21,
+      "version": "5",
+      "when": 1776596600010,
+      "tag": "0021_woozy_norrin_radd",
+      "breakpoints": true
     }
   ]
 }
