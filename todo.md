@@ -390,3 +390,8 @@
 - [x] Track view + opt-in events per variant
 - [x] Add A/B results to admin panel (CVR per variant, auto-lock after 100 impressions)
 - [x] TypeScript check, checkpoint, GitHub push
+
+## Phase 36: Countdown Timer on /order
+- [x] Create CountdownTimer component (15 min, session-persistent via localStorage)
+- [x] Integrate into /order page as sticky bar after FunnelProgressBar
+- [x] TypeScript check, checkpoint, GitHub push
