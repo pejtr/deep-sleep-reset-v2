@@ -62,6 +62,30 @@ export default function Squeeze() {
         transition={{ duration: 0.8 }}
         className="w-full max-w-lg relative z-10"
       >
+        {/* Progress bar — Step 1 of 3 */}
+        <div className="mb-8">
+          <div className="flex items-center justify-between text-xs text-foreground/40 mb-2">
+            <span className="font-medium text-amber/80">Step 1 of 3</span>
+            <span>Claim Your Free Protocol</span>
+          </div>
+          <div className="w-full h-1.5 bg-foreground/10 rounded-full overflow-hidden">
+            <motion.div
+              initial={{ width: 0 }}
+              animate={{ width: "33%" }}
+              transition={{ duration: 0.8, delay: 0.3, ease: "easeOut" }}
+              className="h-full bg-amber rounded-full"
+            />
+          </div>
+          <div className="flex justify-between mt-2">
+            {["Free Protocol", "Full Guide", "Bonus Resources"].map((label, i) => (
+              <div key={i} className="flex flex-col items-center gap-1">
+                <div className={`w-2 h-2 rounded-full ${i === 0 ? "bg-amber" : "bg-foreground/15"}`} />
+                <span className={`text-[10px] ${i === 0 ? "text-amber/70" : "text-foreground/25"}`}>{label}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
         {/* Logo */}
         <div className="flex items-center justify-center gap-2 mb-8">
           <Moon className="w-5 h-5 text-amber" />

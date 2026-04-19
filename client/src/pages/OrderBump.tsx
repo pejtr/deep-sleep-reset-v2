@@ -18,6 +18,7 @@ import { Link, useSearch } from "wouter";
 import { trackEvent } from "@/components/MetaPixel";
 import ReturningCustomerBanner from "@/components/ReturningCustomerBanner";
 import FunnelProgressBar from "@/components/FunnelProgressBar";
+import BreakEvenCalculator from "@/components/BreakEvenCalculator";
 import { getButtonColorVariant, BUTTON_VARIANTS, type ButtonColorVariant } from "@/lib/ab-button";
 import { getPriceVariant, PRICE_VARIANTS, type PriceVariant } from "@/lib/ab-price";
 import { getSessionId } from "@/lib/ab-hooks";
@@ -518,6 +519,11 @@ export default function OrderBump() {
             <span>Secure checkout · 30-Day Money-Back Guarantee · Instant Access</span>
           </div>
         </motion.div>
+
+        {/* Break-Even ROI Calculator — for solo ad buyers */}
+        <div className="mt-8 mb-2">
+          <BreakEvenCalculator />
+        </div>
 
         {/* Footer links */}
         <div className="mt-8 text-center text-foreground/30 text-xs flex flex-wrap items-center justify-center gap-4">

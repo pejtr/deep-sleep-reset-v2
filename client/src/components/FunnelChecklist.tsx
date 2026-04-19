@@ -131,9 +131,10 @@ export default function FunnelChecklist() {
       status: "ok",
     },
     {
-      label: "Email Sequence",
-      description: "Automated follow-up emails after purchase",
-      status: "warn",
+      label: "Email Sequence (7-day post-purchase)",
+      description: "Automated 7-day nurture sequence — Day 0 welcome + 6 content/upsell emails via Brevo",
+      status: "ok",
+      link: "/admin/email-sequence",
     },
     {
       label: "Affiliate Program (/affiliates)",

@@ -372,3 +372,14 @@
 - [x] Post-purchase bridge page /bridge — shown after Stripe success, before upsell chain, with "what happens next" + next step CTA
 - [x] Email swipe vault page /swipes — 5 DFY email templates for affiliates/solo ad buyers to promote Deep Sleep Reset
 - [x] Funnel optimization checklist in admin — live checklist of CRO elements (squeeze, exit popup, chatbot, upsells, email sequence) with green/red status
+
+## Phase 34: 3 CRO Improvements
+- [x] Add BreakEvenCalculator below order bump section on /order page
+- [x] Add visual progress bar to /squeeze page
+- [x] Set up 7-day email follow-up sequence UI in admin panel
+
+## Phase 34: 3 CRO Improvements + GitHub Push
+- [x] Add BreakEvenCalculator below order bump section on /order page
+- [x] Add visual progress bar to /squeeze page
+- [x] Set up 7-day email follow-up sequence UI in admin panel
+- [ ] Push to GitHub (pending)
