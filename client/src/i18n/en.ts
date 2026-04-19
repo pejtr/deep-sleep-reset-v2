@@ -255,12 +255,15 @@ const en = {
 
   // Exit Popup
   exitPopup: {
-    badge: "WAIT — One Last Thing",
-    title: "What If Tonight Was ",
-    titleHighlight: "Different?",
-    subtitle: "Get the full 7-Night Reset for just $4 — less than your last coffee. 30-day guarantee.",
+    badge: "WAIT — Exclusive Discount",
+    title: "Don't Leave Without Your ",
+    titleHighlight: "20% Off Code",
+    subtitle: "Use code SLEEP20 at checkout to save 20% on your order. Less than one coffee. 30-day guarantee.",
     regularPrice: "Regular price: $5",
     yourPriceNow: "Your price now: $4",
+    couponCode: "SLEEP20",
+    couponLabel: "Your exclusive discount code:",
+    couponCopied: "Copied to clipboard!",
     offerExpires: "This offer expires in:",
     items: [
       "The Full 7-Night Deep Sleep Reset",
@@ -268,9 +271,9 @@ const en = {
       "Sleep Journal + Progress Tracker",
       "30-Day Money-Back Guarantee",
     ],
-    ctaButton: "Yes — I'm Curious. Give Me $4 Access.",
-    savings: "Save 20% — less than one coffee",
-    decline: "No thanks, I'll keep waking up tired",
+    ctaButton: "Copy Code & Return to Checkout",
+    savings: "Save 20% — code auto-copied to clipboard",
+    decline: "No thanks, I'll pay full price",
   },
 
   // FOMO Notification

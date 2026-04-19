@@ -395,3 +395,16 @@
 - [x] Create CountdownTimer component (15 min, session-persistent via localStorage)
 - [x] Integrate into /order page as sticky bar after FunnelProgressBar
 - [x] TypeScript check, checkpoint, GitHub push
+
+## Phase 37: Exit-Intent Popup on /order
+- [ ] Create ExitIntentPopup component (mouse-leave detection, SLEEP20 coupon, session-once)
+- [ ] Integrate into /order page (OrderBump.tsx)
+- [ ] TypeScript check, checkpoint, GitHub push
+
+## Phase 37: Exit-Intent Popup with SLEEP20 Coupon
+- [x] Rewrite ExitIntentPopup component with SLEEP20 coupon code display + copy-to-clipboard
+- [x] 3-second countdown before coupon code reveals (builds anticipation)
+- [x] Mouse-leave (desktop) and scroll-up (mobile) triggers, 10s delay before activation
+- [x] Update en.ts and es.ts translations with couponCode, couponLabel, couponCopied fields
+- [x] Integrate ExitIntentPopup into /order page (OrderBump.tsx) with orderPageOnly=true
+- [x] TypeScript: 0 errors

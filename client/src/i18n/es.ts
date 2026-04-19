@@ -248,12 +248,15 @@ const es: Translations = {
 
   // Exit Intent Popup
   exitPopup: {
-    badge: "ESPERA — Una Última Cosa",
-    title: "¿Y Si Esta Noche Fuera ",
-    titleHighlight: "Diferente?",
-    subtitle: "Obtén el Reset Completo de 7 Noches por solo $4 — menos que tu último café. Garantía de 30 días.",
+    badge: "ESPERA — Descuento Exclusivo",
+    title: "No Te Vayas Sin Tu ",
+    titleHighlight: "Código 20% Off",
+    subtitle: "Usa el código SLEEP20 en el pago para ahorrar 20%. Menos que un café. Garantía de 30 días.",
     regularPrice: "Precio regular: $5",
     yourPriceNow: "Tu precio ahora: $4",
+    couponCode: "SLEEP20",
+    couponLabel: "Tu código de descuento exclusivo:",
+    couponCopied: "¡Copiado al portapapeles!",
     offerExpires: "Esta oferta expira en:",
     items: [
       "Programa Completo de Reset de Sueño de 7 Noches",
