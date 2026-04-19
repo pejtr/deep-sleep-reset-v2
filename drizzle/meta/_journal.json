@@ -5,43 +5,15 @@
     {
       "idx": 0,
       "version": "5",
-      "when": 1775984525978,
-      "tag": "0000_smart_deathstrike",
+      "when": 1776478721626,
+      "tag": "0000_purple_molten_man",
       "breakpoints": true
     },
     {
       "idx": 1,
       "version": "5",
-      "when": 1775985176988,
-      "tag": "0001_charming_reavers",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "5",
-      "when": 1775993307446,
-      "tag": "0002_woozy_sentinels",
-      "breakpoints": true
-    },
-    {
-      "idx": 3,
-      "version": "5",
-      "when": 1775995352782,
-      "tag": "0003_tricky_carlie_cooper",
-      "breakpoints": true
-    },
-    {
-      "idx": 4,
-      "version": "5",
-      "when": 1775996691723,
-      "tag": "0004_nebulous_mystique",
-      "breakpoints": true
-    },
-    {
-      "idx": 5,
-      "version": "5",
-      "when": 1775997586532,
-      "tag": "0005_serious_carlie_cooper",
+      "when": 1776480193137,
+      "tag": "0001_sharp_jackpot",
       "breakpoints": true
     }
   ]

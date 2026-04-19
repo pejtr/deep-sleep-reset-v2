@@ -1,5 +1,4 @@
 import {
-  decimal,
   int,
   mysqlEnum,
   mysqlTable,
@@ -15,143 +14,120 @@ export const users = mysqlTable("users", {
   email: varchar("email", { length: 320 }),
   loginMethod: varchar("loginMethod", { length: 64 }),
   role: mysqlEnum("role", ["user", "admin"]).default("user").notNull(),
+  stripeCustomerId: varchar("stripeCustomerId", { length: 128 }),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
   lastSignedIn: timestamp("lastSignedIn").defaultNow().notNull(),
 });
+
+export const purchases = mysqlTable("purchases", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  productKey: varchar("productKey", { length: 64 }).notNull(),
+  purchaseType: mysqlEnum("purchaseType", ["one_time", "subscription"]).notNull().default("subscription"),
+  status: mysqlEnum("status", ["pending", "paid", "active", "canceled", "refunded"]).notNull().default("pending"),
+  stripeCheckoutSessionId: varchar("stripeCheckoutSessionId", { length: 128 }).unique(),
+  stripeCustomerId: varchar("stripeCustomerId", { length: 128 }),
+  stripeSubscriptionId: varchar("stripeSubscriptionId", { length: 128 }).unique(),
+  stripePaymentIntentId: varchar("stripePaymentIntentId", { length: 128 }).unique(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export const programProgress = mysqlTable("programProgress", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull().unique(),
+  status: mysqlEnum("status", ["locked", "active", "completed"]).notNull().default("locked"),
+  currentDay: int("currentDay").notNull().default(1),
+  completedDays: int("completedDays").notNull().default(0),
+  streakDays: int("streakDays").notNull().default(0),
+  lastCheckInAt: timestamp("lastCheckInAt"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export const contentItems = mysqlTable("contentItems", {
+  id: int("id").autoincrement().primaryKey(),
+  slug: varchar("slug", { length: 160 }).notNull().unique(),
+  title: varchar("title", { length: 160 }).notNull(),
+  summary: text("summary").notNull(),
+  body: text("body").notNull(),
+  contentType: mysqlEnum("contentType", ["tip", "audio", "video", "checkin"]).notNull(),
+  mediaUrl: varchar("mediaUrl", { length: 1024 }),
+  dayNumber: int("dayNumber").notNull().default(1),
+  isPremium: int("isPremium").notNull().default(1),
+  isPublished: int("isPublished").notNull().default(0),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export const contentHistory = mysqlTable("contentHistory", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  contentItemId: int("contentItemId").notNull(),
+  progressPercent: int("progressPercent").notNull().default(0),
+  completed: int("completed").notNull().default(0),
+  lastViewedAt: timestamp("lastViewedAt").defaultNow().notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export const emailJobs = mysqlTable("emailJobs", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId"),
+  email: varchar("email", { length: 320 }).notNull(),
+  eventType: mysqlEnum("eventType", ["signup", "purchase", "funnel", "checkin"]).notNull(),
+  subject: varchar("subject", { length: 255 }).notNull(),
+  body: text("body").notNull(),
+  status: mysqlEnum("status", ["pending", "processing", "sent", "failed"]).notNull().default("pending"),
+  retryCount: int("retryCount").notNull().default(0),
+  nextAttemptAt: timestamp("nextAttemptAt").defaultNow().notNull(),
+  lastError: text("lastError"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export const funnelEvents = mysqlTable("funnelEvents", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId"),
+  email: varchar("email", { length: 320 }),
+  eventType: mysqlEnum("eventType", [
+    "landing_view",
+    "checkout_started",
+    "checkout_completed",
+    "signup",
+    "login",
+    "content_view",
+    "checkin",
+  ]).notNull(),
+  detail: text("detail"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export const qaChecklistItems = mysqlTable("qaChecklistItems", {
+  id: int("id").autoincrement().primaryKey(),
+  label: varchar("label", { length: 255 }).notNull(),
+  description: text("description").notNull(),
+  status: mysqlEnum("status", ["pending", "pass", "fail"]).notNull().default("pending"),
+  notes: text("notes"),
+  updatedByUserId: int("updatedByUserId"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
 export type User = typeof users.$inferSelect;
 export type InsertUser = typeof users.$inferInsert;
-
-// Quiz results
-export const quizResults = mysqlTable("quiz_results", {
-  id: int("id").autoincrement().primaryKey(),
-  sessionId: varchar("sessionId", { length: 128 }),
-  chronotype: mysqlEnum("chronotype", ["lion", "bear", "wolf", "dolphin"]).notNull(),
-  answers: text("answers"), // JSON string
-  email: varchar("email", { length: 320 }),
-  source: varchar("source", { length: 50 }).default("organic"), // fb, ig, direct
-  createdAt: timestamp("createdAt").defaultNow().notNull(),
-});
-export type QuizResult = typeof quizResults.$inferSelect;
-
-// Email leads
-export const emailLeads = mysqlTable("email_leads", {
-  id: int("id").autoincrement().primaryKey(),
-  email: varchar("email", { length: 320 }).notNull(),
-  chronotype: mysqlEnum("chronotype", ["lion", "bear", "wolf", "dolphin"]),
-  source: varchar("source", { length: 50 }).default("quiz_result"),
-  createdAt: timestamp("createdAt").defaultNow().notNull(),
-});
-export type EmailLead = typeof emailLeads.$inferSelect;
-
-// Orders
-export const orders = mysqlTable("orders", {
-  id: int("id").autoincrement().primaryKey(),
-  stripeSessionId: varchar("stripeSessionId", { length: 256 }),
-  stripePaymentIntentId: varchar("stripePaymentIntentId", { length: 256 }),
-  product: mysqlEnum("product", ["tripwire", "oto1", "oto2", "oto3"]).notNull(),
-  amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
-  currency: varchar("currency", { length: 3 }).default("usd"),
-  status: mysqlEnum("status", ["pending", "paid", "failed", "refunded"]).default("pending").notNull(),
-  chronotype: mysqlEnum("chronotype", ["lion", "bear", "wolf", "dolphin"]),
-  email: varchar("email", { length: 320 }),
-  sessionId: varchar("sessionId", { length: 128 }),
-  createdAt: timestamp("createdAt").defaultNow().notNull(),
-  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
-});
-export type Order = typeof orders.$inferSelect;
-
-// Scheduled emails for autonomous 7-day sequence
-export const scheduledEmails = mysqlTable("scheduled_emails", {
-  id: int("id").autoincrement().primaryKey(),
-  email: varchar("email", { length: 320 }).notNull(),
-  name: text("name"),
-  chronotype: varchar("chronotype", { length: 20 }).notNull(),
-  day: int("day").notNull(), // 1, 2, 3, 5, 7
-  sendAt: timestamp("sendAt").notNull(),
-  sentAt: timestamp("sentAt"),
-  status: mysqlEnum("status", ["pending", "processing", "sent", "failed"]).default("pending").notNull(),
-  createdAt: timestamp("createdAt").defaultNow().notNull(),
-});
-export type ScheduledEmail = typeof scheduledEmails.$inferSelect;
-
-// A/B test tracking
-export const abTestEvents = mysqlTable("ab_test_events", {
-  id: int("id").autoincrement().primaryKey(),
-  testName: varchar("testName", { length: 100 }).notNull(),
-  variant: varchar("variant", { length: 10 }).notNull(),
-  eventType: mysqlEnum("eventType", ["impression", "click", "conversion"]).notNull(),
-  sessionId: varchar("sessionId", { length: 128 }),
-  createdAt: timestamp("createdAt").defaultNow().notNull(),
-});
-export type AbTestEvent = typeof abTestEvents.$inferSelect;
-
-// A/B test weights — stores winner allocations (70/30 split)
-export const abTestWeights = mysqlTable("ab_test_weights", {
-  id: int("id").autoincrement().primaryKey(),
-  testName: varchar("testName", { length: 100 }).notNull(),
-  variant: varchar("variant", { length: 10 }).notNull(),
-  weight: int("weight").default(50).notNull(), // 0-100 percentage
-  isWinner: mysqlEnum("isWinner", ["yes", "no"]).default("no").notNull(),
-  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
-});
-export type AbTestWeight = typeof abTestWeights.$inferSelect;
-
-// Optimization history — log of all auto-optimization actions
-export const optimizationHistoryTable = mysqlTable("optimization_history", {
-  id: int("id").autoincrement().primaryKey(),
-  action: text("action").notNull(),
-  testName: varchar("testName", { length: 100 }),
-  winner: varchar("winner", { length: 10 }),
-  confidence: int("confidence"),
-  impact: varchar("impact", { length: 100 }),
-  createdAt: timestamp("createdAt").defaultNow().notNull(),
-});
-export type OptimizationHistoryEntry = typeof optimizationHistoryTable.$inferSelect;
-
-// Premium Subscriptions — Sleep Optimizers Community
-export const subscriptions = mysqlTable("subscriptions", {
-  id: int("id").autoincrement().primaryKey(),
-  email: varchar("email", { length: 320 }).notNull(),
-  stripeCustomerId: varchar("stripeCustomerId", { length: 256 }),
-  stripeSubscriptionId: varchar("stripeSubscriptionId", { length: 256 }),
-  tier: mysqlEnum("tier", ["basic", "pro", "elite"]).notNull(),
-  status: mysqlEnum("status", ["active", "canceled", "past_due", "trialing"]).default("active").notNull(),
-  currentPeriodStart: timestamp("currentPeriodStart"),
-  currentPeriodEnd: timestamp("currentPeriodEnd"),
-  canceledAt: timestamp("canceledAt"),
-  chronotype: mysqlEnum("chronotype", ["lion", "bear", "wolf", "dolphin"]),
-  source: varchar("source", { length: 50 }).default("funnel"), // funnel, email, organic
-  createdAt: timestamp("createdAt").defaultNow().notNull(),
-  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
-});
-export type Subscription = typeof subscriptions.$inferSelect;
-export type InsertSubscription = typeof subscriptions.$inferInsert;
-
-// Member content — monthly exclusive content for subscribers
-export const memberContent = mysqlTable("member_content", {
-  id: int("id").autoincrement().primaryKey(),
-  title: varchar("title", { length: 256 }).notNull(),
-  description: text("description"),
-  contentType: mysqlEnum("contentType", ["guide", "audio", "video", "report", "bonus"]).notNull(),
-  tier: mysqlEnum("tier", ["basic", "pro", "elite"]).notNull(), // minimum tier required
-  downloadUrl: text("downloadUrl"),
-  month: varchar("month", { length: 7 }).notNull(), // YYYY-MM format
-  chronotype: mysqlEnum("chronotype", ["lion", "bear", "wolf", "dolphin"]), // null = all
-  createdAt: timestamp("createdAt").defaultNow().notNull(),
-});
-export type MemberContent = typeof memberContent.$inferSelect;
-
-// Content history — AI-generated content for social media / email
-export const contentHistory = mysqlTable("content_history", {
-  id: int("id").autoincrement().primaryKey(),
-  contentType: mysqlEnum("contentType", ["reel_script", "email", "instagram", "facebook", "tiktok", "blog", "ad_copy"]).notNull(),
-  prompt: text("prompt").notNull(),
-  content: text("content").notNull(),
-  chronotype: mysqlEnum("chronotype", ["lion", "bear", "wolf", "dolphin"]),
-  generatedBy: mysqlEnum("generatedBy", ["manual", "cron"]).default("manual").notNull(),
-  createdAt: timestamp("createdAt").defaultNow().notNull(),
-});
+export type Purchase = typeof purchases.$inferSelect;
+export type InsertPurchase = typeof purchases.$inferInsert;
+export type ProgramProgress = typeof programProgress.$inferSelect;
+export type InsertProgramProgress = typeof programProgress.$inferInsert;
+export type ContentItem = typeof contentItems.$inferSelect;
+export type InsertContentItem = typeof contentItems.$inferInsert;
 export type ContentHistory = typeof contentHistory.$inferSelect;
 export type InsertContentHistory = typeof contentHistory.$inferInsert;
-
+export type EmailJob = typeof emailJobs.$inferSelect;
+export type InsertEmailJob = typeof emailJobs.$inferInsert;
+export type FunnelEvent = typeof funnelEvents.$inferSelect;
+export type InsertFunnelEvent = typeof funnelEvents.$inferInsert;
+export type QaChecklistItem = typeof qaChecklistItems.$inferSelect;
+export type InsertQaChecklistItem = typeof qaChecklistItems.$inferInsert;

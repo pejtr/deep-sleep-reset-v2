@@ -1,135 +1,108 @@
-// Autonomous Email Scheduler — sends 7-day follow-up sequence after purchase
-// Uses database to track scheduled emails and processes them via cron-like interval
+import { listDueEmailJobs, markEmailJobStatus } from "./db";
 
-import { getDb } from "./db";
-import { scheduledEmails } from "../drizzle/schema";
-import { eq, lte, and } from "drizzle-orm";
-import { sendSequenceEmail } from "./emailService";
+const MAX_RETRIES = 5;
+const BASE_RETRY_MINUTES = 10;
+const RESEND_API_URL = "https://api.resend.com/emails";
+const DEFAULT_FROM_EMAIL = process.env.RESEND_FROM_EMAIL?.trim() || "DeepSleepReset <onboarding@resend.dev>";
 
-const SEQUENCE_DAYS = [1, 2, 3, 5, 7]; // Days after purchase to send emails
+function isConnResetError(error: unknown) {
+  if (!(error instanceof Error)) return false;
+  const message = error.message ?? "";
+  const causeMessage =
+    typeof error.cause === "object" && error.cause && "message" in error.cause
+      ? String((error.cause as { message?: string }).message ?? "")
+      : "";
 
-// ─── Schedule email sequence for a new customer ───────────────────────────────
-export async function scheduleEmailSequence({
-  email,
-  name,
-  chronotype,
-  purchasedAt,
-}: {
-  email: string;
-  name?: string;
-  chronotype: string;
-  purchasedAt: Date;
-}): Promise<void> {
-  const db = await getDb();
-  if (!db) {
-    console.warn("[EmailScheduler] DB not available — skipping schedule");
+  return message.includes("ECONNRESET") || causeMessage.includes("ECONNRESET") || message.includes("Connect Timeout");
+}
+
+function getRetryDate(retryCount: number) {
+  const minutes = BASE_RETRY_MINUTES * Math.max(1, retryCount);
+  return new Date(Date.now() + minutes * 60 * 1000);
+}
+
+async function sendEmailJob(job: Awaited<ReturnType<typeof listDueEmailJobs>>[number]) {
+  const apiKey = process.env.RESEND_API_KEY;
+  if (!apiKey) {
+    throw new Error("RESEND_API_KEY is missing");
+  }
+
+  const response = await fetch(RESEND_API_URL, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      from: DEFAULT_FROM_EMAIL,
+      to: [job.email],
+      subject: job.subject,
+      text: job.body,
+    }),
+  });
+
+  if (!response.ok) {
+    const body = await response.text();
+    throw new Error(`Resend send failed (${response.status}): ${body}`);
+  }
+}
+
+export async function processPendingEmailJobs() {
+  let jobs: Awaited<ReturnType<typeof listDueEmailJobs>> = [];
+
+  try {
+    jobs = await listDueEmailJobs();
+  } catch (error) {
+    if (isConnResetError(error)) {
+      console.warn("[EmailScheduler] Database temporarily unavailable while loading due jobs. Will retry on next loop.");
+      return;
+    }
+
+    console.error("[EmailScheduler] Failed to load due email jobs:", error);
     return;
   }
 
-  const inserts = SEQUENCE_DAYS.map((day) => {
-    const sendAt = new Date(purchasedAt.getTime() + day * 24 * 60 * 60 * 1000);
-    return {
-      email,
-      name: name || null,
-      chronotype,
-      day,
-      sendAt,
-      status: "pending" as const,
-    };
-  });
+  for (const job of jobs) {
+    try {
+      await markEmailJobStatus({
+        id: job.id,
+        status: "processing",
+        retryCount: job.retryCount,
+        lastError: null,
+      });
 
-  try {
-    for (const insert of inserts) {
-      await db.insert(scheduledEmails).values(insert);
-    }
-    console.log(`[EmailScheduler] Scheduled ${inserts.length} emails for ${email}`);
-  } catch (err) {
-    console.error("[EmailScheduler] Failed to schedule emails:", err);
-  }
-}
+      await sendEmailJob(job);
+      await markEmailJobStatus({
+        id: job.id,
+        status: "sent",
+        retryCount: job.retryCount,
+        lastError: null,
+      });
+    } catch (error) {
+      const nextRetryCount = job.retryCount + 1;
+      const retryable = isConnResetError(error) && nextRetryCount <= MAX_RETRIES;
 
-// ─── Process pending emails (called by interval) ──────────────────────────────
-export async function processPendingEmails(): Promise<void> {
-  const db = await getDb();
-  if (!db) return;
-
-  try {
-    const now = new Date();
-    const pending = await db
-      .select()
-      .from(scheduledEmails)
-      .where(
-        and(
-          eq(scheduledEmails.status, "pending"),
-          lte(scheduledEmails.sendAt, now)
-        )
-      )
-      .limit(20); // Process max 20 at a time to avoid rate limits
-
-    if (pending.length === 0) return;
-
-    console.log(`[EmailScheduler] Processing ${pending.length} pending emails`);
-
-    for (const scheduled of pending) {
       try {
-        // Mark as processing to prevent duplicate sends
-        await db
-          .update(scheduledEmails)
-          .set({ status: "processing" })
-          .where(eq(scheduledEmails.id, scheduled.id));
-
-        const success = await sendSequenceEmail({
-          email: scheduled.email,
-          name: scheduled.name || undefined,
-          chronotype: scheduled.chronotype,
-          day: scheduled.day,
+        await markEmailJobStatus({
+          id: job.id,
+          status: "failed",
+          retryCount: nextRetryCount,
+          nextAttemptAt: retryable ? getRetryDate(nextRetryCount) : undefined,
+          lastError: error instanceof Error ? error.message : "Unknown email scheduler error",
         });
+      } catch (statusError) {
+        if (isConnResetError(statusError)) {
+          console.warn(`[EmailScheduler] Could not update job ${job.id} after transient connection reset. The job will be retried on the next scheduler loop.`);
+          continue;
+        }
 
-        await db
-          .update(scheduledEmails)
-          .set({
-            status: success ? "sent" : "failed",
-            sentAt: success ? new Date() : null,
-          })
-          .where(eq(scheduledEmails.id, scheduled.id));
+        console.error(`[EmailScheduler] Failed to persist status for job ${job.id}:`, statusError);
+        continue;
+      }
 
-        console.log(
-          `[EmailScheduler] Day ${scheduled.day} email ${success ? "sent" : "failed"} → ${scheduled.email}`
-        );
-      } catch (err) {
-        console.error(`[EmailScheduler] Error processing email ${scheduled.id}:`, err);
-        await db
-          .update(scheduledEmails)
-          .set({ status: "failed" })
-          .where(eq(scheduledEmails.id, scheduled.id));
+      if (!retryable) {
+        console.error("[EmailScheduler] Non-retryable email failure:", error);
       }
     }
-  } catch (err) {
-    console.error("[EmailScheduler] processPendingEmails error:", err);
-  }
-}
-
-// ─── Start scheduler (runs every 5 minutes) ───────────────────────────────────
-let schedulerInterval: NodeJS.Timeout | null = null;
-
-export function startEmailScheduler(): void {
-  if (schedulerInterval) return; // Already running
-
-  console.log("[EmailScheduler] Starting — checking every 5 minutes");
-
-  // Run immediately on start
-  processPendingEmails().catch(console.error);
-
-  // Then every 5 minutes
-  schedulerInterval = setInterval(() => {
-    processPendingEmails().catch(console.error);
-  }, 5 * 60 * 1000);
-}
-
-export function stopEmailScheduler(): void {
-  if (schedulerInterval) {
-    clearInterval(schedulerInterval);
-    schedulerInterval = null;
-    console.log("[EmailScheduler] Stopped");
   }
 }

@@ -1,194 +1,35 @@
-# Deep Sleep Reset V2 — TODO
+# Project TODO
 
-## Funnel Architektura
-```
-FB/IG Post → Landing Page (Hero + Quiz) → Quiz Výsledek + CTA
-→ Order Page ($1 tripwire) → OTO1 ($7) → OTO2 ($17) → OTO3 ($27) → Thank You
-```
-
-## Produkty (plně digitální, autonomní)
-- Tripwire $1: "7-Night Deep Sleep Reset" — PDF průvodce + sleep schedule
-- OTO1 $7:    "30-Day Sleep Transformation" — rozšířený program + tracker
-- OTO2 $17:   "Chronotype Mastery Pack" — 4 audio guided sleep sessions (MP3)
-- OTO3 $27:   "Deep Sleep Toolkit" — sleep journal template + habit tracker + bonus recipes
-
-## Funnel Pages
-- [x] Hero landing page (dark, mobile-first, FB/IG OG tags) s A/B headline testem
-- [x] Chronotype Quiz (5 otázek → Lion/Bear/Wolf/Dolphin výsledek)
-- [x] Quiz výsledek stránka s personalizovaným CTA
-- [x] Order stránka ($1 tripwire, urgency timer, social proof)
-- [x] OTO1 stránka ($7 — one-click upsell)
-- [x] OTO2 stránka ($17 — one-click upsell)
-- [x] OTO3 stránka ($27 — one-click upsell)
-- [x] Thank You stránka (download links + email confirmation)
-
-## Konverzní prvky
-- [x] A/B test pro hero headline (4 varianty)
-- [x] A/B test pro CTA button text (3 varianty)
-- [x] Exit-intent popup (personalizovaný dle CTA varianty)
-- [x] Social proof notification ("Pavel z Brna právě koupil...")
-- [x] Countdown timer na order stránce (15 min urgency)
-- [x] Progress bar v quizu
-- [x] Scarcity element ("Pouze 47 míst zbývá dnes")
-- [x] OG meta tags pro FB/IG sharing preview
-
-## Databázové tabulky
-- [x] quiz_results — výsledky quizu + email capture
-- [x] orders — objednávky + upsell tracking
-- [x] ab_test_impressions — A/B tracking
-- [x] email_leads — email capture
-
-## Backend API
-- [x] POST /api/quiz/submit
-- [x] POST /api/orders/create (Stripe session)
-- [x] POST /api/orders/upsell (one-click upsell)
-- [x] POST /api/stripe/webhook (opraveno — raw body handler)
-- [x] GET /api/admin/stats
-- [x] POST /api/ab-test/track
-
-## Admin Dashboard
-- [x] Revenue overview (total, per product, per day)
-- [x] Funnel konverze (quiz → order → upsell rates)
-- [x] A/B test výsledky
-- [x] Email leads seznam
-
-## Stripe
-- [x] Tripwire $1 checkout
-- [x] One-click upsell (bez re-zadání karty)
-- [x] Webhook handler (opraveno)
-- [x] Promo kód (TEST99OFF — Stripe allow_promotion_codes: true)
-
-## Email Automation (autonomní)
-- [x] Potvrzení nákupu + download link
-  - [x] 7-denní email sekvence (automatická)
-  - [x] Upsell follow-up emaily (den 5 a 7)
-
-## SEO & Performance
-- [x] OG tags (FB/IG preview optimalizace)
-  - [x] robots.txt + sitemap.xml (client/public/)
-- [x] Mobile-first, < 2s load time
-
-## Testy
-- [x] Vitest: funnel pricing (12 testů)
-- [x] Vitest: auth logout (1 test)
-- [x] Vitest: quiz logika (součást funnel.test.ts)
-  - [x] Vitest: A/B test systém (součást funnel.test.ts)
-
-## PDF Produkty (obsah)
-- [x] Tripwire $1: "7-Night Deep Sleep Reset" PDF — CDN nahraný
-- [x] OTO1 $7: "30-Day Sleep Transformation" PDF — CDN nahraný
-- [x] OTO2 $17: "Chronotype Mastery Pack" PDF — CDN nahraný
-- [x] OTO3 $27: "Deep Sleep Toolkit" PDF — CDN nahraný
-- [x] Nahrát PDF na CDN a propojit s download endpointem
-
-## Email Automatizace
-- [x] Brevo integrace (petr.matej@gmail.com, API klíč ověřen)
-- [x] Potvrzovací email po nákupu s download linkem
-- [x] 7-denní email sekvence (dny 1, 2, 3, 5, 7)
-- [x] Upsell follow-up email (den 5 a 7 sekvence)
-
-## Nové funkce (přidáno)
-- [x] Sekce uživatelských recenzí a hodnocení na Home stránce (ReviewsSection.tsx — 6 recenzí)
-- [x] Real-time analytický panel pro admina (Admin.tsx — funnel, A/B, behavior, goal progress)
-- [x] Email popup pro sběr kontaktů (EmailCapturePopup.tsx — timed 8s + exit-intent)
-- [x] Přeložit celý funnel do angličtiny (Home, Quiz, QuizResult, Order, Upsell 1-3, ThankYou)
-- [x] Přeložit emailService.ts do angličtiny ✓
-- [x] Aktualizovat OG tagy pro anglický trh (index.html)
-- [x] Přidat low-tier tržní optimalizaci (mobile-first design, lazy loading)
-
-## Behaviorální psychologie & Neuro-marketing
-- [x] Přeložit celý funnel do angličtiny ✓
-- [x] Cialdini principy: Scarcity, Social Proof, Authority, Reciprocity, Commitment ✓
-- [x] Loss aversion framing na Order stránce ✓
-- [x] Anchoring na upsell stránkách (přeškrtnuté ceny) ✓
-- [x] Progress bias v quizu ("You're X% done!") ✓
-- [x] Micro-commitments sekvence (quiz → email popup → platba) ✓
-- [x] Fear of Missing Out (FOMO) na Order stránce ✓
-- [x] Sekce recenzí s avatary a verified badge (ReviewsSection.tsx) ✓
-- [x] Email lead capture popup (timed 8s + exit-intent) ✓
-
-## Heat Mapy & Behavior Analytics
-- [x] Click tracking na každý element (/api/behavior/track) ✓
-- [x] Scroll depth tracking (25%, 50%, 75%, 100%) ✓
-- [x] Rage click detection (useBehaviorTracker.ts) ✓
-- [x] Session time tracking per page ✓
-- [x] Funnel drop-off tracking (behaviorEvents tabulka) ✓
-- [x] Heat mapa vizualizace v Admin dashboardu (BehaviorAnalyticsPanel.tsx)
-- [x] Behavior analytics panel v Admin (BehaviorAnalyticsPanel.tsx — funnel drop-off, scroll depth, click heatmap, rage clicks)
-
-## Autonomní noční AI analyzátor (půlnoc)
-- [x] Cron job každou půlnoc (scheduleNightlyAnalysis v index.ts) ✓
-- [x] Sbírá data: konverze, A/B výsledky, drop-off body, revenue ✓
-- [x] AI (LLM) analyzuje data a generuje insights (nightlyAnalyzer.ts) ✓
-- [x] Automaticky aktualizuje A/B varianty (/api/ab-test/winner — vítěz dostane 70% traffic)
-- [x] Generuje denní report a posílá notifikaci vlastníkovi ✓
-- [x] Ukládá historii optimalizací do DB (optimizationHistory v behavior summary)
-
-## Opravy mezer (identifikováno systémem)
-- [x] A/B traffic allocation — ab_test_weights tabulka, 70/30 split, persist do DB
-- [x] Optimization history — optimization_history tabulka, write v ab-test/winner, read v behavior/summary
-- [x] Behavior summary — reálné dropoffByPage z behavior_events, abWinners a optimizationHistory z DB
-- [x] robots.txt + sitemap.xml (client/public/)
-
-## Finální opravy (systémem identifikované mezery 2)
-- [x] Weighted variant selection — Home.tsx načítá ab_test_weights z /api/behavior/summary a aplikuje 70/30 split (getOrSetVariant s weights param)
-- [x] Testy pro /api/ab-test/winner persistence a /api/behavior/summary — analytics.test.ts (12 testů), 27/27 celkem
-- [x] True funnel drop-off percentages — dropoffByPage vrací { visitors, dropoffRate, nextStep } pro každý krok
-- [x] Error handling pro optimization_history writes — try/catch s console.error (ne silent)
-
-## Kliken 3.0 + AI Content Generátor
-- [x] Kliken 3.0 scripty pro 3 Reels (timing, text overlay, voiceover, CTA) — viz contentCron.ts reel_script type
-- [x] AI content generátor endpoint (/api/admin/generate-content) — LLM generuje Reels scripty, captions, hashtags
-- [x] Admin dashboard — Content Generator tab s formulářem a výstupem
-- [x] Automatické denní generování 3 postů (cron job 6am) — contentCron.ts + scheduleDailyContentGeneration()
-- [x] Content history — uložení vygenerovaného obsahu do DB — content_history tabulka + /api/admin/content-history
-
-## Premium Subscription Program (Klein + Hormozi)
-- [x] Navrhnout Premium program strukturu (tiers, ceny, obsah, identity)
-- [x] Stripe recurring subscription ($9.99/měsíc nebo $27/měsíc)
-- [x] Member area — chráněné stránky pro předplatitele — /members (Members.tsx)
-- [x] Měsíční nový obsah (Sleep Protocol updates, nové audio, nové guides) — member_content tabulka + Members.tsx content library
-- [x] Komunita identita — "Sleep Optimizers" brand
-- [x] Upgrade CTA v ThankYou stránce a email sekvenci
-- [x] Admin dashboard — subscription metrics (MRR, churn, LTV)
-
-## Premium Redesign & Klein Princip (dokončeno)
-- [x] Premium redesign Home.tsx — Playfair Display, glassmorphism, premium hero, value stack
-- [x] Premium stránka /premium — Sleep Optimizers Community s Klein principem a Hormozi value stackem
-- [x] Premium redesign Order.tsx — glassmorphism cards, chronotype colors, value stack s cenami
-- [x] Premium redesign ThankYou.tsx — identity upsell, Premium teaser po 8s, premium feel
-- [x] Admin: Subscriptions tab — tier metrics, Klein identity metrics, MRR tracking
-- [x] Admin: AI Content Generator tab — Hormozi-style content, email/social/ad copy
-- [x] Backend: /api/admin/generate-content — LLM content generation endpoint
-- [x] Backend: /api/subscriptions/create — Stripe recurring subscription checkout
-- [x] App.tsx: /premium route přidána
-- [x] CSS: Premium utility classes (glass-card, cta-premium, subscription-card-pro, badge-popular, trust-badge, stars-premium, orb-gold, animate-reveal)
-
-## Kliken 3.0 Reels Scripty + Content Cron
-- [x] Kliken 3.0 scripty pro 3 Reels (timing, text overlay, voiceover, CTA) — implementováno v Content Generator (reel_script typ)
-- [x] Content history tabulka v DB + uložení vygenerovaného obsahu (contentHistory tabulka)
-- [x] Cron job 6am — automatické denní generování 3 postů (contentCron.ts)
-- [x] Member area /members — chráněná stránka pro předplatitele (Members.tsx)
-
-## Zbývající mezery (identifikováno)
-- [x] Vitest testy pro contentCron (scheduling, DB persistence, error handling) — 9 testů v content.test.ts
-- [x] Member area: Members.tsx s content library, tier badges, upgrade CTA
-- [x] Admin Content Generator: zobrazit historii vygenerovaného obsahu z DB
-
-## Jazykové opravy
-- [x] Opravit všechny české texty v notifikacích, toast zprávách a server hlášeních na angličtinu
-
-## Design Redesign — Originální Estetika
-- [x] Home.tsx — noční nebe hero background, zlatá amber typografie, serif Playfair Display
-- [x] index.css — amber/gold tokeny, hero-photo třída, progress bar styl, cta-gold
-- [x] Navigace — minimalistická s progress barem nahoře (jako originál) + scarcity ticker
-- [x] Hero — fullscreen s noční oblohou, zlatý CTA button (cta-gold)
-
-## A/B Test: Gold vs. Purple CTA Button
-- [x] Přidat cta_color variant do A/B test systému (gold / purple) — CTA_COLOR_VARIANTS v Home.tsx
-- [x] Rozšířit Home.tsx o purple CTA variantu s trackingem — všechna CTA tlačítka používají ctaColorVariant
-- [x] Přidat statistickou analýzu (konverzní poměr, winner card, progress bar) do Admin dashboardu
-- [x] Vitest testy pro A/B test logiku — 36 testů prochází
-
-## Bug Fix
-- [x] Opravit testimonial badge overflow — badge přesunut na vlastní řádek pod hvězdičkami, žádné překrývání
+- [x] Establish DeepSleepReset brand direction, information architecture, and premium visual system across public and gated areas
+- [x] Build public landing page sales funnel with hero, benefits, testimonials, and strong purchase call-to-action
+- [x] Add checkout and payment flow for buying or subscribing to DeepSleepReset
+- [x] Wire Manus OAuth authentication and account creation flows
+- [x] Implement purchase-gated premium members area for paid users only
+- [x] Build member progress tracking for the DeepSleepReset program
+- [x] Add personalized premium content history feed with sleep tips, audio or video lessons, and daily check-ins
+- [x] Implement Petra AI chatbot in the members area with the Gentle Support persona for Premium subscribers only
+- [x] Add automated email notifications for sign-ups, purchases, and key funnel events
+- [x] Implement ECONNRESET-resilient email scheduler with graceful error handling and retry logic
+- [x] Build private admin dashboard for subscriber management, funnel monitoring, and content management
+- [x] Add admin-only pre-launch QA audit checklist page
+- [x] Cover backend and gating behavior with Vitest tests
+- [x] Run TypeScript checks, tests, and end-to-end QA before first delivery
+- [ ] Complete and verify the end-to-end checkout flow from landing CTA through Stripe redirect, webhook fulfillment, premium unlock, and add a user payment history page
+- [ ] Implement explicit Manus OAuth sign-up completion handling with signup event tracking and email trigger verification
+- [ ] Refactor Petra client access to use a tRPC procedure and verify premium-only Petra interaction in a paid state
+- [x] Replace owner notifications with real user email delivery for sign-up, purchase, and key funnel events
+- [x] Add admin content management capabilities for program and feed items
+- [ ] Finish end-to-end QA for checkout, premium unlock, Petra, and admin flows, then rerun tests and checks
+- [ ] Connect the current DeepSleepReset implementation with the newly enabled GitHub repository workflow and prepare the codebase for repository sync
+- [ ] Evaluate and prepare synchronization of the current DeepSleepReset codebase to the additional repository git@github.com:pejtr/deep-sleep-reset-v2.git
+- [x] Rebuild the DeepSleepReset landing page to match the provided night-sky luxury funnel reference with dark cosmic background, dramatic hero typography, gold and violet accents, minimal top bar, and quiz-first CTA structure
+- [x] Replace the current generic premium wellness homepage composition with the reference-style hero-first sales funnel visual language before any further delivery
+- [x] Review and inherit the newly provided shared thread https://manus.im/share/yxgmoNlujfMdAOHjyPW6F9 as the new baseline for this project
+- [ ] Rework DeepSleepReset into a significantly stronger, more beautiful, and more conversion-focused version than the prior imported thread
+- [x] Shift the public acquisition flow from a generic premium homepage into a chronotype-led quiz-first funnel with a 60-second promise and stronger direct-response structure
+- [x] Rework the landing copy hierarchy around biology, chronotype insight, curiosity, authority, and low-friction quiz completion before the paid offer
+- [x] Preserve the premium members area after purchase, but make the public funnel primarily about personalized sleep diagnosis rather than gated premium features
+- [x] Build a real chronotype quiz-first entry experience so the new landing CTA leads into an actual diagnostic funnel instead of jumping straight to members logic
+- [x] Fix mobile overflow and spacing issues in the DeepSleepReset first fold so header, copy, and CTA fit cleanly on narrow screens
+- [ ] Strengthen the hero art direction into a richer night-sky luxury presentation with clearer brand hierarchy and cleaner mobile adaptation
+- [x] Tighten the continuity from quiz completion to insight to paid offer so the public funnel reads as one persuasive narrative

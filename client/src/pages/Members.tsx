@@ -1,232 +1,271 @@
-import { useState } from "react";
-import { useLocation } from "wouter";
+import { useAuth } from "@/_core/hooks/useAuth";
+import { AIChatBox, Message } from "@/components/AIChatBox";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Progress } from "@/components/ui/progress";
+import { trpc } from "@/lib/trpc";
+import { CheckCircle2, Lock, MoonStar, Sparkles } from "lucide-react";
+import { useMemo, useState } from "react";
 
-// Mock member content — in production this would come from /api/members/content
-const MEMBER_CONTENT = [
+const starterMessages: Message[] = [
   {
-    id: 1,
-    title: "April 2026 Sleep Protocol Update",
-    description: "New research on sleep architecture and chronotype optimization for spring season.",
-    contentType: "guide",
-    tier: "basic",
-    month: "2026-04",
-    icon: "📄",
-    isNew: true,
-  },
-  {
-    id: 2,
-    title: "Wolf Chronotype Deep Dive",
-    description: "Advanced protocol for night owls: optimize your late-night productivity without destroying sleep quality.",
-    contentType: "guide",
-    tier: "pro",
-    month: "2026-04",
-    icon: "🐺",
-    isNew: true,
-  },
-  {
-    id: 3,
-    title: "Weekly AI Sleep Score Report — Week 15",
-    description: "Your personalized sleep optimization recommendations based on community data.",
-    contentType: "report",
-    tier: "pro",
-    month: "2026-04",
-    icon: "📊",
-    isNew: false,
-  },
-  {
-    id: 4,
-    title: "Guided Sleep Meditation — Delta Wave",
-    description: "30-minute audio session designed to induce deep delta wave sleep within 15 minutes.",
-    contentType: "audio",
-    tier: "pro",
-    month: "2026-03",
-    icon: "🎧",
-    isNew: false,
-  },
-  {
-    id: 5,
-    title: "Q&A Recording — March 2026",
-    description: "Monthly live Q&A with sleep optimization experts. Topics: supplements, light therapy, travel.",
-    contentType: "video",
-    tier: "pro",
-    month: "2026-03",
-    icon: "🎥",
-    isNew: false,
-  },
-  {
-    id: 6,
-    title: "Elite: 1-on-1 Sleep Audit Template",
-    description: "Comprehensive 7-day sleep tracking template with AI-powered recommendations.",
-    contentType: "bonus",
-    tier: "elite",
-    month: "2026-04",
-    icon: "⚡",
-    isNew: true,
+    role: "assistant",
+    content: "I am Petra, your Gentle Support companion inside DeepSleepReset. Tell me how your evening feels, and we will slow it down together.",
   },
 ];
 
-const TIER_COLORS: Record<string, string> = {
-  basic: "oklch(0.65 0.18 250)",
-  pro: "oklch(0.65 0.22 280)",
-  elite: "oklch(0.75 0.18 65)",
-};
+export default function MembersPage() {
+  const { user } = useAuth();
+  const dashboardQuery = trpc.member.dashboard.useQuery();
+  const feedQuery = trpc.member.feed.useQuery();
+  const paymentsQuery = trpc.member.payments.useQuery();
+  const checkInMutation = trpc.member.checkIn.useMutation({
+    onSuccess: () => {
+      dashboardQuery.refetch();
+      feedQuery.refetch();
+    },
+  });
+  const checkoutMutation = trpc.checkout.createSession.useMutation({
+    onSuccess: (data) => {
+      if (data.checkoutUrl) {
+        window.open(data.checkoutUrl, "_blank", "noopener,noreferrer");
+      }
+    },
+  });
+  const petraMutation = trpc.petra.chat.useMutation();
+  const [messages, setMessages] = useState<Message[]>(starterMessages);
+  const [petraLoading, setPetraLoading] = useState(false);
 
-const TIER_LABELS: Record<string, string> = {
-  basic: "Basic",
-  pro: "Pro",
-  elite: "Elite",
-};
+  const progress = dashboardQuery.data?.progress;
+  const completionRatio = progress ? Math.min(100, Math.round((progress.completedDays / 21) * 100)) : 0;
+  const hasPremium = dashboardQuery.data?.hasPremium ?? false;
 
-export default function Members() {
-  const [, setLocation] = useLocation();
-  const [activeFilter, setActiveFilter] = useState<"all" | "guide" | "audio" | "video" | "report" | "bonus">("all");
+  const feedItems = useMemo(() => feedQuery.data ?? [], [feedQuery.data]);
 
-  const filtered = activeFilter === "all"
-    ? MEMBER_CONTENT
-    : MEMBER_CONTENT.filter(c => c.contentType === activeFilter);
+  const sendPetraMessage = async (content: string) => {
+    const nextMessages = [...messages, { role: "user" as const, content }];
+    setMessages(nextMessages);
+    setPetraLoading(true);
 
-  return (
-    <div className="min-h-screen stars-premium px-4 py-10 relative overflow-hidden">
-      {/* Orbs */}
-      <div className="orb orb-purple w-[400px] h-[400px] top-[-100px] right-[-100px]" style={{ opacity: 0.08 }} />
-      <div className="orb orb-gold w-[300px] h-[300px] bottom-[10%] left-[-100px]" style={{ opacity: 0.06 }} />
+    try {
+      const data = await petraMutation.mutateAsync({
+        messages: nextMessages.filter((message) => message.role !== "system").map((message) => ({
+          role: message.role === "assistant" ? "assistant" : "user",
+          content: message.content,
+        })),
+      });
+      const responseText = typeof data.content === "string"
+        ? data.content
+        : "Petra is taking a quiet pause. Please try again shortly.";
+      setMessages((current) => [
+        ...current,
+        {
+          role: "assistant",
+          content: responseText,
+        },
+      ]);
+    } catch (error) {
+      setMessages((current) => [
+        ...current,
+        {
+          role: "assistant",
+          content: "I am temporarily unavailable, but your reset can still continue with one slow breath and a softer evening pace.",
+        },
+      ]);
+    } finally {
+      setPetraLoading(false);
+    }
+  };
 
-      <div className="max-w-4xl mx-auto relative z-10">
-
-        {/* Header */}
-        <div className="flex items-center justify-between mb-8">
-          <div>
-            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[oklch(0.65_0.22_280/0.15)] border border-[oklch(0.65_0.22_280/0.3)] text-[oklch(0.75_0.18_280)] text-xs font-bold uppercase tracking-widest mb-3">
-              💎 Sleep Optimizers Pro
-            </div>
-            <h1 className="font-display text-3xl font-black text-white">Member Area</h1>
-            <p className="text-[oklch(0.58_0.04_265)] text-sm mt-1">Your exclusive content library</p>
-          </div>
-          <button
-            onClick={() => setLocation("/")}
-            className="text-sm text-[oklch(0.5_0.04_265)] hover:text-white transition-colors"
-          >
-            ← Home
-          </button>
-        </div>
-
-        {/* Identity banner — Klein principle */}
-        <div className="subscription-card-pro rounded-2xl p-5 mb-8">
-          <div className="flex items-center gap-4">
-            <div className="text-4xl">⚡</div>
-            <div>
-              <h2 className="font-display font-black text-white text-lg">
-                You are a <span className="text-gradient-animated">Sleep Optimizer</span>
-              </h2>
-              <p className="text-sm text-[oklch(0.65_0.04_265)]">
-                You've chosen to optimize while others just "try to sleep better." That's the difference.
-              </p>
-            </div>
-          </div>
-        </div>
-
-        {/* Filter tabs */}
-        <div className="flex gap-2 mb-6 overflow-x-auto pb-1">
-          {[
-            { id: "all", label: "All Content" },
-            { id: "guide", label: "📄 Guides" },
-            { id: "audio", label: "🎧 Audio" },
-            { id: "video", label: "🎥 Videos" },
-            { id: "report", label: "📊 Reports" },
-            { id: "bonus", label: "⚡ Bonuses" },
-          ].map((tab) => (
-            <button
-              key={tab.id}
-              onClick={() => setActiveFilter(tab.id as typeof activeFilter)}
-              className={`px-4 py-2 rounded-xl text-sm font-semibold whitespace-nowrap transition-all ${
-                activeFilter === tab.id
-                  ? "bg-[oklch(0.65_0.22_280/0.2)] border border-[oklch(0.65_0.22_280/0.4)] text-white"
-                  : "bg-[oklch(0.12_0.025_265)] border border-[oklch(0.2_0.03_265)] text-[oklch(0.55_0.04_265)] hover:text-white"
-              }`}
-            >
-              {tab.label}
-            </button>
-          ))}
-        </div>
-
-        {/* Content grid */}
-        <div className="grid md:grid-cols-2 gap-4 mb-8">
-          {filtered.map((item) => (
-            <div
-              key={item.id}
-              className="glass-card glass-card-hover rounded-2xl p-5 relative overflow-hidden"
-            >
-              {/* Tier accent */}
-              <div
-                className="absolute top-0 left-0 right-0 h-0.5 rounded-t-2xl"
-                style={{ background: `linear-gradient(90deg, ${TIER_COLORS[item.tier]}, transparent)` }}
-              />
-
-              {/* New badge */}
-              {item.isNew && (
-                <div className="absolute top-3 right-3 px-2 py-0.5 rounded-full bg-green-500/20 border border-green-500/30 text-green-400 text-[0.6rem] font-bold uppercase tracking-wider">
-                  NEW
-                </div>
-              )}
-
-              <div className="flex items-start gap-3 mb-3">
-                <div className="text-3xl flex-shrink-0">{item.icon}</div>
-                <div>
-                  <div className="flex items-center gap-2 mb-1">
-                    <span
-                      className="text-[0.6rem] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full"
-                      style={{
-                        color: TIER_COLORS[item.tier],
-                        background: `${TIER_COLORS[item.tier]}20`,
-                        border: `1px solid ${TIER_COLORS[item.tier]}40`,
-                      }}
-                    >
-                      {TIER_LABELS[item.tier]}
-                    </span>
-                    <span className="text-[0.6rem] text-[oklch(0.45_0.04_265)]">{item.month}</span>
+  if (!hasPremium) {
+    return (
+      <div className="relative min-h-screen overflow-hidden bg-background text-foreground">
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(38,62,138,0.35),transparent_34%),radial-gradient(circle_at_78%_72%,rgba(119,80,255,0.22),transparent_24%),linear-gradient(180deg,rgba(5,8,23,0.2),rgba(5,8,23,0.92))]" />
+        <div className="container relative py-16 md:py-24">
+          <div className="mx-auto max-w-4xl rounded-[2rem] border border-white/10 bg-[rgba(8,11,28,0.7)] p-8 shadow-[0_24px_90px_rgba(0,0,0,0.42)] backdrop-blur-xl md:p-12">
+            <div className="space-y-8 text-center md:text-left">
+              <Badge variant="secondary" className="rounded-full border border-[#f0b25b]/20 bg-[rgba(240,178,91,0.12)] px-4 py-2 text-[#f3c57d]">
+                Premium gating active
+              </Badge>
+              <div className="space-y-4">
+                <p className="text-xs uppercase tracking-[0.34em] text-[#e7b15a]">Members access checkpoint</p>
+                <h1 className="font-display text-5xl leading-[0.95] text-white md:text-7xl">
+                  Your personalized reset is protected until Premium access is confirmed.
+                </h1>
+                <p className="mx-auto max-w-3xl text-base leading-8 text-[#c8cde0] md:mx-0 md:text-lg">
+                  This area unlocks the DeepSleepReset program feed, Petra, and daily progress tracking. Your account is recognized, but your premium activation has not completed yet.
+                </p>
+              </div>
+              <div className="grid gap-4 md:grid-cols-[1.15fr_0.85fr]">
+                <div className="rounded-[1.75rem] border border-white/10 bg-[rgba(255,255,255,0.04)] p-6 text-left shadow-[inset_0_1px_0_rgba(255,255,255,0.05)]">
+                  <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-[rgba(139,92,246,0.18)] text-[#bf9bff]">
+                    <Lock className="h-5 w-5" />
                   </div>
-                  <h3 className="font-bold text-white text-sm leading-tight">{item.title}</h3>
+                  <h2 className="text-2xl font-semibold text-white">DeepSleepReset Members Area</h2>
+                  <p className="mt-3 leading-7 text-[#b8c0dc]">
+                    Continue to secure checkout to unlock the program feed, Petra, sleep lessons, and premium check-ins calibrated to your chronotype direction.
+                  </p>
+                </div>
+                <div className="rounded-[1.75rem] border border-[#9a77ff]/25 bg-[linear-gradient(180deg,rgba(130,91,255,0.18),rgba(130,91,255,0.08))] p-6 text-left">
+                  <p className="text-xs uppercase tracking-[0.28em] text-[#f0c486]">Status</p>
+                  <p className="mt-3 text-3xl font-semibold text-white">Authenticated</p>
+                  <p className="mt-2 leading-7 text-[#d0d5eb]">Your current session is active. The remaining step is premium confirmation.</p>
                 </div>
               </div>
-
-              <p className="text-xs text-[oklch(0.58_0.04_265)] mb-4 leading-relaxed">{item.description}</p>
-
-              <button
-                className="w-full py-2.5 rounded-xl text-xs font-bold transition-all"
-                style={{
-                  background: `${TIER_COLORS[item.tier]}20`,
-                  border: `1px solid ${TIER_COLORS[item.tier]}40`,
-                  color: TIER_COLORS[item.tier],
-                }}
-                onClick={() => {
-                  // In production: fetch download URL from /api/members/content/:id
-                  alert("Content download coming soon! Your subscription is active.");
-                }}
-              >
-                Access Content →
-              </button>
+              <div className="flex flex-col gap-4 pt-2 sm:flex-row">
+                <button
+                  type="button"
+                  onClick={() => checkoutMutation.mutate()}
+                  disabled={checkoutMutation.isPending}
+                  className="cosmic-cta inline-flex appearance-none items-center justify-center rounded-[1.2rem] border-0 px-8 py-5 text-base font-semibold text-white shadow-[0_18px_55px_rgba(140,97,255,0.45)] transition hover:scale-[1.01] disabled:cursor-not-allowed disabled:opacity-70"
+                >
+                  {checkoutMutation.isPending ? "Preparing checkout..." : "Continue to secure checkout"}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => window.location.assign("/")}
+                  className="inline-flex appearance-none items-center justify-center rounded-[1.2rem] border border-white/12 bg-white/5 px-8 py-5 text-base font-semibold text-white transition hover:bg-white/8"
+                >
+                  Return to funnel
+                </button>
+              </div>
             </div>
-          ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="container py-10 md:py-12">
+      <div className="grid gap-6 xl:grid-cols-[0.95fr_1.05fr]">
+        <div className="space-y-6">
+          <Card className="glass-card border-none">
+            <CardContent className="space-y-6 p-8">
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <Badge variant="secondary" className="rounded-full px-4 py-2">Premium member</Badge>
+                  <h1 className="mt-4 font-display text-5xl">Welcome back, {user?.name?.split(" ")[0] ?? "member"}.</h1>
+                  <p className="mt-3 max-w-xl leading-8 text-muted-foreground">
+                    Your DeepSleepReset environment is ready. Keep your rhythm gentle, visible, and consistent.
+                  </p>
+                </div>
+                <MoonStar className="mt-2 h-10 w-10 text-primary" />
+              </div>
+
+              <div className="grid gap-4 md:grid-cols-3">
+                <Card className="border-none bg-background/75 shadow-none">
+                  <CardContent className="p-5">
+                    <p className="text-sm text-muted-foreground">Current day</p>
+                    <p className="mt-2 text-3xl font-semibold">{progress?.currentDay ?? 1}</p>
+                  </CardContent>
+                </Card>
+                <Card className="border-none bg-background/75 shadow-none">
+                  <CardContent className="p-5">
+                    <p className="text-sm text-muted-foreground">Completed days</p>
+                    <p className="mt-2 text-3xl font-semibold">{progress?.completedDays ?? 0}</p>
+                  </CardContent>
+                </Card>
+                <Card className="border-none bg-background/75 shadow-none">
+                  <CardContent className="p-5">
+                    <p className="text-sm text-muted-foreground">Streak</p>
+                    <p className="mt-2 text-3xl font-semibold">{progress?.streakDays ?? 0}</p>
+                  </CardContent>
+                </Card>
+              </div>
+
+              <div className="space-y-3">
+                <div className="flex items-center justify-between text-sm text-muted-foreground">
+                  <span>Program completion</span>
+                  <span>{completionRatio}%</span>
+                </div>
+                <Progress value={completionRatio} className="h-3" />
+              </div>
+
+              <Button
+                size="lg"
+                className="rounded-full px-7"
+                onClick={() => checkInMutation.mutate()}
+                disabled={checkInMutation.isPending}
+              >
+                <CheckCircle2 className="mr-2 h-4 w-4" />
+                Log today’s check-in
+              </Button>
+            </CardContent>
+          </Card>
+
+          <Card className="glass-card border-none">
+            <CardHeader>
+              <CardTitle className="font-display text-4xl">Premium content history</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {feedItems.length === 0 ? (
+                <div className="rounded-3xl bg-background/70 p-6 text-muted-foreground">
+                  Premium content will appear here as soon as published items are available in your DeepSleepReset program feed.
+                </div>
+              ) : (
+                feedItems.map((item) => (
+                  <div key={item.id} className="rounded-3xl bg-background/70 p-5">
+                    <div className="flex items-start justify-between gap-4">
+                      <div>
+                        <p className="text-sm uppercase tracking-[0.22em] text-muted-foreground">Day {item.dayNumber} · {item.contentType}</p>
+                        <h2 className="mt-2 text-2xl font-semibold">{item.title}</h2>
+                        <p className="mt-2 leading-7 text-muted-foreground">{item.summary}</p>
+                      </div>
+                      <Badge variant="outline" className="rounded-full">{item.completed ? "Completed" : `${item.progressPercent ?? 0}%`}</Badge>
+                    </div>
+                  </div>
+                ))
+              )}
+            </CardContent>
+          </Card>
+
+          <Card className="glass-card border-none">
+            <CardHeader>
+              <CardTitle className="font-display text-4xl">Payment history</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {(paymentsQuery.data ?? []).length === 0 ? (
+                <div className="rounded-3xl bg-background/70 p-6 text-muted-foreground">
+                  Your completed DeepSleepReset purchases will appear here after checkout confirmation.
+                </div>
+              ) : (
+                (paymentsQuery.data ?? []).map((payment) => (
+                  <div key={payment.id} className="rounded-3xl bg-background/70 p-5">
+                    <p className="text-sm uppercase tracking-[0.22em] text-muted-foreground">{payment.purchaseType} · {payment.status}</p>
+                    <h2 className="mt-2 text-2xl font-semibold">{payment.productKey}</h2>
+                    <p className="mt-2 leading-7 text-muted-foreground">Created {new Date(payment.createdAt).toLocaleString()}</p>
+                  </div>
+                ))
+              )}
+            </CardContent>
+          </Card>
         </div>
 
-        {/* Upgrade CTA for non-elite */}
-        <div className="glass-card rounded-2xl p-6 text-center">
-          <div className="text-3xl mb-3">⚡</div>
-          <h3 className="font-display font-black text-white text-xl mb-2">
-            Unlock Sleep Optimizer Elite
-          </h3>
-          <p className="text-sm text-[oklch(0.58_0.04_265)] mb-4 max-w-md mx-auto">
-            Get priority support, 1-on-1 sleep audits, VIP community access, and exclusive Elite-only protocols.
-          </p>
-          <button
-            onClick={() => setLocation("/premium")}
-            className="cta-premium cta-shimmer px-8 py-3 rounded-xl font-bold text-sm text-white"
-          >
-            Upgrade to Elite — $47/month →
-          </button>
-          <p className="text-xs text-[oklch(0.4_0.03_265)] mt-2">Cancel anytime · Instant access</p>
-        </div>
-
+        <Card className="glass-card border-none">
+          <CardHeader className="space-y-3">
+            <Badge variant="secondary" className="w-fit rounded-full px-4 py-2">Petra · Gentle Support</Badge>
+            <CardTitle className="font-display text-4xl">A private conversation for Premium subscribers</CardTitle>
+            <p className="max-w-2xl leading-7 text-muted-foreground">
+              Petra is available only inside DeepSleepReset Premium. Ask for help with evening routines, gentle reframing, or small next steps when your sleep rhythm feels fragile.
+            </p>
+          </CardHeader>
+          <CardContent>
+            <AIChatBox
+              messages={messages}
+              onSendMessage={sendPetraMessage}
+              isLoading={petraLoading}
+              height={760}
+              emptyStateMessage="Petra is ready when you are."
+              suggestedPrompts={[
+                "Petra, help me settle after a mentally heavy day.",
+                "Give me a gentle pre-sleep reset for tonight.",
+                "I missed yesterday. How do I restart without guilt?",
+              ]}
+            />
+          </CardContent>
+        </Card>
       </div>
     </div>
   );
