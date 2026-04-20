@@ -105,6 +105,38 @@ async function startServer() {
 
   // OAuth callback under /api/oauth/callback
   registerOAuthRoutes(app);
+
+  // Secret stats snapshot endpoint for hourly monitoring (hourly_stats.py)
+  // Protected by a static token — not user-facing
+  app.get("/api/stats-snapshot", async (req, res) => {
+    const STATS_TOKEN = process.env.STATS_SNAPSHOT_TOKEN || "5d606afc11cb66674b2733559b3f38ad1adc40fd9a49b07ed63f4c57ac1954b2";
+    if (req.query.token !== STATS_TOKEN) {
+      res.status(401).json({ error: "Unauthorized" });
+      return;
+    }
+    try {
+      const { getAdminStats, getFunnelStats, getDailyRevenue, getRecentOrders, getRecentLeads } = await import("../db");
+      const [stats, funnel, daily, recentOrders, recentLeads] = await Promise.all([
+        getAdminStats(),
+        getFunnelStats(),
+        getDailyRevenue(),
+        getRecentOrders(10),
+        getRecentLeads(10),
+      ]);
+      res.json({
+        timestamp: new Date().toISOString(),
+        stats,
+        funnel,
+        daily,
+        recentOrders,
+        recentLeads,
+      });
+    } catch (err) {
+      console.error("[Stats Snapshot] Error:", err);
+      res.status(500).json({ error: "Failed to fetch stats", message: String(err) });
+    }
+  });
+
   // tRPC API
   app.use(
     "/api/trpc",
