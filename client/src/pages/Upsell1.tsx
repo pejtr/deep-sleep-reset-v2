@@ -17,32 +17,21 @@ export default function Upsell1() {
     }).catch(() => {});
   }, []);
 
-  const handleAccept = async () => {
-    setLoading(true);
+  const handleAccept = () => {
     fetch("/api/behavior/track", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ event: "upsell_accept", page: "upsell1", product: "oto1", ts: Date.now() }),
     }).catch(() => {});
-    try {
-      const res = await fetch("/api/orders/create", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ productId: "oto1", chronotype }),
-      });
-      const data = await res.json();
-      if (data.url) {
-        window.open(data.url, "_blank");
-        toast.success("Redirecting to checkout...");
-        setTimeout(() => setLocation("/upsell/2"), 1500);
-      } else {
-        setLocation("/upsell/2");
-      }
-    } catch {
-      setLocation("/upsell/2");
-    } finally {
-      setLoading(false);
-    }
+    // Record locally (fire and forget)
+    fetch("/api/orders/create", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ productId: "oto1", chronotype, useGumroad: true }),
+    }).catch(() => {});
+    toast.success("Opening secure checkout...");
+    window.open("https://petrmatej.gumroad.com/l/fdtifc?wanted=true", "_blank");
+    setTimeout(() => setLocation("/upsell/2"), 800);
   };
 
   const handleDecline = () => {

@@ -78,8 +78,8 @@ router.post("/quiz/email", async (req: Request, res: Response) => {
 router.post("/orders/create", async (req: Request, res: Response) => {
   try {
     const db = await getDb();
-    const { product = "tripwire", chronotype, email } = req.body;
-    const productKey = product as ProductKey;
+    const { product = "tripwire", productId, chronotype, email, useGumroad } = req.body;
+    const productKey = (productId || product) as ProductKey;
     const productInfo = FUNNEL_PRODUCTS[productKey];
 
     if (!productInfo) {
@@ -87,6 +87,20 @@ router.post("/orders/create", async (req: Request, res: Response) => {
     }
 
     const baseUrl = getBaseUrl(req);
+
+    // Gumroad mode — record order locally as pending_gumroad, return success
+    if (useGumroad) {
+      if (db) {
+        await db.insert(orders).values({
+          product: productKey,
+          amount: String(productInfo.price / 100),
+          status: "pending_gumroad",
+          chronotype: chronotype || null,
+          email: email || null,
+        }).catch(() => {});
+      }
+      return res.json({ success: true, provider: "gumroad" });
+    }
 
     // Dev/no-Stripe mode — skip payment, go straight to upsell
     if (!stripe) {

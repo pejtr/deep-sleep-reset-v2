@@ -3,27 +3,15 @@ import { useLocation } from "wouter";
 
 export default function Upsell2() {
   const [, setLocation] = useLocation();
-  const [loading, setLoading] = useState(false);
-
-  const handleAccept = async () => {
-    setLoading(true);
-    try {
-      const res = await fetch("/api/orders/create", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ productId: "oto2" }),
-      });
-      const data = await res.json();
-      if (data.url) {
-        window.location.href = data.url;
-      } else {
-        setLocation("/upsell/3");
-      }
-    } catch {
-      setLocation("/upsell/3");
-    } finally {
-      setLoading(false);
-    }
+  const handleAccept = () => {
+    // Record locally (fire and forget)
+    fetch("/api/orders/create", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ productId: "oto2", useGumroad: true }),
+    }).catch(() => {});
+    window.open("https://petrmatej.gumroad.com/l/fdtifc?wanted=true", "_blank");
+    setTimeout(() => setLocation("/upsell/3"), 800);
   };
 
   const handleDecline = () => setLocation("/upsell/3");
@@ -73,10 +61,9 @@ export default function Upsell2() {
 
         <button
           onClick={handleAccept}
-          disabled={loading}
-          className="cta-shimmer w-full py-5 rounded-2xl font-black text-lg bg-gradient-to-r from-[oklch(0.65_0.22_280)] to-[oklch(0.55_0.22_290)] text-white animate-pulse-glow hover:scale-[1.02] transition-transform disabled:opacity-70 shadow-2xl mb-3"
+          className="cta-shimmer w-full py-5 rounded-2xl font-black text-lg bg-gradient-to-r from-[oklch(0.65_0.22_280)] to-[oklch(0.55_0.22_290)] text-white animate-pulse-glow hover:scale-[1.02] transition-transform shadow-2xl mb-3"
         >
-          {loading ? "Processing..." : "Yes! Add Audio Pack — $17 →"}
+          Yes! Add Audio Pack — $17 →
         </button>
 
         <p className="text-xs text-[oklch(0.4_0.03_265)] mb-4">

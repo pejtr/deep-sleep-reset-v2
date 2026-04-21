@@ -207,7 +207,7 @@ FB/IG Post → Landing Page (Hero + Quiz) → Quiz Výsledek + CTA
 - [x] Backend: POST /api/chat/petra — LLM with Petra persona (warm, expert, proactive links)
 - [x] Frontend: PetraChat.tsx component — floating button + slide-in panel, suggested prompts
 - [x] Integration: Mount PetraChat in Members.tsx, wire to backend
-- [ ] Tests: Vitest for Petra endpoint (persona, error handling, auth guard)
+- [x] Tests: Vitest for Petra endpoint (persona, error handling, auth guard) — 7 testů v petra.test.ts
 
 ## Pre-Launch QA
 - [x] Opravit ECONNRESET chybu v emailScheduler (DB reconnect)
@@ -231,3 +231,26 @@ FB/IG Post → Landing Page (Hero + Quiz) → Quiz Výsledek + CTA
 - [ ] Překlad do portugalštiny (Português) — pro Brazil
 - [ ] Přeložit email sekvence do 4 jazyků
 - [ ] SEO meta tagy pro každý jazyk (hreflang)
+
+## Bug: Stripe platby nefungují (2026-04-21)
+- [ ] Diagnostikovat proč je karta odmítána ("Vaše karta byla odmítnuta")
+- [ ] Opravit Stripe checkout integraci na produkčním webu
+- [ ] Otestovat platbu end-to-end na sleeprset-omp8ch8v.manus.space
+
+## PayPal Integrace (náhrada Stripe)
+- [ ] Získat PayPal Client ID a Secret od uživatele
+- [ ] Backend: PayPal Orders API (create order, capture order)
+- [ ] Frontend: PayPal Smart Button na Order stránce
+- [ ] Frontend: PayPal Smart Button na Upsell 1, 2, 3
+- [ ] Webhook/IPN: ověření platby po dokončení
+- [ ] Otestovat platbu end-to-end
+
+## Gumroad Integrace (náhrada Stripe — 2026-04-21)
+- [x] Gumroad skript přidán do index.html
+- [x] Order.tsx přepsán na Gumroad overlay (petrmatej.gumroad.com/l/fdtifc)
+- [x] Upsell1.tsx přepsán na Gumroad
+- [x] Upsell2.tsx přepsán na Gumroad
+- [x] Upsell3.tsx přepsán na Gumroad
+- [x] Backend /orders/create přidán useGumroad flag
+- [x] DB migrace: přidán status 'pending_gumroad' do enum
+- [x] Otestováno: Gumroad checkout se otevírá správně

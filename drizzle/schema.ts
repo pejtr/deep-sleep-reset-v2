@@ -52,7 +52,7 @@ export const orders = mysqlTable("orders", {
   product: mysqlEnum("product", ["tripwire", "oto1", "oto2", "oto3"]).notNull(),
   amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
   currency: varchar("currency", { length: 3 }).default("usd"),
-  status: mysqlEnum("status", ["pending", "paid", "failed", "refunded"]).default("pending").notNull(),
+  status: mysqlEnum("status", ["pending", "pending_gumroad", "paid", "failed", "refunded"]).default("pending").notNull(),
   chronotype: mysqlEnum("chronotype", ["lion", "bear", "wolf", "dolphin"]),
   email: varchar("email", { length: 320 }),
   sessionId: varchar("sessionId", { length: 128 }),

@@ -2,6 +2,9 @@ import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { toast } from "sonner";
 
+// Gumroad product permalink for the main tripwire ($1)
+const GUMROAD_PRODUCT_URL = "https://petrmatej.gumroad.com/l/fdtifc";
+
 const CHRONOTYPE_NAMES: Record<string, string> = {
   lion: "Lion 🦁",
   bear: "Bear 🐻",
@@ -30,8 +33,6 @@ function useCountdown(minutes: number) {
 export default function Order() {
   const [, setLocation] = useLocation();
   const [chronotype, setChronotype] = useState("bear");
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
   const [buyers] = useState(() => Math.floor(Math.random() * 40) + 60);
   const { display: countdown, expired } = useCountdown(15);
 
@@ -45,31 +46,29 @@ export default function Order() {
     }).catch(() => {});
   }, []);
 
-  const handleCheckout = async () => {
-    setLoading(true);
-    setError("");
+  const handleCheckout = () => {
+    // Track click
     fetch("/api/behavior/track", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ event: "checkout_click", page: "order", product: "tripwire", ts: Date.now() }),
     }).catch(() => {});
-    try {
-      const res = await fetch("/api/orders/create", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ productId: "tripwire", chronotype }),
-      });
-      const data = await res.json();
-      if (data.url) {
-        window.open(data.url, "_blank");
-        toast.success("Redirecting to secure checkout...");
-      } else {
-        setError("Could not create payment. Please try again.");
-      }
-    } catch {
-      setError("Connection error. Please try again.");
-    } finally {
-      setLoading(false);
+
+    // Record order locally (fire and forget)
+    fetch("/api/orders/create", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ productId: "tripwire", chronotype, useGumroad: true }),
+    }).catch(() => {});
+
+    // Open Gumroad overlay or fallback to new tab
+    const gumroadUrl = `${GUMROAD_PRODUCT_URL}?wanted=true`;
+    const overlay = (window as any).GumroadOverlay;
+    if (overlay && typeof overlay.show === "function") {
+      overlay.show(gumroadUrl);
+    } else {
+      toast.success("Opening secure checkout...");
+      window.open(gumroadUrl, "_blank");
     }
   };
 
@@ -174,28 +173,20 @@ export default function Order() {
           </div>
         </div>
 
-        {/* Error */}
-        {error && (
-          <div className="mb-4 p-3 rounded-lg bg-red-900/30 border border-red-500/40 text-red-400 text-sm text-center">
-            {error}
-          </div>
-        )}
-
-        {/* Primary CTA */}
+        {/* Primary CTA — Gumroad overlay trigger */}
         <button
           onClick={handleCheckout}
-          disabled={loading}
-          className="cta-premium cta-shimmer w-full py-5 rounded-2xl font-black text-xl text-white disabled:opacity-70 disabled:cursor-not-allowed mb-3"
+          className="cta-premium cta-shimmer w-full py-5 rounded-2xl font-black text-xl text-white mb-3"
         >
-          {loading ? (
-            <span className="flex items-center justify-center gap-2">
-              <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-              Preparing checkout...
-            </span>
-          ) : (
-            "Get Instant Access — $1 →"
-          )}
+          Get Instant Access — $1 →
         </button>
+
+        {/* Payment methods */}
+        <div className="flex items-center justify-center gap-2 mb-4 text-xs text-[oklch(0.5_0.04_265)]">
+          <span>💳</span>
+          <span>Visa · Mastercard · PayPal · Apple Pay</span>
+          <span>🔒</span>
+        </div>
 
         {/* Trust row */}
         <div className="flex items-center justify-center gap-3 mb-6 flex-wrap">
