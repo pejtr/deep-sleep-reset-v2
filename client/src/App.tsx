@@ -4,6 +4,7 @@ import NotFound from "@/pages/NotFound";
 import { Route, Switch } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
+import { HelmetProvider } from "react-helmet-async";
 import Home from "./pages/Home";
 import Quiz from "./pages/Quiz";
 import QuizResult from "./pages/QuizResult";
@@ -15,6 +16,8 @@ import ThankYou from "./pages/ThankYou";
 import Admin from "./pages/Admin";
 import Premium from "./pages/Premium";
 import Members from "./pages/Members";
+import BlogList from "./pages/BlogList";
+import BlogPost from "./pages/BlogPost";
 import PetraChatbot from "./components/PetraChatbot";
 
 function Router() {
@@ -31,6 +34,8 @@ function Router() {
       <Route path="/admin" component={Admin} />
       <Route path="/premium" component={Premium} />
       <Route path="/members" component={Members} />
+      <Route path="/blog" component={BlogList} />
+      <Route path="/blog/:slug" component={BlogPost} />
       <Route path="/404" component={NotFound} />
       <Route component={NotFound} />
     </Switch>
@@ -39,14 +44,16 @@ function Router() {
 
 export default function App() {
   return (
-    <ErrorBoundary>
-      <ThemeProvider defaultTheme="dark">
-        <TooltipProvider>
-          <Toaster richColors position="bottom-left" />
-          <Router />
-          <PetraChatbot />
-        </TooltipProvider>
-      </ThemeProvider>
-    </ErrorBoundary>
+    <HelmetProvider>
+      <ErrorBoundary>
+        <ThemeProvider defaultTheme="dark">
+          <TooltipProvider>
+            <Toaster richColors position="bottom-left" />
+            <Router />
+            <PetraChatbot />
+          </TooltipProvider>
+        </ThemeProvider>
+      </ErrorBoundary>
+    </HelmetProvider>
   );
 }

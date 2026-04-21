@@ -273,7 +273,7 @@ FB/IG Post → Landing Page (Hero + Quiz) → Quiz Výsledek + CTA
 - [ ] Sledovat konverze per varianta v admin dashboardu
 
 ## URL Aktualizace (2026-04-21)
-- [ ] Aktualizovat reference sleeprset-omp8ch8v → deepsleepquest.manus.space v kódu
+- [x] Aktualizovat reference sleeprset-omp8ch8v → deepsleepquest.manus.space v kódu
 - [ ] Gumroad upsell produkty: OTO1 ttrsd $5, OTO2 cuhln $12, OTO3 ubsxk $19
 
 ## Prodejní Milník Notifikace (petr.matej@gmail.com)
@@ -283,3 +283,41 @@ FB/IG Post → Landing Page (Hero + Quiz) → Quiz Výsledek + CTA
 - [ ] Backend: milestoneNotifier.ts — kontrola počtu prodejů po každém novém prodeji
 - [ ] Brevo email šablony pro milníky
 - [ ] Vitest testy pro milestone logiku
+
+## External Marketing API (2026-04-21)
+- [ ] DB: api_keys tabulka (id, key_hash, name, permissions, created_at)
+- [ ] Endpoint: POST /api/v1/keys — generovat API klíč (admin only)
+- [ ] Middleware: API key autentizace pro /api/v1/*
+- [ ] GET /api/v1/stats — celková analytika (revenue, orders, leads, conversion)
+- [ ] GET /api/v1/orders — seznam objednávek s filtrováním
+- [ ] GET /api/v1/leads — seznam email leadů
+- [ ] GET /api/v1/events — A/B test events
+- [ ] POST /api/v1/orders — vytvořit objednávku externě
+- [ ] PATCH /api/v1/orders/:id — aktualizovat status objednávky
+- [ ] POST /api/v1/email/send — poslat email zákazníkovi
+- [ ] GET /api/v1/docs — API dokumentace (JSON/Swagger)
+- [ ] Vitest testy pro API endpointy
+
+## Půlnoční AI Hloubková Analýza (2026-04-21)
+- [ ] Rozšířit nightlyAnalyzer.ts — hloubkové chování: scroll depth, rage clicks, drop-off, session time
+- [ ] Automatické aplikování optimalizací: A/B winner, CTA text, headline swap, urgency level
+- [ ] Uložit aplikované optimalizace do DB (applied_optimizations tabulka)
+- [ ] Email report vlastníkovi s konkrétními změnami které AI provedla
+- [ ] Cron job ověřen — každou půlnoc (00:00 CET)
+
+## SEO & Indexing (2026-04-21)
+- [ ] Google Search Console — přidat deepsleep.quest a ověřit
+- [x] Bing Webmaster Tools — přidat deepsleep.quest a ověřit (meta tag přidán)
+- [ ] sitemap.xml — dynamicky generovaný endpoint /sitemap.xml
+- [ ] robots.txt — odkaz na sitemap, blokovat /admin, /api
+- [ ] Schema.org JSON-LD strukturovaná data (Organization, Product, FAQ)
+- [ ] Open Graph meta tagy pro sdílení na sociálních sítích
+- [ ] Odeslat sitemap do Google a Bing po ověření
+
+## SEO Blog pro Organický Traffic (2026-04-21)
+- [x] Blog sekce na webu (/blog, /blog/:slug routes)
+- [x] BlogList.tsx — seznam článků s SEO meta tagy
+- [x] BlogPost.tsx — detailní článek s Schema.org Article JSON-LD
+- [x] 5 SEO optimalizovaných článků (sleep niche, long-tail keywords)
+- [x] Dynamická sitemap.xml zahrnující blog posty
+- [x] Bing Webmaster Tools registrace (meta tag přidán, verifikace čeká na deploy)

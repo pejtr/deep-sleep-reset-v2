@@ -129,7 +129,7 @@ function buildWelcomeEmail(name: string | undefined, productKey: ProductKey, amo
         <li>Each night builds on the last, so follow them in order.</li>
         <li>By Night 4, most people notice a significant difference.</li>
       </ol>
-      <p>Access your program here: <a href="https://deepsleepreset.manus.space" style="color:#d4a853;">deepsleepreset.manus.space</a></p>
+      <p>Access your program here: <a href="https://deepsleep.quest" style="color:#d4a853;">deepsleep.quest</a></p>
     `;
   } else if (isUpsell1) {
     subject = "🎧 Your Anxiety Dissolve Audio Pack — Access Inside";
@@ -143,7 +143,7 @@ function buildWelcomeEmail(name: string | undefined, productKey: ProductKey, amo
         <li>The Deep Dive (35 min) — for profound relaxation</li>
         <li>The Power Nap Protocol (20 min) — for daytime recovery</li>
       </ul>
-      <p>Access your audios: <a href="https://deepsleepreset.manus.space" style="color:#d4a853;">deepsleepreset.manus.space</a></p>
+      <p>Access your audios: <a href="https://deepsleep.quest" style="color:#d4a853;">deepsleep.quest</a></p>
     `;
   } else {
     subject = "📊 Your Sleep Optimizer Toolkit — Access Inside";
@@ -156,7 +156,7 @@ function buildWelcomeEmail(name: string | undefined, productKey: ProductKey, amo
         <li>Evidence-Based Supplement Guide</li>
         <li>"Screen Detox" Protocol</li>
       </ul>
-      <p>Access your toolkit: <a href="https://deepsleepreset.manus.space" style="color:#d4a853;">deepsleepreset.manus.space</a></p>
+      <p>Access your toolkit: <a href="https://deepsleep.quest" style="color:#d4a853;">deepsleep.quest</a></p>
     `;
   }
 
@@ -204,7 +204,7 @@ function buildWelcomeEmail(name: string | undefined, productKey: ProductKey, amo
     <div class="footer">
       <p>You're receiving this because you purchased from Deep Sleep Reset.</p>
       <p>© ${new Date().getFullYear()} Deep Sleep Reset. All rights reserved.</p>
-      <p><a href="https://deepsleepreset.manus.space/privacy">Privacy Policy</a> | <a href="mailto:support@deepsleepreset.com">Unsubscribe</a></p>
+      <p><a href="https://deepsleep.quest/privacy">Privacy Policy</a> | <a href="mailto:support@deepsleepreset.com">Unsubscribe</a></p>
     </div>
   </div>
 </body>
@@ -216,7 +216,7 @@ Hey ${firstName},
 
 Your purchase of ${productName} (${amount}) is confirmed.
 
-${isCore ? `Start with Night 1 tonight — "The Sleep Pressure Reset". Access your program at: https://deepsleepreset.manus.space` : `Access your content at: https://deepsleepreset.manus.space`}
+${isCore ? `Start with Night 1 tonight — "The Sleep Pressure Reset". Access your program at: https://deepsleep.quest` : `Access your content at: https://deepsleep.quest`}
 
 Tonight, you sleep.
 — The Deep Sleep Reset Team

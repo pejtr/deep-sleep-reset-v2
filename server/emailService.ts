@@ -223,7 +223,7 @@ const EMAIL_SEQUENCE = [
       <div style="background:#1a1230;border:1px solid #2d2050;border-radius:12px;padding:16px;margin:16px 0;text-align:center;">
         <p style="color:#c4a8ff;font-weight:700;margin:0 0 8px;">Want to go deeper?</p>
         <p style="color:#a89bc8;margin:0 0 12px;font-size:14px;">The 30-Day Sleep Transformation Program gives you the complete system for lasting sleep change.</p>
-        <a href="https://deepsleep.manus.space/upsell/1" style="display:inline-block;background:linear-gradient(135deg,#7c3aed,#5b21b6);color:#fff;text-decoration:none;padding:10px 24px;border-radius:8px;font-size:13px;font-weight:700;">
+        <a href="https://deepsleep.quest/upsell/1" style="display:inline-block;background:linear-gradient(135deg,#7c3aed,#5b21b6);color:#fff;text-decoration:none;padding:10px 24px;border-radius:8px;font-size:13px;font-weight:700;">
           View Program →
         </a>
       </div>
@@ -240,7 +240,7 @@ const EMAIL_SEQUENCE = [
       <div style="background:linear-gradient(135deg,#2d1b69,#1a0f3a);border:1px solid #4a3080;border-radius:16px;padding:24px;margin:16px 0;text-align:center;">
         <p style="color:#c4a8ff;font-size:18px;font-weight:800;margin:0 0 8px;">30-Day Sleep Transformation</p>
         <p style="color:#a89bc8;margin:0 0 16px;font-size:14px;">Complete system for lasting sleep change — only $7</p>
-        <a href="https://deepsleep.manus.space/upsell/1" style="display:inline-block;background:linear-gradient(135deg,#7c3aed,#5b21b6);color:#fff;text-decoration:none;padding:12px 28px;border-radius:8px;font-size:14px;font-weight:700;">
+        <a href="https://deepsleep.quest/upsell/1" style="display:inline-block;background:linear-gradient(135deg,#7c3aed,#5b21b6);color:#fff;text-decoration:none;padding:12px 28px;border-radius:8px;font-size:14px;font-weight:700;">
           Continue My Journey →
         </a>
       </div>

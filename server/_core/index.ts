@@ -8,6 +8,7 @@ import { appRouter } from "../routers";
 import { createContext } from "./context";
 import { serveStatic, setupVite } from "./vite";
 import funnelRoutes from "../funnelRoutes";
+import externalApiRouter from "../externalApi";
 import { startEmailScheduler } from "../emailScheduler";
 import { ENV } from "./env";
 
@@ -104,6 +105,8 @@ async function startServer() {
   registerOAuthRoutes(app);
   // Funnel API routes (all other /api/* routes)
   app.use("/api", funnelRoutes);
+  // External Marketing API v1
+  app.use("/api/v1", externalApiRouter);
   // tRPC API
   app.use(
     "/api/trpc",

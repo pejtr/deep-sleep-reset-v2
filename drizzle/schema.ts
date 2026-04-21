@@ -1,4 +1,5 @@
 import {
+  boolean,
   decimal,
   int,
   mysqlEnum,
@@ -154,4 +155,17 @@ export const contentHistory = mysqlTable("content_history", {
 });
 export type ContentHistory = typeof contentHistory.$inferSelect;
 export type InsertContentHistory = typeof contentHistory.$inferInsert;
+
+// API Keys — for external marketing system access (Zapier, Make.com, n8n)
+export const apiKeys = mysqlTable("api_keys", {
+  id: int("id").autoincrement().primaryKey(),
+  keyHash: varchar("key_hash", { length: 64 }).notNull().unique(), // SHA-256 hash
+  name: varchar("name", { length: 128 }).notNull(), // e.g. "Zapier Integration"
+  permissions: mysqlEnum("permissions", ["read", "write", "admin"]).default("read").notNull(),
+  lastUsedAt: timestamp("last_used_at"),
+  isActive: boolean("is_active").default(true).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+export type ApiKey = typeof apiKeys.$inferSelect;
+export type InsertApiKey = typeof apiKeys.$inferInsert;
 

@@ -495,7 +495,7 @@ const day6: SequenceEmail = {
       <div style="font-size: 36px; margin-bottom: 12px;">🦁 🐻 🐺 🐬</div>
       <h3 style="color: #c4a0e8; font-size: 20px; margin: 0 0 10px;">Discover Your Sleep Chronotype</h3>
       <p style="color: #9ca3af; font-size: 14px; line-height: 1.6; margin: 0 0 18px;">Now that you've completed the 7-Night Reset, go deeper. Take our free 2-minute quiz to discover whether you're a Lion, Bear, Wolf, or Dolphin — and get a personalised AI sleep plan built for your biology.</p>
-      <a href="https://deepsleepreset.manus.space/chronotype-quiz" style="display: inline-block; background: #c4a0e8; color: #0a0e1a; font-weight: bold; padding: 12px 28px; border-radius: 8px; text-decoration: none; font-size: 15px;">Take the Free Chronotype Quiz →</a>
+      <a href="https://deepsleep.quest/chronotype-quiz" style="display: inline-block; background: #c4a0e8; color: #0a0e1a; font-weight: bold; padding: 12px 28px; border-radius: 8px; text-decoration: none; font-size: 15px;">Take the Free Chronotype Quiz →</a>
       <p style="color: #6b7280; font-size: 12px; margin: 12px 0 0;">Free · 2 minutes · Personalised AI plan included</p>
     </div>
 
