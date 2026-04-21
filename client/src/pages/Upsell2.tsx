@@ -10,7 +10,7 @@ export default function Upsell2() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ productId: "oto2", useGumroad: true }),
     }).catch(() => {});
-    window.open("https://petrmatej.gumroad.com/l/fdtifc?wanted=true", "_blank");
+    window.open("https://petrmatej.gumroad.com/l/cuhln?wanted=true", "_blank");
     setTimeout(() => setLocation("/upsell/3"), 800);
   };
 
@@ -52,9 +52,9 @@ export default function Upsell2() {
 
           <div className="flex items-center justify-center gap-3 py-3 border-t border-[oklch(0.22_0.03_265)]">
             <span className="price-original text-base">$67</span>
-            <span className="text-3xl font-black text-white">$17</span>
+            <span className="text-3xl font-black text-white">$12</span>
             <span className="px-2 py-1 rounded-lg bg-green-500/20 border border-green-500/40 text-green-400 text-xs font-bold">
-              75% OFF
+              82% OFF
             </span>
           </div>
         </div>
@@ -63,7 +63,7 @@ export default function Upsell2() {
           onClick={handleAccept}
           className="cta-shimmer w-full py-5 rounded-2xl font-black text-lg bg-gradient-to-r from-[oklch(0.65_0.22_280)] to-[oklch(0.55_0.22_290)] text-white animate-pulse-glow hover:scale-[1.02] transition-transform shadow-2xl mb-3"
         >
-          Yes! Add Audio Pack — $17 →
+          Yes! Add Audio Pack — $12 →
         </button>
 
         <p className="text-xs text-[oklch(0.4_0.03_265)] mb-4">

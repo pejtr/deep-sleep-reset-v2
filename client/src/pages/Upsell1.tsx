@@ -30,7 +30,7 @@ export default function Upsell1() {
       body: JSON.stringify({ productId: "oto1", chronotype, useGumroad: true }),
     }).catch(() => {});
     toast.success("Opening secure checkout...");
-    window.open("https://petrmatej.gumroad.com/l/fdtifc?wanted=true", "_blank");
+    window.open("https://petrmatej.gumroad.com/l/ttrsd?wanted=true", "_blank");
     setTimeout(() => setLocation("/upsell/2"), 800);
   };
 
@@ -85,9 +85,9 @@ export default function Upsell1() {
 
           <div className="flex items-center justify-center gap-3 py-3 border-t border-[oklch(0.22_0.03_265)]">
             <span className="text-sm text-[oklch(0.45_0.03_265)] line-through">$47</span>
-            <span className="text-3xl font-black text-white">$7</span>
+            <span className="text-3xl font-black text-white">$5</span>
             <span className="px-2 py-1 rounded-lg bg-green-500/20 border border-green-500/40 text-green-400 text-xs font-bold">
-              85% OFF
+              89% OFF
             </span>
           </div>
         </div>
@@ -97,7 +97,7 @@ export default function Upsell1() {
           disabled={loading}
           className="cta-shimmer w-full py-5 rounded-2xl font-black text-lg bg-gradient-to-r from-[oklch(0.65_0.22_280)] to-[oklch(0.55_0.22_290)] text-white animate-pulse-glow hover:scale-[1.02] transition-transform disabled:opacity-70 shadow-2xl mb-3"
         >
-          {loading ? "Processing..." : "Yes! Add 30-Day Program — $7 →"}
+          {loading ? "Processing..." : "Yes! Add 30-Day Program — $5 →"}
         </button>
 
         <p className="text-xs text-[oklch(0.4_0.03_265)] mb-4">
