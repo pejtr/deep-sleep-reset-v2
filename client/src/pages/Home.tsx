@@ -4,6 +4,7 @@ import SocialProofToast from "@/components/SocialProofToast";
 import ExitIntentPopup from "@/components/ExitIntentPopup";
 import EmailCapturePopup from "@/components/EmailCapturePopup";
 import ReviewsSection from "@/components/ReviewsSection";
+import FAQSection from "@/components/FAQSection";
 
 // ─── A/B Test Variants ────────────────────────────────────────────────────────
 const HEADLINE_VARIANTS = [
@@ -652,7 +653,10 @@ export default function Home() {
 
       <ReviewsSection />
 
-      {/* ── FINAL CTA ────────────────────────────────────────────────────────── */}
+      {/* ── FAQ ─────────────────────────────────────────────────────────────────────────── */}
+      <FAQSection />
+
+      {/* ── FINAL CTA ──────────────────────────────────────────────────────────────────────── */}
       <section className="py-20 px-4 text-center relative overflow-hidden">
         <div className="orb orb-gold w-[500px] h-[500px] bottom-[-200px] left-[50%] -translate-x-1/2" style={{ opacity: 0.05 }} />
         <div className="max-w-xl mx-auto relative z-10">

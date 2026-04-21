@@ -15,6 +15,7 @@ import ThankYou from "./pages/ThankYou";
 import Admin from "./pages/Admin";
 import Premium from "./pages/Premium";
 import Members from "./pages/Members";
+import PetraChatbot from "./components/PetraChatbot";
 
 function Router() {
   return (
@@ -43,6 +44,7 @@ export default function App() {
         <TooltipProvider>
           <Toaster richColors position="bottom-left" />
           <Router />
+          <PetraChatbot />
         </TooltipProvider>
       </ThemeProvider>
     </ErrorBoundary>

@@ -3,7 +3,7 @@ import { appRouter } from "./routers";
 import type { TrpcContext } from "./_core/context";
 
 // Mock Stripe
-vi.mock("./stripe/stripe", () => ({
+vi.mock("./_core/stripeHelper", () => ({
   getStripe: () => ({
     checkout: {
       sessions: {

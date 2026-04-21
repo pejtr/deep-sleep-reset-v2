@@ -104,8 +104,18 @@ export async function processPendingEmails(): Promise<void> {
           .where(eq(scheduledEmails.id, scheduled.id));
       }
     }
-  } catch (err) {
-    console.error("[EmailScheduler] processPendingEmails error:", err);
+  } catch (err: unknown) {
+    // ECONNRESET is a transient DB connection error — log quietly and retry next interval
+    const msg = err instanceof Error ? err.message : String(err);
+    const causeMsg = (err instanceof Error && (err as Error & { cause?: unknown }).cause instanceof Error)
+      ? ((err as Error & { cause?: Error }).cause as Error).message
+      : "";
+    const isConnReset = msg.includes("ECONNRESET") || causeMsg.includes("ECONNRESET");
+    if (isConnReset) {
+      console.warn("[EmailScheduler] DB connection reset — will retry next interval");
+    } else {
+      console.error("[EmailScheduler] processPendingEmails error:", err);
+    }
   }
 }
 

@@ -192,3 +192,42 @@ FB/IG Post → Landing Page (Hero + Quiz) → Quiz Výsledek + CTA
 
 ## Bug Fix
 - [x] Opravit testimonial badge overflow — badge přesunut na vlastní řádek pod hvězdičkami, žádné překrývání
+
+## FAQ Sekce
+- [ ] Přidat FAQ accordion sekci do Home.tsx (10-12 otázek, snížit support dotazy)
+
+## AI Chatbot Petra — Gentle Support pro Premium
+- [x] Opravit poškozený JSX v Home.tsx (ReviewsSection + FAQ)
+- [ ] FAQ komponenta (FAQSection.tsx) — 12 otázek, accordion, amber design
+- [x] AI chatbot "Petra" v Members.tsx — Gentle Support pro Premium předplatitele
+- [x] Backend endpoint /api/chat/petra — LLM s personou Petra (sleep expert, warm tone)
+- [x] Chat UI v Members.tsx — floating button + slide-in panel
+
+## Petra AI Chatbot — Premium Members
+- [x] Backend: POST /api/chat/petra — LLM with Petra persona (warm, expert, proactive links)
+- [x] Frontend: PetraChat.tsx component — floating button + slide-in panel, suggested prompts
+- [x] Integration: Mount PetraChat in Members.tsx, wire to backend
+- [ ] Tests: Vitest for Petra endpoint (persona, error handling, auth guard)
+
+## Pre-Launch QA
+- [x] Opravit ECONNRESET chybu v emailScheduler (DB reconnect)
+- [x] Všechny testy prochází (pnpm test) — 83/83 testů
+- [x] 0 TypeScript chyb
+- [x] Vizuální kontrola: Home, Order, ThankYou, Premium, Members, Admin
+- [x] Checkpoint + publish instrukce
+
+## Nové funkce (2026-04-21)
+- [x] Microsoft Clarity heatmapy integrovány (VITE_CLARITY_PROJECT_ID nastaveno)
+- [x] Petra AI Chatbot (globální floating widget na všech stránkách)
+- [x] Opraveny upsell přesměrování (/upsell2 → /upsell/2, /upsell3 → /upsell/3)
+- [x] Merge GitHub remote changes (feat: stats-snapshot endpoint)
+- [x] Stripe platba otestována end-to-end ($1 → Upsell 1 → Thank You)
+
+## Překlad webu — Multijazyčnost
+- [ ] i18n infrastruktura — react-i18next setup, jazykový přepínač v navigaci
+- [ ] Překlad do indonéštiny (Bahasa Indonesia) — Home, Order, ThankYou, Premium, Members, FAQ
+- [ ] Překlad do vietnamštiny (Tiếng Việt) — všechny stránky
+- [ ] Překlad do španělštiny (Español) — pro Mexico + latinskoamerický trh
+- [ ] Překlad do portugalštiny (Português) — pro Brazil
+- [ ] Přeložit email sekvence do 4 jazyků
+- [ ] SEO meta tagy pro každý jazyk (hreflang)

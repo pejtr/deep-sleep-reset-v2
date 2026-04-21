@@ -9,7 +9,7 @@
  * 3. Upsell 2 confirmation email
  */
 
-import type { ProductKey } from "./stripe/products";
+type ProductKey = "frontEnd" | "exitDiscount" | "oto1" | "oto2" | "oto3" | "upsell1" | "upsell2";
 
 interface SendEmailOptions {
   to: string;

@@ -34,12 +34,12 @@ export default function Upsell1() {
       if (data.url) {
         window.open(data.url, "_blank");
         toast.success("Redirecting to checkout...");
-        setTimeout(() => setLocation("/upsell2"), 1500);
+        setTimeout(() => setLocation("/upsell/2"), 1500);
       } else {
-        setLocation("/upsell2");
+        setLocation("/upsell/2");
       }
     } catch {
-      setLocation("/upsell2");
+      setLocation("/upsell/2");
     } finally {
       setLoading(false);
     }
@@ -51,7 +51,7 @@ export default function Upsell1() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ event: "upsell_decline", page: "upsell1", product: "oto1", ts: Date.now() }),
     }).catch(() => {});
-    setLocation("/upsell2");
+    setLocation("/upsell/2");
   };
 
   return (

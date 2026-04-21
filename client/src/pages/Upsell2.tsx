@@ -17,16 +17,16 @@ export default function Upsell2() {
       if (data.url) {
         window.location.href = data.url;
       } else {
-        setLocation("/upsell3");
+        setLocation("/upsell/3");
       }
     } catch {
-      setLocation("/upsell3");
+      setLocation("/upsell/3");
     } finally {
       setLoading(false);
     }
   };
 
-  const handleDecline = () => setLocation("/upsell3");
+  const handleDecline = () => setLocation("/upsell/3");
 
   return (
     <div className="min-h-screen stars-bg px-4 py-10">
