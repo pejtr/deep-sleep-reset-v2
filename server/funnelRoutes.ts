@@ -9,6 +9,7 @@ import { sendPurchaseConfirmation, addBrevoContact } from "./emailService";
 import { scheduleEmailSequence } from "./emailScheduler";
 import { invokeLLM } from "./_core/llm";
 import { contentHistory } from "../drizzle/schema";
+import { notifyMilestoneAfterSale } from "./milestoneNotifier";
 
 const router = Router();
 
@@ -245,10 +246,73 @@ router.post("/orders/upsell", async (req: Request, res: Response) => {
     console.error("Upsell error:", err);
     res.status(500).json({ error: "Server error" });
   }
-});
+})// ─── Gumroad Webhook ────────────────────────────────────────────────────────
+// Gumroad sends a POST to this URL when a sale is completed
+// Set this in Gumroad Dashboard → Settings → Advanced → Ping URL:
+// https://deepsleepquest.manus.space/api/gumroad/webhook
+router.post("/gumroad/webhook",
+  async (req: Request, res: Response) => {
+    try {
+      const db = await getDb();
+      const body = req.body;
 
-/// ─── Stripe Webhook ─────────────────────────────────────────────────────
-// Raw body is applied in index.ts via app.use("/api/stripe/webhook", express.raw(...))
+      // Gumroad sends form-encoded data
+      const email = body.email || body.purchase?.email || null;
+      const productPermalink = body.permalink || body.product_permalink || "fdtifc";
+      const sellerName = body.seller_name || "";
+      const price = parseFloat(body.price || "0") / 100; // Gumroad sends cents
+      const purchaseId = body.sale_id || body.id || null;
+
+      // Map Gumroad permalink to our product key
+      const permalinkToProduct: Record<string, string> = {
+        fdtifc: "tripwire",
+        ttrsd: "oto1",
+        cuhln: "oto2",
+        ubsxk: "oto3",
+      };
+      const productKey = (permalinkToProduct[productPermalink] || "tripwire") as ProductKey;
+
+      console.log(`[Gumroad] Sale received: ${productKey} | ${email} | $${price}`);
+
+      if (db) {
+        // Record as paid order
+        await db.insert(orders).values({
+          product: productKey,
+          amount: String(price),
+          status: "paid",
+          email: email || null,
+          stripeSessionId: purchaseId ? `gumroad_${purchaseId}` : null,
+        }).catch(() => {});
+
+        // Check milestone and notify owner
+        await notifyMilestoneAfterSale(db, {
+          product: productKey,
+          amount: String(price),
+          email,
+          chronotype: null,
+        });
+      }
+
+      // Send purchase confirmation email
+      if (email) {
+        await sendPurchaseConfirmation({
+          email,
+          name: sellerName || undefined,
+          product: productKey,
+          chronotype: "bear",
+          amount: price,
+        }).catch(() => {});
+      }
+
+      res.json({ success: true });
+    } catch (err) {
+      console.error("[Gumroad] Webhook error:", err);
+      res.status(500).json({ error: "Webhook error" });
+    }
+  }
+);
+
+/// ─── Stripe Webhook ─────────────────────────────────────────────────────────// Raw body is applied in index.ts via app.use("/api/stripe/webhook", express.raw(...))
 // BEFORE express.json() middleware - this ensures Buffer is preserved for signature verification
 router.post(
   "/stripe/webhook",
@@ -327,6 +391,14 @@ router.post(
 
         console.log(`[Email] Confirmation sent to ${customerEmail} for ${productKey}`);
       }
+
+      // Check and send milestone notification to owner
+      await notifyMilestoneAfterSale(db, {
+        product: productKey,
+        amount: String((session.amount_total || 100) / 100),
+        email: customerEmail,
+        chronotype: session.metadata?.chronotype || null,
+      });
     }
 
     res.json({ received: true });

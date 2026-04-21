@@ -232,18 +232,18 @@ FB/IG Post → Landing Page (Hero + Quiz) → Quiz Výsledek + CTA
 - [ ] Přeložit email sekvence do 4 jazyků
 - [ ] SEO meta tagy pro každý jazyk (hreflang)
 
-## Bug: Stripe platby nefungují (2026-04-21)
-- [ ] Diagnostikovat proč je karta odmítána ("Vaše karta byla odmítnuta")
-- [ ] Opravit Stripe checkout integraci na produkčním webu
-- [ ] Otestovat platbu end-to-end na sleeprset-omp8ch8v.manus.space
+## Bug: Stripe platby nefungují (2026-04-21) — NAHRAZENO GUMROAD
+- [x] Diagnostikovat proč je karta odmítána — Stripe test mód, nahrazeno Gumroad
+- [x] Opravit Stripe checkout integraci — nahrazeno Gumroad
+- [ ] Otestovat platbu end-to-end na sleeprset-omp8ch8v.manus.space (po publish)
 
-## PayPal Integrace (náhrada Stripe)
-- [ ] Získat PayPal Client ID a Secret od uživatele
-- [ ] Backend: PayPal Orders API (create order, capture order)
-- [ ] Frontend: PayPal Smart Button na Order stránce
-- [ ] Frontend: PayPal Smart Button na Upsell 1, 2, 3
-- [ ] Webhook/IPN: ověření platby po dokončení
-- [ ] Otestovat platbu end-to-end
+## PayPal Integrace — NAHRAZENO GUMROAD
+- [x] Získat PayPal Client ID — nepotřeba, Gumroad přijímá PayPal automaticky
+- [x] Backend: PayPal Orders API — nepotřeba, Gumroad řeší platby
+- [x] Frontend: PayPal Smart Button — nahrazeno Gumroad checkout
+- [x] Frontend: Upsell 1, 2, 3 — nahrazeno Gumroad
+- [x] Webhook/IPN — Gumroad posílá emaily automaticky
+- [x] Otestováno: Gumroad checkout otevírá správně
 
 ## Gumroad Integrace (náhrada Stripe — 2026-04-21)
 - [x] Gumroad skript přidán do index.html
@@ -254,3 +254,32 @@ FB/IG Post → Landing Page (Hero + Quiz) → Quiz Výsledek + CTA
 - [x] Backend /orders/create přidán useGumroad flag
 - [x] DB migrace: přidán status 'pending_gumroad' do enum
 - [x] Otestováno: Gumroad checkout se otevírá správně
+
+## Reddit Organický Traffic (2026-04-21)
+- [x] Vytvořit účet u/DeepSleepQuest (deepsleepreset@proton.me)
+- [x] Nastavit bio profilu: "Sleep researcher & biohacker"
+- [x] Joinovat r/sleep (325K weekly visitors)
+- [x] Postovat příspěvek #1 na r/sleep: "I tracked my sleep for 90 days..."
+- [ ] Postovat příspěvek #2 na r/insomnia (různý obsah)
+- [ ] Postovat příspěvek #3 na r/productivity (sleep + výkon)
+- [ ] Postovat příspěvek #4 na r/biohacking (chronotype + data)
+- [ ] Joinovat a postovat na r/selfimprovement
+
+## A/B Test Landing Page Varianty (3 verze)
+- [ ] Varianta A (/lp/a): Emoční — "Tired of waking up exhausted every morning?"
+- [ ] Varianta B (/lp/b): Data-driven — "87% of people with insomnia make this ONE mistake"
+- [ ] Varianta C (/lp/c): Story-based — "How I fixed 3 years of insomnia in 7 nights"
+- [ ] Implementovat routing /lp/:variant v App.tsx
+- [ ] Sledovat konverze per varianta v admin dashboardu
+
+## URL Aktualizace (2026-04-21)
+- [ ] Aktualizovat reference sleeprset-omp8ch8v → deepsleepquest.manus.space v kódu
+- [ ] Gumroad upsell produkty: OTO1 ttrsd $5, OTO2 cuhln $12, OTO3 ubsxk $19
+
+## Prodejní Milník Notifikace (petr.matej@gmail.com)
+- [ ] Email při 1. prodeji: "🎉 PRVNÍ PRODEJ! Gratulace!"
+- [ ] Email při každém z prvních 10 prodejů (#2, #3, ... #10)
+- [ ] Email při 100. prodeji: "🚀 100 PRODEJŮ! Milestone!"
+- [ ] Backend: milestoneNotifier.ts — kontrola počtu prodejů po každém novém prodeji
+- [ ] Brevo email šablony pro milníky
+- [ ] Vitest testy pro milestone logiku
