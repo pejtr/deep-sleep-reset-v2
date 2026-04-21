@@ -1,0 +1,150 @@
+{
+  "query": "SELECT id, title, category, status, readTimeMinutes FROM blog_posts ORDER BY createdAt DESC LIMIT 25;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 4VFjuiBDjCy66KV.dcd9224b4f92 --database RrG9k2uFQkqVyNWK8WEbxj --execute SELECT id, title, category, status, readTimeMinutes FROM blog_posts ORDER BY createdAt DESC LIMIT 25;",
+  "rows": [
+    {
+      "id": "20",
+      "title": "Blue Light and Sleep: How Screens Are Destroying Your Rest",
+      "category": "lifestyle",
+      "status": "published",
+      "readTimeMinutes": "6"
+    },
+    {
+      "id": "18",
+      "title": "Circadian Rhythm Reset: How to Fix Your Internal Clock",
+      "category": "sleep-science",
+      "status": "published",
+      "readTimeMinutes": "8"
+    },
+    {
+      "id": "15",
+      "title": "Sleep Restriction Therapy: The Counterintuitive Fix for Insomnia",
+      "category": "cbt-i",
+      "status": "published",
+      "readTimeMinutes": "7"
+    },
+    {
+      "id": "14",
+      "title": "The 4-7-8 Breathing Technique for Sleep: Does It Really Work?",
+      "category": "sleep-science",
+      "status": "published",
+      "readTimeMinutes": "7"
+    },
+    {
+      "id": "13",
+      "title": "How to Fall Asleep Fast: 12 Science-Backed Techniques",
+      "category": "insomnia",
+      "status": "published",
+      "readTimeMinutes": "8"
+    },
+    {
+      "id": "19",
+      "title": "Deep Sleep Stages Explained: Why REM and Slow-Wave Sleep Matter",
+      "category": "sleep-science",
+      "status": "published",
+      "readTimeMinutes": "8"
+    },
+    {
+      "id": "16",
+      "title": "How Cortisol Destroys Your Sleep (And How to Fix It)",
+      "category": "sleep-science",
+      "status": "published",
+      "readTimeMinutes": "7"
+    },
+    {
+      "id": "17",
+      "title": "Body Scan Meditation: The Technique That Melts Away Bedtime Tension",
+      "category": "mindfulness",
+      "status": "published",
+      "readTimeMinutes": "8"
+    },
+    {
+      "id": "11",
+      "title": "Yoga for Better Sleep: 7 Poses to Do Before Bed",
+      "category": "mindfulness",
+      "status": "published",
+      "readTimeMinutes": "12"
+    },
+    {
+      "id": "1",
+      "title": "CBT-I: The Gold Standard Insomnia Treatment You Haven’t Tried",
+      "category": "cbt-i",
+      "status": "published",
+      "readTimeMinutes": "8"
+    },
+    {
+      "id": "4",
+      "title": "Natural Sleep Remedies That Actually Work (No Melatonin Needed)",
+      "category": "lifestyle",
+      "status": "published",
+      "readTimeMinutes": "8"
+    },
+    {
+      "id": "7",
+      "title": "Mindfulness Meditation for Sleep: A Step-by-Step Guide",
+      "category": "mindfulness",
+      "status": "published",
+      "readTimeMinutes": "7"
+    },
+    {
+      "id": "5",
+      "title": "Waking Up at 3am Every Night? Here's What Your Body Is Telling You",
+      "category": "insomnia",
+      "status": "published",
+      "readTimeMinutes": "5"
+    },
+    {
+      "id": "12",
+      "title": "Journaling Before Bed: How Writing Quiets the Mind",
+      "category": "mindfulness",
+      "status": "published",
+      "readTimeMinutes": "10"
+    },
+    {
+      "id": "2",
+      "title": "Why You Can't Sleep at Night: 9 Surprising Causes",
+      "category": "insomnia",
+      "status": "published",
+      "readTimeMinutes": "7"
+    },
+    {
+      "id": "9",
+      "title": "Magnesium for Sleep: Does It Really Work?",
+      "category": "lifestyle",
+      "status": "published",
+      "readTimeMinutes": "10"
+    },
+    {
+      "id": "8",
+      "title": "How to Stop Overthinking at Night: 8 Proven Strategies",
+      "category": "anxiety",
+      "status": "published",
+      "readTimeMinutes": "8"
+    },
+    {
+      "id": "10",
+      "title": "Sleep and Anxiety: Breaking the Vicious Cycle",
+      "category": "anxiety",
+      "status": "published",
+      "readTimeMinutes": "10"
+    },
+    {
+      "id": "3",
+      "title": "Sleep Anxiety: How to Stop Racing Thoughts at Bedtime",
+      "category": "anxiety",
+      "status": "published",
+      "readTimeMinutes": "7"
+    },
+    {
+      "id": "6",
+      "title": "Sleep Hygiene: The Complete Guide to Better Sleep Habits",
+      "category": "lifestyle",
+      "status": "published",
+      "readTimeMinutes": "6"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\ttitle\tcategory\tstatus\treadTimeMinutes\n20\tBlue Light and Sleep: How Screens Are Destroying Your Rest\tlifestyle\tpublished\t6\n18\tCircadian Rhythm Reset: How to Fix Your Internal Clock\tsleep-science\tpublished\t8\n15\tSleep Restriction Therapy: The Counterintuitive Fix for Insomnia\tcbt-i\tpublished\t7\n14\tThe 4-7-8 Breathing Technique for Sleep: Does It Really Work?\tsleep-science\tpublished\t7\n13\tHow to Fall Asleep Fast: 12 Science-Backed Techniques\tinsomnia\tpublished\t8\n19\tDeep Sleep Stages Explained: Why REM and Slow-Wave Sleep Matter\tsleep-science\tpublished\t8\n16\tHow Cortisol Destroys Your Sleep (And How to Fix It)\tsleep-science\tpublished\t7\n17\tBody Scan Meditation: The Technique That Melts Away Bedtime Tension\tmindfulness\tpublished\t8\n11\tYoga for Better Sleep: 7 Poses to Do Before Bed\tmindfulness\tpublished\t12\n1\tCBT-I: The Gold Standard Insomnia Treatment You Haven’t Tried\tcbt-i\tpublished\t8\n4\tNatural Sleep Remedies That Actually Work (No Melatonin Needed)\tlifestyle\tpublished\t8\n7\tMindfulness Meditation for Sleep: A Step-by-Step Guide\tmindfulness\tpublished\t7\n5\tWaking Up at 3am Every Night? Here's What Your Body Is Telling You\tinsomnia\tpublished\t5\n12\tJournaling Before Bed: How Writing Quiets the Mind\tmindfulness\tpublished\t10\n2\tWhy You Can't Sleep at Night: 9 Surprising Causes\tinsomnia\tpublished\t7\n9\tMagnesium for Sleep: Does It Really Work?\tlifestyle\tpublished\t10\n8\tHow to Stop Overthinking at Night: 8 Proven Strategies\tanxiety\tpublished\t8\n10\tSleep and Anxiety: Breaking the Vicious Cycle\tanxiety\tpublished\t10\n3\tSleep Anxiety: How to Stop Racing Thoughts at Bedtime\tanxiety\tpublished\t7\n6\tSleep Hygiene: The Complete Guide to Better Sleep Habits\tlifestyle\tpublished\t6\n",
+  "stderr": "",
+  "execution_time_ms": 61
+}

@@ -1,0 +1,1 @@
+ALTER TABLE `ab_events` MODIFY COLUMN `variant` enum('quiz','chatbot','social','btn_amber','btn_green','btn_blue') NOT NULL;

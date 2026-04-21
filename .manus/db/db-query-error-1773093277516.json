@@ -1,0 +1,8 @@
+{
+  "query": "UPDATE users SET role = 'admin' WHERE open_id = (SELECT OWNER_OPEN_ID FROM (SELECT @OWNER_OPEN_ID := @@global.OWNER_OPEN_ID) t) OR 1=1 LIMIT 0;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 4VFjuiBDjCy66KV.dcd9224b4f92 --database RrG9k2uFQkqVyNWK8WEbxj --execute UPDATE users SET role = 'admin' WHERE open_id = (SELECT OWNER_OPEN_ID FROM (SELECT @OWNER_OPEN_ID := @@global.OWNER_OPEN_ID) t) OR 1=1 LIMIT 0;",
+  "returncode": 1,
+  "logs": [
+    "ERROR 1054 (42S22) at line 1: Unknown column 'open_id' in 'where clause'"
+  ]
+}

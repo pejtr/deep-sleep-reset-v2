@@ -1,0 +1,23 @@
+CREATE TABLE `blog_posts` (
+	`id` int AUTO_INCREMENT NOT NULL,
+	`slug` varchar(255) NOT NULL,
+	`title` varchar(255) NOT NULL,
+	`metaDescription` varchar(500),
+	`focusKeyword` varchar(128),
+	`secondaryKeywords` text,
+	`body` text NOT NULL,
+	`excerpt` text,
+	`heroImageUrl` text,
+	`heroImageAlt` varchar(255),
+	`author` varchar(128) NOT NULL DEFAULT 'Deep Sleep Reset Team',
+	`category` varchar(64) NOT NULL DEFAULT 'sleep-science',
+	`readTimeMinutes` int NOT NULL DEFAULT 5,
+	`status` enum('draft','published','archived') NOT NULL DEFAULT 'draft',
+	`featured` int NOT NULL DEFAULT 0,
+	`faqSchema` text,
+	`publishedAt` timestamp,
+	`createdAt` timestamp NOT NULL DEFAULT (now()),
+	`updatedAt` timestamp NOT NULL DEFAULT (now()) ON UPDATE CURRENT_TIMESTAMP,
+	CONSTRAINT `blog_posts_id` PRIMARY KEY(`id`),
+	CONSTRAINT `blog_posts_slug_unique` UNIQUE(`slug`)
+);

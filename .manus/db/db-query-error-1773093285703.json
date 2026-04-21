@@ -1,0 +1,19 @@
+{
+  "query": "SELECT column_name FROM information_schema.columns WHERE table_name = 'users' ORDER BY ordinal_position; SELECT id, open_id, name, role FROM users LIMIT 10;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 4VFjuiBDjCy66KV.dcd9224b4f92 --database RrG9k2uFQkqVyNWK8WEbxj --execute SELECT column_name FROM information_schema.columns WHERE table_name = 'users' ORDER BY ordinal_position; SELECT id, open_id, name, role FROM users LIMIT 10;",
+  "returncode": 1,
+  "logs": [
+    "column_name",
+    "id",
+    "openId",
+    "name",
+    "email",
+    "loginMethod",
+    "role",
+    "createdAt",
+    "updatedAt",
+    "lastSignedIn",
+    "stripeCustomerId",
+    "ERROR 1054 (42S22) at line 1: Unknown column 'open_id' in 'field list'"
+  ]
+}

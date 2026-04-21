@@ -1,0 +1,1 @@
+ALTER TABLE `ab_events` ADD `metadata` varchar(64);
