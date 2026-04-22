@@ -1,9 +1,11 @@
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { useLocation } from "wouter";
 import { toast } from "sonner";
 import BehaviorAnalyticsPanel from "@/components/BehaviorAnalyticsPanel";
 import { AIChatBox, type Message } from "@/components/AIChatBox";
+import { trpc } from "@/lib/trpc";
+import PetraChatAnalytics from "@/components/PetraChatAnalytics";
 
 interface Stats {
   totalRevenue: number;
@@ -27,7 +29,7 @@ export default function Admin() {
   const [, setLocation] = useLocation();
   const [stats, setStats] = useState<Stats | null>(null);
   const [statsLoading, setStatsLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<"overview" | "funnel" | "abtests" | "orders" | "behavior" | "subscriptions" | "content">("overview");
+  const [activeTab, setActiveTab] = useState<"overview" | "funnel" | "abtests" | "orders" | "behavior" | "subscriptions" | "content" | "chatbot">("overview");
   const [runningAnalysis, setRunningAnalysis] = useState(false);
   const [contentHistory, setContentHistory] = useState<Array<{id: number; contentType: string; prompt: string; content: string; generatedBy: string; createdAt: string}>>([]);
   const [historyLoading, setHistoryLoading] = useState(false);
@@ -95,6 +97,7 @@ export default function Admin() {
     { id: "behavior", label: "Behavior" },
     { id: "subscriptions", label: "💎 Subscriptions" },
     { id: "content", label: "🤖 AI Content" },
+    { id: "chatbot", label: "🌙 Petra Chat" },
   ] as const;
 
   return (
@@ -511,6 +514,9 @@ export default function Admin() {
             </div>
           </div>
         )}
+
+        {/* Petra Chat Analytics Tab */}
+        {activeTab === "chatbot" && <PetraChatAnalytics />}
 
         {/* AI Content Generator Tab */}
         {activeTab === "content" && (

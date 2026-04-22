@@ -321,3 +321,20 @@ FB/IG Post → Landing Page (Hero + Quiz) → Quiz Výsledek + CTA
 - [x] 5 SEO optimalizovaných článků (sleep niche, long-tail keywords)
 - [x] Dynamická sitemap.xml zahrnující blog posty
 - [x] Bing Webmaster Tools registrace (meta tag přidán, verifikace čeká na deploy)
+
+## Petra AI Chatbot — Kompletace (2026-04-22)
+- [x] DB: chat_sessions + chat_messages tabulky (MySQL)
+- [x] Backend: persistentní ukládání konverzací do DB (graceful degradation)
+- [x] Backend: chronotyp detekce z textu konverzace (lion/bear/wolf/dolphin)
+- [x] Backend: lead capture — email uložení do chat_sessions
+- [x] Backend: markConverted — sledování konverzí z chatu
+- [x] Backend: chatbot.getAnalytics — admin přehled (sessions, messages, conversions, chronotypes)
+- [x] PETRA_SYSTEM_PROMPT — kompletní znalostní báze (4 chronotypy, protokoly, linky)
+- [x] Frontend: email capture flow (po 4 zprávách)
+- [x] Frontend: chronotyp badge v hlavičce chatu
+- [x] Frontend: typing indicator (3 tečky animace)
+- [x] Frontend: quick replies při prvním otevření
+- [x] Frontend: CTA card po 6+ zprávách (quiz link)
+- [x] Frontend: renderMessageContent — [LINK:/path] → klikatelná tlačítka
+- [x] Admin: Petra Chat tab v Admin dashboardu (PetraChatAnalytics.tsx)
+- [x] Vitest: chatbot.test.ts — 116/116 testů prochází

@@ -156,6 +156,34 @@ export const contentHistory = mysqlTable("content_history", {
 export type ContentHistory = typeof contentHistory.$inferSelect;
 export type InsertContentHistory = typeof contentHistory.$inferInsert;
 
+// Chat sessions — Petra AI Sleep Coach conversations
+export const chatSessions = mysqlTable("chat_sessions", {
+  id: int("id").autoincrement().primaryKey(),
+  sessionId: varchar("sessionId", { length: 128 }).notNull(), // browser session
+  email: varchar("email", { length: 320 }), // captured mid-chat
+  chronotype: mysqlEnum("chronotype", ["lion", "bear", "wolf", "dolphin"]), // detected from chat
+  messageCount: int("message_count").default(0).notNull(),
+  converted: boolean("converted").default(false).notNull(), // clicked CTA to /quiz or /order
+  source: varchar("source", { length: 50 }).default("organic"), // page where chat started
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+export type ChatSession = typeof chatSessions.$inferSelect;
+export type InsertChatSession = typeof chatSessions.$inferInsert;
+
+// Chat messages — individual messages in each session
+export const chatMessages = mysqlTable("chat_messages", {
+  id: int("id").autoincrement().primaryKey(),
+  sessionId: varchar("sessionId", { length: 128 }).notNull(),
+  role: mysqlEnum("role", ["user", "assistant"]).notNull(),
+  content: text("content").notNull(),
+  detectedChronotype: mysqlEnum("detectedChronotype", ["lion", "bear", "wolf", "dolphin"]), // if AI detected type in this message
+  ctaShown: boolean("cta_shown").default(false).notNull(), // was CTA button shown after this message
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+export type ChatMessage = typeof chatMessages.$inferSelect;
+export type InsertChatMessage = typeof chatMessages.$inferInsert;
+
 // API Keys — for external marketing system access (Zapier, Make.com, n8n)
 export const apiKeys = mysqlTable("api_keys", {
   id: int("id").autoincrement().primaryKey(),

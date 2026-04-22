@@ -1,28 +1,87 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { trpc } from "@/lib/trpc";
-import { MessageCircle, X, Send, Loader2, Moon } from "lucide-react";
+import { MessageCircle, X, Send, Moon, ExternalLink } from "lucide-react";
+import { Link } from "wouter";
 
 interface Message {
   role: "user" | "assistant";
   content: string;
 }
 
-const WELCOME_MESSAGE: Message = {
+// Parse [LINK:/path] — Label into clickable inline buttons
+function renderMessageContent(content: string) {
+  const linkRegex = /\[LINK:([^\]]+)\](?:\s*[—-]\s*([^\n[]+))?/g;
+  const parts: React.ReactNode[] = [];
+  let lastIndex = 0;
+  let match: RegExpExecArray | null;
+  let key = 0;
+  while ((match = linkRegex.exec(content)) !== null) {
+    const before = content.slice(lastIndex, match.index);
+    if (before) parts.push(<span key={key++}>{before}</span>);
+    const path = match[1];
+    const label = match[2]?.trim() || path;
+    parts.push(
+      <Link key={key++} href={path}
+        className="inline-flex items-center gap-1 mt-1 px-2 py-0.5 rounded-full bg-[oklch(0.65_0.22_280/0.2)] border border-[oklch(0.65_0.22_280/0.5)] text-[oklch(0.75_0.15_280)] text-xs hover:bg-[oklch(0.65_0.22_280/0.35)] transition-colors">
+        <ExternalLink size={10} />{label}
+      </Link>
+    );
+    lastIndex = match.index + match[0].length;
+  }
+  const remaining = content.slice(lastIndex);
+  if (remaining) parts.push(<span key={key++}>{remaining}</span>);
+  return parts.length > 0 ? <>{parts}</> : <>{content}</>;
+}
+
+function getSessionId(): string {
+  const key = "petra_session_id";
+  let id = sessionStorage.getItem(key);
+  if (!id) {
+    id = `petra_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`;
+    sessionStorage.setItem(key, id);
+  }
+  return id;
+}
+
+const INITIAL_MESSAGE: Message = {
   role: "assistant",
-  content: "Hi! I'm Petra, your sleep coach 🌙 I'm here to help you sleep better. What's keeping you up at night?",
+  content: "Hi! I'm Petra \uD83C\uDF19 Your AI sleep coach. What's your biggest sleep challenge right now?",
+};
+
+const QUICK_REPLIES = [
+  "I can't fall asleep",
+  "I wake up at night",
+  "What's a chronotype?",
+  "Tell me about the $1 guide",
+];
+
+const CHRONOTYPE_BADGE: Record<string, string> = {
+  lion: "text-amber-400 border-amber-400/40 bg-amber-400/10",
+  bear: "text-blue-400 border-blue-400/40 bg-blue-400/10",
+  wolf: "text-purple-400 border-purple-400/40 bg-purple-400/10",
+  dolphin: "text-cyan-400 border-cyan-400/40 bg-cyan-400/10",
+};
+const CHRONOTYPE_EMOJI: Record<string, string> = {
+  lion: "\uD83E\uDD81", bear: "\uD83D\uDC3B", wolf: "\uD83D\uDC3A", dolphin: "\uD83D\uDC2C",
 };
 
 export default function PetraChatbot() {
   const [isOpen, setIsOpen] = useState(false);
-  const [messages, setMessages] = useState<Message[]>([WELCOME_MESSAGE]);
-  const [inputValue, setInputValue] = useState("");
   const [hasNewMessage, setHasNewMessage] = useState(false);
+  const [messages, setMessages] = useState<Message[]>([INITIAL_MESSAGE]);
+  const [inputValue, setInputValue] = useState("");
+  const [detectedChronotype, setDetectedChronotype] = useState<string | null>(null);
+  const [showEmailCapture, setShowEmailCapture] = useState(false);
+  const [emailInput, setEmailInput] = useState("");
+  const [emailCaptured, setEmailCaptured] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
+  const sessionId = useRef(getSessionId());
 
   const sendMessageMutation = trpc.chatbot.sendMessage.useMutation({
     onSuccess: (data) => {
       setMessages(prev => [...prev, { role: "assistant" as const, content: String(data.reply) }]);
+      if (data.detectedChronotype) setDetectedChronotype(data.detectedChronotype);
     },
     onError: () => {
       setMessages(prev => [...prev, {
@@ -32,44 +91,68 @@ export default function PetraChatbot() {
     },
   });
 
+  const captureEmailMutation = trpc.chatbot.captureEmail.useMutation();
+  const markConvertedMutation = trpc.chatbot.markConverted.useMutation();
+
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  // Show notification bubble after 15s
+  // Show notification bubble after 20s
   useEffect(() => {
-    const timer = setTimeout(() => {
-      if (!isOpen) setHasNewMessage(true);
-    }, 15000);
+    const timer = setTimeout(() => { if (!isOpen) setHasNewMessage(true); }, 20000);
     return () => clearTimeout(timer);
   }, [isOpen]);
 
-  const handleSend = () => {
-    const text = inputValue.trim();
-    if (!text || sendMessageMutation.isPending) return;
+  // Show email capture after 4 user messages
+  useEffect(() => {
+    const userMsgs = messages.filter(m => m.role === "user").length;
+    if (userMsgs >= 4 && !emailCaptured && !showEmailCapture) {
+      setTimeout(() => setShowEmailCapture(true), 1000);
+    }
+  }, [messages, emailCaptured, showEmailCapture]);
 
-    const newUserMessage: Message = { role: "user", content: text };
-    const updatedMessages = [...messages, newUserMessage];
-    setMessages(updatedMessages);
+  const handleSend = useCallback((text?: string) => {
+    const content = (text ?? inputValue).trim();
+    if (!content || sendMessageMutation.isPending) return;
     setInputValue("");
-
+    const userMsg: Message = { role: "user", content };
+    setMessages(prev => [...prev, userMsg]);
     sendMessageMutation.mutate({
-      messages: updatedMessages.filter(m => m.role !== "assistant" || m !== WELCOME_MESSAGE).slice(-10),
-      userMessage: text,
+      messages: messages.map(m => ({ role: m.role, content: m.content })).slice(-10),
+      userMessage: content,
+      sessionId: sessionId.current,
+      source: window.location.pathname,
     });
-  };
+  }, [inputValue, messages, sendMessageMutation]);
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault();
-      handleSend();
-    }
+    if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSend(); }
   };
 
   const handleOpen = () => {
     setIsOpen(true);
     setHasNewMessage(false);
     setTimeout(() => inputRef.current?.focus(), 100);
+  };
+
+  const handleEmailCapture = async () => {
+    if (!emailInput.includes("@")) return;
+    await captureEmailMutation.mutateAsync({
+      email: emailInput,
+      sessionId: sessionId.current,
+      chronotype: detectedChronotype as "lion" | "bear" | "wolf" | "dolphin" | undefined,
+    });
+    setEmailCaptured(true);
+    setShowEmailCapture(false);
+    setMessages(prev => [...prev, {
+      role: "assistant",
+      content: `Perfect! I'll send your personalized sleep tips to ${emailInput} \uD83D\uDC8C Now, let's keep working on your sleep...`,
+    }]);
+  };
+
+  const handleCTAClick = () => {
+    markConvertedMutation.mutate({ sessionId: sessionId.current });
   };
 
   return (
@@ -104,13 +187,18 @@ export default function PetraChatbot() {
             <div className="w-9 h-9 rounded-full bg-white/20 flex items-center justify-center text-lg">
               🌙
             </div>
-            <div>
+            <div className="flex-1 min-w-0">
               <p className="text-white font-bold text-sm">Petra</p>
               <p className="text-white/70 text-xs">AI Sleep Coach · Online</p>
             </div>
+            {detectedChronotype && (
+              <span className={`text-xs px-2 py-0.5 rounded-full border font-medium ${CHRONOTYPE_BADGE[detectedChronotype]}`}>
+                {CHRONOTYPE_EMOJI[detectedChronotype]} {detectedChronotype.charAt(0).toUpperCase() + detectedChronotype.slice(1)}
+              </span>
+            )}
             <button
               onClick={() => setIsOpen(false)}
-              className="ml-auto text-white/70 hover:text-white transition-colors"
+              className="text-white/70 hover:text-white transition-colors ml-1"
             >
               <X size={18} />
             </button>
@@ -132,7 +220,7 @@ export default function PetraChatbot() {
                       : "bg-[oklch(0.15_0.025_265)] text-[oklch(0.85_0.03_265)] rounded-bl-sm border border-[oklch(0.22_0.03_265)]"
                   }`}
                 >
-                  {msg.content}
+                  {msg.role === "assistant" ? renderMessageContent(msg.content) : msg.content}
                 </div>
               </div>
             ))}
@@ -141,8 +229,10 @@ export default function PetraChatbot() {
                 <div className="w-7 h-7 rounded-full bg-gradient-to-br from-[oklch(0.65_0.22_280)] to-[oklch(0.55_0.22_290)] flex items-center justify-center text-sm mr-2 flex-shrink-0">
                   <Moon size={14} className="text-white" />
                 </div>
-                <div className="bg-[oklch(0.15_0.025_265)] border border-[oklch(0.22_0.03_265)] rounded-2xl rounded-bl-sm px-3 py-2">
-                  <Loader2 size={16} className="text-[oklch(0.65_0.22_280)] animate-spin" />
+                <div className="bg-[oklch(0.15_0.025_265)] border border-[oklch(0.22_0.03_265)] rounded-2xl rounded-bl-sm px-4 py-2.5 flex gap-1 items-center">
+                  <span className="w-1.5 h-1.5 bg-[oklch(0.65_0.22_280)] rounded-full animate-bounce" style={{ animationDelay: "0ms" }} />
+                  <span className="w-1.5 h-1.5 bg-[oklch(0.65_0.22_280)] rounded-full animate-bounce" style={{ animationDelay: "150ms" }} />
+                  <span className="w-1.5 h-1.5 bg-[oklch(0.65_0.22_280)] rounded-full animate-bounce" style={{ animationDelay: "300ms" }} />
                 </div>
               </div>
             )}
@@ -152,14 +242,10 @@ export default function PetraChatbot() {
           {/* Quick replies */}
           {messages.length === 1 && (
             <div className="px-3 pb-2 flex flex-wrap gap-1.5">
-              {["I can't fall asleep", "I wake up at night", "What's a chronotype?", "Tell me about the $1 guide"].map(q => (
+              {QUICK_REPLIES.map(q => (
                 <button
                   key={q}
-                  onClick={() => {
-                    setInputValue(q);
-                    setTimeout(() => handleSend(), 0);
-                    setInputValue(q);
-                  }}
+                  onClick={() => handleSend(q)}
                   className="text-xs px-2.5 py-1 rounded-full bg-[oklch(0.15_0.025_265)] border border-[oklch(0.65_0.22_280/0.4)] text-[oklch(0.75_0.04_265)] hover:border-[oklch(0.65_0.22_280)] hover:text-white transition-colors"
                 >
                   {q}
@@ -181,7 +267,7 @@ export default function PetraChatbot() {
               style={{ maxHeight: "80px" }}
             />
             <button
-              onClick={handleSend}
+              onClick={() => handleSend()}
               disabled={!inputValue.trim() || sendMessageMutation.isPending}
               className="w-9 h-9 rounded-xl bg-gradient-to-br from-[oklch(0.65_0.22_280)] to-[oklch(0.55_0.22_290)] text-white flex items-center justify-center disabled:opacity-40 hover:scale-105 transition-all flex-shrink-0"
             >
