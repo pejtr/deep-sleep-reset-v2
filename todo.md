@@ -338,3 +338,11 @@ FB/IG Post → Landing Page (Hero + Quiz) → Quiz Výsledek + CTA
 - [x] Frontend: renderMessageContent — [LINK:/path] → klikatelná tlačítka
 - [x] Admin: Petra Chat tab v Admin dashboardu (PetraChatAnalytics.tsx)
 - [x] Vitest: chatbot.test.ts — 116/116 testů prochází
+
+## 7 Strategických Kroků (2026-04-22)
+- [x] Krok 1: Zkrátit quiz na 3 otázky (Quiz.tsx)
+- [x] Krok 2: Odeslat sitemap do Google Search Console (instrukce připraveny)- [x] Krok 3: Google Ads Search kampaně (instrukce připraveny)
+- [x] Krok 4: Reddit post #2 na r/insomnia (instrukce připraveny)
+- [x] Krok 5: A/B monitoring cron — automatické vyhodnocení po 200 impresích (nightlyAnalyzer.ts)
+- [x] Krok 6: Brevo ověřeno — API klíč aktivní, 5 emailů ve frontě pro test@example.com (testovací data)
+- [x] Krok 7: Auto-scaling logika — notifikace při 10 prodejích implementována (nightlyAnalyzer.ts)

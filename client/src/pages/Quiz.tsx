@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 
-// ─── Neuro-marketing: Questions use curiosity + self-discovery framing ────────
+// ─── Neuro-marketing: 3 high-signal questions = 60s completion, max conversion ──
+// Reduced from 5 to 3 questions (2026-04-22) — quiz completion rate was 0.5%, target 15%+
 const QUESTIONS = [
   {
     id: 1,
@@ -27,19 +28,8 @@ const QUESTIONS = [
   },
   {
     id: 3,
-    question: "When is your mental performance at its peak?",
-    subtext: "When do you do your best thinking, writing, or problem-solving?",
-    options: [
-      { label: "Early morning (6am–10am)", value: "lion" },
-      { label: "Mid-morning (9am–12pm)", value: "bear" },
-      { label: "Evening (6pm–10pm)", value: "wolf" },
-      { label: "Unpredictably — it changes day to day", value: "dolphin" },
-    ],
-  },
-  {
-    id: 4,
     question: "How would you describe your sleep quality?",
-    subtext: "Not how long you sleep — but how deeply.",
+    subtext: "Not how long — but how deeply. This is the #1 predictor of your type.",
     options: [
       { label: "Deep and solid — almost nothing wakes me", value: "lion" },
       { label: "Generally good, occasional wake-ups", value: "bear" },
@@ -47,25 +37,12 @@ const QUESTIONS = [
       { label: "Light — I wake from any sound or thought", value: "dolphin" },
     ],
   },
-  {
-    id: 5,
-    question: "Sunday night before a work week — how do you feel?",
-    subtext: "This reveals your relationship with your sleep schedule.",
-    options: [
-      { label: "Fine — I'll be up early and ready", value: "lion" },
-      { label: "Slightly anxious but manageable", value: "bear" },
-      { label: "Energized — I don't want to sleep yet", value: "wolf" },
-      { label: "Anxious — I'm already worried I won't sleep", value: "dolphin" },
-    ],
-  },
 ];
 
 // ─── Behavioral: Progress labels create completion drive ──────────────────────
 const PROGRESS_LABELS = [
   "Just starting...",
-  "Getting warmer...",
-  "More than halfway!",
-  "Almost there...",
+  "Almost there!",
   "Final question!",
 ];
 

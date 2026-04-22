@@ -124,13 +124,28 @@ export async function runNightlyAnalysis(): Promise<NightlyReport> {
       clicks: parseInt(row.clicks || "0"),
     };
   }
-  // Find highest CTR variant
+  // Find highest CTR variant with minimum 200 impressions (statistically significant)
   let bestCTR = 0;
+  const abWinners: string[] = [];
+  const abTestsByName: Record<string, Array<{ variant: string; ctr: number; impressions: number }>> = {};
   for (const [key, data] of Object.entries(abByVariant)) {
+    const [testName, variant] = key.split(":");
     const ctr = data.impressions > 0 ? data.clicks / data.impressions : 0;
-    if (ctr > bestCTR && data.impressions >= 10) {
+    if (!abTestsByName[testName]) abTestsByName[testName] = [];
+    abTestsByName[testName].push({ variant, ctr, impressions: data.impressions });
+    if (ctr > bestCTR && data.impressions >= 200) {
       bestCTR = ctr;
       abTestWinner = key;
+    }
+  }
+  // Check if any test has a clear winner (200+ impressions AND 1.5x CTR of runner-up)
+  for (const [testName, variants] of Object.entries(abTestsByName)) {
+    const qualified = variants.filter(v => v.impressions >= 200);
+    if (qualified.length >= 2) {
+      const sorted = qualified.sort((a, b) => b.ctr - a.ctr);
+      if (sorted[0].ctr >= sorted[1].ctr * 1.5) {
+        abWinners.push(`${testName}:${sorted[0].variant} (CTR ${(sorted[0].ctr * 100).toFixed(1)}% vs ${(sorted[1].ctr * 100).toFixed(1)}%)`);
+      }
     }
   }
 
@@ -248,6 +263,39 @@ Respond in JSON format:
     abTestWinner,
     estimatedMonthlyRevenue,
   };
+
+  // Auto-scaling check: notify owner when 10+ paid orders reached
+  const SCALE_THRESHOLD = 10;
+  if (tripwire >= SCALE_THRESHOLD) {
+    await notifyOwner({
+      title: `SCALE SIGNAL — ${tripwire} Sales Reached!`,
+      content: `**Deep Sleep Reset hit ${tripwire} paid orders!**
+
+Current tripwire CVR: ${tripwireRate.toFixed(1)}%
+Estimated monthly revenue: $${estimatedMonthlyRevenue.toFixed(0)}
+
+**Action required:** Double your daily ad budget on winning channels.
+
+A/B winners confirmed: ${abWinners.length > 0 ? abWinners.join(", ") : "still collecting data (need 200+ impressions per variant)"}
+
+Next milestone: 50 sales = scale 5x budget.`
+    });
+    console.log(`[Auto-Scale] TRIGGERED at ${tripwire} sales — owner notified`);
+  }
+
+  // Notify about A/B winners if any confirmed today
+  if (abWinners.length > 0) {
+    await notifyOwner({
+      title: `A/B Winner Confirmed: ${abWinners.join(", ")}`,
+      content: `**Statistical significance reached (200+ impressions).**
+
+Winners:
+${abWinners.map((w, i) => `${i + 1}. ${w}`).join("\n")}
+
+**Action:** Pause losing variants, allocate 100% traffic to winners.`
+    });
+    console.log(`[A/B Monitor] Winners confirmed: ${abWinners.join(", ")}`);
+  }
 
   // Send report to owner via notification
   await sendNightlyReport(report);
