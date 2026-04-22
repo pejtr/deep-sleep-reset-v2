@@ -1,80 +1,118 @@
-/*
- * Sticky Mobile CTA Bar
- * Design: Midnight Noir — fixed bottom bar, visible only on mobile/tablet
- * Appears after user scrolls past the hero section (~600px)
- * Hides when user is near the main offer section to avoid overlap
- * i18n: Strings from useLanguage()
- */
+import { useState, useEffect } from "react";
 
-import { useEffect, useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { ArrowRight } from "lucide-react";
-import { useLanguage } from "@/contexts/LanguageContext";
-import { useLocation } from "wouter";
+// ─── Sticky Mobile CTA Bar ────────────────────────────────────────────────────
+// Performance: Mobile users often miss the main CTA when scrolling.
+// This sticky bar appears after 3s or 400px scroll, dramatically increasing mobile CVR.
+// Updated 2026-04-22: Added urgency countdown, personalized price display, dismiss button
 
-export default function StickyMobileCTA() {
-  const { t } = useLanguage();
-  const [, navigate] = useLocation();
-  const [isVisible, setIsVisible] = useState(false);
+interface StickyMobileCTAProps {
+  label: string;
+  subtext?: string;
+  price?: string;
+  originalPrice?: string;
+  onClick: () => void;
+  countdown?: string; // Optional countdown display
+  countdownExpired?: boolean;
+}
+
+export default function StickyMobileCTA({
+  label,
+  subtext,
+  price,
+  originalPrice,
+  onClick,
+  countdown,
+  countdownExpired,
+}: StickyMobileCTAProps) {
+  const [visible, setVisible] = useState(false);
+  const [dismissed, setDismissed] = useState(false);
 
   useEffect(() => {
+    if (dismissed) return;
+
+    // Show after 3 seconds
+    const timer = setTimeout(() => setVisible(true), 3000);
+
+    // Also show on scroll
     const handleScroll = () => {
-      const scrollY = window.scrollY;
-      const viewportHeight = window.innerHeight;
-      const docHeight = document.documentElement.scrollHeight;
-
-      // Show after scrolling past hero (~600px)
-      // Hide when near bottom (last 20% of page — near offer/footer)
-      const pastHero = scrollY > 600;
-      const nearBottom = scrollY + viewportHeight > docHeight * 0.8;
-
-      setIsVisible(pastHero && !nearBottom);
+      if (window.scrollY > 400) setVisible(true);
     };
-
     window.addEventListener("scroll", handleScroll, { passive: true });
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
 
-  // Only show on mobile/tablet — hidden on lg+ via CSS
+    return () => {
+      clearTimeout(timer);
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, [dismissed]);
+
+  if (!visible || dismissed) return null;
+
   return (
-    <AnimatePresence>
-      {isVisible && (
-        <motion.div
-          initial={{ y: 100, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          exit={{ y: 100, opacity: 0 }}
-          transition={{ duration: 0.3, ease: "easeOut" }}
-          className="fixed bottom-0 left-0 right-0 z-50 lg:hidden"
-        >
-          {/* Top shadow gradient */}
-          <div className="h-6 bg-gradient-to-t from-[#0a0e1a] to-transparent" />
-
-          <div className="bg-[#0a0e1a]/95 backdrop-blur-md border-t border-amber/10 px-4 pb-[env(safe-area-inset-bottom,8px)] pt-3">
-            <div className="flex items-center gap-3">
-              {/* Price info */}
-              <div className="flex-1 min-w-0">
-                <p className="text-foreground/90 font-semibold text-sm truncate">
-                  7-Night Deep Sleep Reset
-                </p>
-                <div className="flex items-center gap-2">
-                  <span className="text-amber font-bold text-lg">$5</span>
-                  <span className="text-foreground/30 line-through text-xs">$47</span>
-                  <span className="text-green-400/80 text-xs font-medium">89% OFF</span>
-                </div>
-              </div>
-
-              {/* CTA Button */}
-              <button
-                onClick={() => navigate("/order")}
-                className="shrink-0 inline-flex items-center gap-2 bg-amber hover:bg-amber-light text-background font-bold px-5 py-3 rounded-xl text-sm transition-all duration-300 active:scale-95"
-              >
-                {t.stickyCta.text}{t.stickyCta.price}
-                <ArrowRight className="w-4 h-4" />
-              </button>
-            </div>
+    // Only visible on mobile (md:hidden)
+    <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 px-3 pb-4 pt-2"
+      style={{
+        background: "linear-gradient(to top, oklch(0.07 0.02 265) 60%, transparent)",
+      }}
+    >
+      <div
+        className="rounded-2xl overflow-hidden shadow-2xl"
+        style={{
+          background: "oklch(0.12 0.025 265 / 0.98)",
+          border: "1px solid oklch(0.65 0.22 280 / 0.4)",
+          backdropFilter: "blur(20px)",
+        }}
+      >
+        {/* Urgency strip */}
+        {countdown && !countdownExpired && (
+          <div
+            className="text-center py-1.5 text-xs font-bold"
+            style={{ background: "oklch(0.65 0.22 280 / 0.15)", color: "oklch(0.85 0.15 280)" }}
+          >
+            ⏰ Offer expires in <span className="font-mono animate-countdown-tick">{countdown}</span>
           </div>
-        </motion.div>
-      )}
-    </AnimatePresence>
+        )}
+        {countdownExpired && (
+          <div className="text-center py-1.5 text-xs font-bold bg-red-900/30 text-red-400">
+            ⚠️ Offer expired — standard pricing applies
+          </div>
+        )}
+
+        <div className="flex items-center gap-3 px-4 py-3">
+          {/* Price */}
+          {price && (
+            <div className="flex-shrink-0 text-center">
+              {originalPrice && (
+                <p className="text-[10px] text-[oklch(0.45_0.03_265)] line-through">{originalPrice}</p>
+              )}
+              <p className="text-2xl font-black text-white leading-none">{price}</p>
+            </div>
+          )}
+
+          {/* CTA */}
+          <button
+            onClick={onClick}
+            className="flex-1 py-3.5 rounded-xl font-black text-sm text-white cta-shimmer"
+            style={{
+              background: "linear-gradient(135deg, oklch(0.65 0.22 280), oklch(0.55 0.22 295))",
+              boxShadow: "0 4px 20px oklch(0.65 0.22 280 / 0.4)",
+            }}
+          >
+            {label}
+          </button>
+
+          {/* Dismiss */}
+          <button
+            onClick={() => setDismissed(true)}
+            className="flex-shrink-0 text-[oklch(0.35_0.03_265)] hover:text-[oklch(0.55_0.04_265)] transition-colors text-lg leading-none"
+          >
+            ×
+          </button>
+        </div>
+
+        {subtext && (
+          <p className="text-center text-[10px] text-[oklch(0.45_0.03_265)] pb-2 px-4">{subtext}</p>
+        )}
+      </div>
+    </div>
   );
 }

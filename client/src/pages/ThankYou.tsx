@@ -9,9 +9,10 @@ export default function ThankYou() {
   const [reviewText, setReviewText] = useState("");
   const [reviewSubmitted, setReviewSubmitted] = useState(false);
   const [showPremiumPulse, setShowPremiumPulse] = useState(false);
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
-    const c = sessionStorage.getItem("dsr_chronotype") || "bear";
+    const c = sessionStorage.getItem("dsr_quiz_result") || sessionStorage.getItem("dsr_chronotype") || "bear";
     setChronotype(c);
     fetch("/api/behavior/track", {
       method: "POST",
@@ -33,9 +34,20 @@ export default function ThankYou() {
     fetch("/api/behavior/track", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ event: "review_submit", page: "thank-you", result: `${rating}stars`, ts: Date.now() }),
+      body: JSON.stringify({ event: "review_submit", page: "thank-you", result: `${rating}stars`, review: reviewText, ts: Date.now() }),
     }).catch(() => {});
     setReviewSubmitted(true);
+  };
+
+  const handleCopyReferral = () => {
+    navigator.clipboard.writeText("https://deepsleepquest.manus.space/?ref=friend").catch(() => {});
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+    fetch("/api/behavior/track", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ event: "referral_copy", page: "thank-you", ts: Date.now() }),
+    }).catch(() => {});
   };
 
   return (
@@ -81,7 +93,13 @@ export default function ThankYou() {
               {
                 icon: "📊",
                 title: "Sleep Score Tracker",
-                sub: "Bonus PDF (included in your guide)",
+                sub: "Bonus PDF — track your progress nightly",
+                href: "/api/downloads/tripwire",
+              },
+              {
+                icon: "🍽️",
+                title: "Chronotype Meal Timing Guide",
+                sub: "Bonus — optimize nutrition for your type",
                 href: "/api/downloads/tripwire",
               },
             ].map((item, i) => (
@@ -114,6 +132,7 @@ export default function ThankYou() {
               "Read Night 1 protocol (5 minutes)",
               "Set your alarm to the time recommended for your chronotype",
               "Track your Sleep Score every morning",
+              "Check your email — Day 1 tip arrives tonight",
             ].map((step, i) => (
               <li key={i} className="flex items-start gap-3 text-sm text-[oklch(0.75_0.03_265)]">
                 <span className="w-5 h-5 rounded-full bg-[oklch(0.65_0.22_280/0.2)] border border-[oklch(0.65_0.22_280/0.4)] flex items-center justify-center text-xs font-black text-[oklch(0.75_0.18_280)] flex-shrink-0 mt-0.5">
@@ -171,7 +190,7 @@ export default function ThankYou() {
           </div>
         )}
 
-        {/* Klein principle: Premium identity upsell — shown after 8s */}
+        {/* Premium identity upsell — shown after 8s */}
         <div className={`subscription-card-pro rounded-2xl p-6 mb-5 transition-all duration-500 ${showPremiumPulse ? "animate-reveal" : "opacity-0"}`}>
           <div className="flex items-start gap-3 mb-4">
             <span className="text-3xl">⚡</span>
@@ -193,6 +212,7 @@ export default function ThankYou() {
               "Weekly AI Sleep Score Report",
               "Private Sleep Optimizers Community",
               "Monthly Q&A Recording",
+              "Early access to new protocols",
             ].map((f, i) => (
               <div key={i} className="flex items-center gap-2 text-sm text-[oklch(0.75_0.03_265)]">
                 <span className="text-green-400 text-xs">✓</span> {f}
@@ -201,8 +221,8 @@ export default function ThankYou() {
           </div>
           <div className="flex items-center justify-between mb-4">
             <div>
-              <p className="text-xs text-[oklch(0.5_0.04_265)]">Total value: <span className="line-through">$275/mo</span></p>
-              <p className="font-display text-2xl font-black text-white">$27<span className="text-sm font-normal text-[oklch(0.55_0.04_265)]">/month</span></p>
+              <p className="text-xs text-[oklch(0.5_0.04_265)]">Total value: <span className="line-through">$97/mo</span></p>
+              <p className="font-display text-2xl font-black text-white">$9.99<span className="text-sm font-normal text-[oklch(0.55_0.04_265)]">/month</span></p>
             </div>
             <p className="text-xs text-green-400 font-bold">Cancel anytime</p>
           </div>
@@ -210,19 +230,37 @@ export default function ThankYou() {
             onClick={() => setLocation("/premium")}
             className="cta-premium cta-shimmer w-full py-3.5 rounded-xl font-bold text-sm text-white"
           >
-            Join Sleep Optimizers Pro →
+            Join Sleep Optimizers Pro — $9.99/mo →
           </button>
-          <p className="text-center text-[0.65rem] text-[oklch(0.4_0.03_265)] mt-2">7-day free trial · No commitment · Instant access</p>
+          <p className="text-center text-[0.65rem] text-[oklch(0.4_0.03_265)] mt-2">7-day free trial · No commitment · Cancel anytime</p>
         </div>
 
-        {/* Share prompt — viral loop */}
+        {/* Referral program — viral loop */}
         <div className="glass-card rounded-2xl p-5 mb-6">
-          <p className="text-sm text-[oklch(0.65_0.04_265)] mb-3 text-center">
-            Know someone who struggles with sleep? Share the free quiz:
+          <h3 className="font-bold text-white mb-2 flex items-center gap-2">
+            <span>🎁</span> Share & Earn
+          </h3>
+          <p className="text-sm text-[oklch(0.65_0.04_265)] mb-3 leading-relaxed">
+            Know someone who struggles with sleep? Share your link — when they buy, you get <strong className="text-white">$2 credit</strong> toward your next purchase.
           </p>
+          <div className="flex gap-2 mb-3">
+            <div
+              className="flex-1 px-3 py-2 rounded-xl text-xs text-[oklch(0.55_0.04_265)] truncate"
+              style={{ background: "oklch(0.15 0.025 265)", border: "1px solid oklch(0.22 0.03 265)" }}
+            >
+              deepsleepquest.manus.space/?ref=friend
+            </div>
+            <button
+              onClick={handleCopyReferral}
+              className="px-3 py-2 rounded-xl text-xs font-bold text-white flex-shrink-0 transition-all"
+              style={{ background: copied ? "oklch(0.5 0.15 160)" : "oklch(0.65 0.22 280 / 0.3)", border: "1px solid oklch(0.65 0.22 280 / 0.4)" }}
+            >
+              {copied ? "✓ Copied!" : "Copy"}
+            </button>
+          </div>
           <div className="flex gap-2">
             <a
-              href="https://www.facebook.com/sharer/sharer.php?u=https://deepsleepre.set"
+              href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent("https://deepsleepquest.manus.space/?ref=friend")}&quote=${encodeURIComponent("I just discovered my sleep chronotype and it's changing my sleep completely! Take the free quiz:")}`}
               target="_blank"
               rel="noopener noreferrer"
               className="flex-1 py-2.5 rounded-xl text-xs font-bold bg-[oklch(0.35_0.1_265)] text-white hover:opacity-80 transition-all text-center"
@@ -230,12 +268,12 @@ export default function ThankYou() {
               Share on Facebook
             </a>
             <a
-              href="https://www.instagram.com/"
+              href={`https://twitter.com/intent/tweet?text=${encodeURIComponent("Just discovered I'm a " + (chronotype.charAt(0).toUpperCase() + chronotype.slice(1)) + " chronotype 🌙 Take the free sleep quiz:")}&url=${encodeURIComponent("https://deepsleepquest.manus.space/?ref=friend")}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex-1 py-2.5 rounded-xl text-xs font-bold bg-gradient-to-r from-[oklch(0.6_0.2_0)] to-[oklch(0.6_0.2_300)] text-white hover:opacity-80 transition-all text-center"
+              className="flex-1 py-2.5 rounded-xl text-xs font-bold bg-[oklch(0.45_0.1_220)] text-white hover:opacity-80 transition-all text-center"
             >
-              Share on Instagram
+              Share on X
             </a>
           </div>
         </div>

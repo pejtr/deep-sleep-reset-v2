@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useLocation } from "wouter";
 import SocialProofToast from "@/components/SocialProofToast";
+import LiveSalesNotification from "@/components/LiveSalesNotification";
 import ExitIntentPopup from "@/components/ExitIntentPopup";
 import EmailCapturePopup from "@/components/EmailCapturePopup";
 import ReviewsSection from "@/components/ReviewsSection";
@@ -40,6 +41,14 @@ const HEADLINE_VARIANTS = [
     subheadline: "Take the free chronotype quiz and reclaim deep, restorative sleep — starting tonight.",
     hook: "TRUSTED BY SLEEP COACHES · BACKED BY CHRONOBIOLOGY RESEARCH",
   },
+  {
+    id: "E",
+    headline: "Waking Up Tired",
+    italic: "Is Not Normal. It's a Signal.",
+    tail: "Your Biology Is Trying to Tell You Something.",
+    subheadline: "Discover your chronotype in 60 seconds and get a personalized 7-night plan to fix your sleep — for $5.",
+    hook: "87% OF PEOPLE SLEEP AGAINST THEIR BIOLOGY — ARE YOU ONE OF THEM?",
+  },
 ];
 
 const CTA_VARIANTS = [
@@ -69,6 +78,8 @@ const SCARCITY_MESSAGES = [
   "🔥 This free quiz closes at midnight",
   "⏰ 23 spots left for today's free plan",
   "📈 Your chronotype results expire in 24h",
+  "🌍 12,847 people already fixed their sleep",
+  "⚡ 3 people are taking the quiz right now",
 ];
 
 function getOrSetVariant<T extends { id: string }>(key: string, variants: T[], weights?: Record<string, number>): T {
@@ -165,6 +176,7 @@ const TESTIMONIALS = [
 export default function Home() {
   const [, setLocation] = useLocation();
   const [headlineVariant, setHeadlineVariant] = useState(HEADLINE_VARIANTS[0]);
+  const [liveViewers] = useState(() => Math.floor(Math.random() * 35) + 45); // 45-80 live viewers
   const [ctaVariant, setCtaVariant] = useState(CTA_VARIANTS[0]);
   const [showExitPopup, setShowExitPopup] = useState(false);
   const [showEmailPopup, setShowEmailPopup] = useState(false);
@@ -265,6 +277,7 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-[oklch(0.07_0.025_255)] relative overflow-x-hidden">
       <SocialProofToast />
+      <LiveSalesNotification position="bottom-left" />
 
       {showExitPopup && (
         <ExitIntentPopup ctaVariant={ctaVariant.id} onClose={() => setShowExitPopup(false)} onCTA={() => handleCTAClick("exit_popup")} />
@@ -331,6 +344,14 @@ export default function Home() {
             {headlineVariant.subheadline}
           </p>
 
+          {/* Live viewers FOMO indicator */}
+          <div className="flex items-center justify-center gap-2 mb-6 animate-reveal stagger-2">
+            <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
+            <span className="text-xs text-[oklch(0.55_0.04_265)]">
+              <strong className="text-white">{liveViewers} people</strong> are taking the quiz right now
+            </span>
+          </div>
+
           {/* Primary CTA — golden amber, chevron down */}
           <div className="animate-reveal stagger-3">
             <button
@@ -354,8 +375,9 @@ export default function Home() {
           {/* Social proof numbers */}
           <div className="flex items-center justify-center gap-8 mt-14 animate-reveal stagger-4">
             {[
-              { value: "12,847", label: "tests completed" },
+              { value: "12,847+", label: "tests completed" },
               { value: "4.9 ★", label: "average rating" },
+              { value: "47", label: "countries" },
               { value: "7 nights", label: "to results" },
             ].map((stat, i) => (
               <div key={i} className="flex flex-col items-center">

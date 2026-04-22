@@ -2,15 +2,19 @@ import { useEffect, useState, useRef } from "react";
 
 const NOTIFICATIONS = [
   { name: "Sarah M.", city: "Austin, TX", action: "just completed the quiz", emoji: "🧠" },
-  { name: "James K.", city: "London, UK", action: "bought Sleep Reset for $1", emoji: "🌙" },
+  { name: "James K.", city: "London, UK", action: "bought Sleep Reset for $5", emoji: "🌙" },
   { name: "Lucie V.", city: "Prague, CZ", action: "discovered she's a Wolf chronotype", emoji: "🐺" },
   { name: "Marcus T.", city: "Toronto, CA", action: "sleeping deeper after 7 nights", emoji: "😴" },
   { name: "Emma L.", city: "Sydney, AU", action: "just completed the quiz", emoji: "🧠" },
-  { name: "David W.", city: "New York, US", action: "bought Sleep Reset for $1", emoji: "🌙" },
+  { name: "David W.", city: "New York, US", action: "bought Sleep Reset for $5", emoji: "🌙" },
   { name: "Priya R.", city: "Mumbai, IN", action: "discovered she's a Lion chronotype", emoji: "🦁" },
-  { name: "Alex B.", city: "Berlin, DE", action: "bought Sleep Reset for $1", emoji: "🌙" },
+  { name: "Alex B.", city: "Berlin, DE", action: "bought Sleep Reset for $5", emoji: "🌙" },
   { name: "Aisha M.", city: "Lagos, NG", action: "sleeping deeper after 7 nights", emoji: "😴" },
   { name: "Tom H.", city: "Amsterdam, NL", action: "discovered he's a Bear chronotype", emoji: "🐻" },
+  { name: "Sophie L.", city: "Paris, FR", action: "bought Sleep Reset for $5", emoji: "🌙" },
+  { name: "Carlos M.", city: "Madrid, ES", action: "just completed the quiz", emoji: "🧠" },
+  { name: "Yuki S.", city: "Tokyo, JP", action: "sleeping deeper after 7 nights", emoji: "😴" },
+  { name: "Isabella F.", city: "São Paulo, BR", action: "discovered she's a Dolphin chronotype", emoji: "🐬" },
 ];
 
 export default function SocialProofToast() {

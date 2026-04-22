@@ -1,8 +1,12 @@
 import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { toast } from "sonner";
+import CountdownUrgencyBanner from "../components/CountdownUrgencyBanner";
+import TestimonialsCarousel from "../components/TestimonialsCarousel";
+import LiveSalesNotification from "../components/LiveSalesNotification";
+import StickyMobileCTA from "../components/StickyMobileCTA";
 
-// Gumroad product permalink for the main tripwire ($1)
+// Gumroad product permalink for the main tripwire ($5)
 const GUMROAD_PRODUCT_URL = "https://petrmatej.gumroad.com/l/fdtifc";
 
 const CHRONOTYPE_NAMES: Record<string, string> = {
@@ -19,22 +23,44 @@ const CHRONOTYPE_COLORS: Record<string, string> = {
   dolphin: "oklch(0.6 0.18 200)",
 };
 
-function useCountdown(minutes: number) {
-  const [seconds, setSeconds] = useState(minutes * 60);
+// Session-persistent countdown hook
+function useSessionCountdown(minutes: number, sessionKey: string) {
+  const [seconds, setSeconds] = useState<number>(() => {
+    const stored = sessionStorage.getItem(sessionKey);
+    if (stored) {
+      const endTime = parseInt(stored, 10);
+      const remaining = Math.max(0, Math.floor((endTime - Date.now()) / 1000));
+      return remaining;
+    }
+    const endTime = Date.now() + minutes * 60 * 1000;
+    sessionStorage.setItem(sessionKey, String(endTime));
+    return minutes * 60;
+  });
+
   useEffect(() => {
-    const interval = setInterval(() => setSeconds((s) => Math.max(0, s - 1)), 1000);
+    const interval = setInterval(() => {
+      const stored = sessionStorage.getItem(sessionKey);
+      if (stored) {
+        const endTime = parseInt(stored, 10);
+        const remaining = Math.max(0, Math.floor((endTime - Date.now()) / 1000));
+        setSeconds(remaining);
+      }
+    }, 1000);
     return () => clearInterval(interval);
-  }, []);
+  }, [sessionKey]);
+
   const m = Math.floor(seconds / 60).toString().padStart(2, "0");
   const s = (seconds % 60).toString().padStart(2, "0");
-  return { display: `${m}:${s}`, expired: seconds === 0 };
+  return { display: `${m}:${s}`, expired: seconds === 0, seconds };
 }
 
 export default function Order() {
   const [, setLocation] = useLocation();
   const [chronotype, setChronotype] = useState("bear");
-  const [buyers] = useState(() => Math.floor(Math.random() * 40) + 60);
-  const { display: countdown, expired } = useCountdown(15);
+  const [buyers] = useState(() => Math.floor(Math.random() * 40) + 80); // 80-120 buyers
+  const [viewers] = useState(() => Math.floor(Math.random() * 12) + 8); // 8-20 viewers
+  const { display: countdown, expired, seconds } = useSessionCountdown(15, "dsr_offer_timer_end");
+  const isUrgent = seconds < 120 && !expired;
 
   useEffect(() => {
     const r = sessionStorage.getItem("dsr_quiz_result") || sessionStorage.getItem("dsr_chronotype") || "bear";
@@ -80,6 +106,20 @@ export default function Order() {
       <div className="orb orb-purple w-[400px] h-[400px] top-[-100px] right-[-100px]" style={{ opacity: 0.1 }} />
       <div className="orb orb-blue w-[300px] h-[300px] bottom-[-50px] left-[-100px]" style={{ opacity: 0.08 }} />
 
+      {/* FOMO: Live sales notifications */}
+      <LiveSalesNotification position="bottom-left" />
+
+      {/* Sticky mobile CTA */}
+      <StickyMobileCTA
+        label="Get Instant Access — $5 →"
+        price="$5"
+        originalPrice="$29"
+        countdown={countdown}
+        countdownExpired={expired}
+        onClick={handleCheckout}
+        subtext="🔒 Secure · Instant PDF · 30-day guarantee"
+      />
+
       <div className="max-w-lg mx-auto relative z-10">
 
         {/* Back link */}
@@ -90,35 +130,35 @@ export default function Order() {
           ← Back to my result
         </button>
 
-        {/* Urgency bar */}
-        <div
-          className={`rounded-xl p-4 mb-6 text-center font-bold transition-all ${
-            expired
-              ? "bg-red-900/30 border border-red-500/40 text-red-400"
-              : "bg-[oklch(0.72_0.18_45/0.12)] border border-[oklch(0.72_0.18_45/0.35)] text-[oklch(0.85_0.15_45)]"
-          }`}
-        >
-          {expired ? (
-            <span>⚠️ Offer expired — standard pricing applies</span>
-          ) : (
-            <span className="flex items-center justify-center gap-2 flex-wrap text-sm">
-              <span>⏰ This $1 offer expires in</span>
-              <span className="font-mono font-black text-lg animate-countdown-tick">{countdown}</span>
-              <span>— then it's $29</span>
+        {/* Session-persistent urgency banner */}
+        <CountdownUrgencyBanner
+          minutes={15}
+          activePrefix="⏰ This $5 offer expires in"
+          activeSuffix="— then it's $29"
+          sessionKey="dsr_offer_timer_end"
+        />
+
+        {/* Social proof — live activity */}
+        <div className="flex items-center justify-between mb-5 text-sm">
+          <div className="flex items-center gap-2 text-[oklch(0.58_0.04_265)]">
+            <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse flex-shrink-0" />
+            <span>
+              <strong className="text-white">{buyers} people</strong> purchased today
             </span>
-          )}
+          </div>
+          <div className="flex items-center gap-2 text-[oklch(0.58_0.04_265)]">
+            <span className="w-2 h-2 rounded-full bg-yellow-400 animate-pulse flex-shrink-0" />
+            <span className="text-xs">
+              <strong className="text-white">{viewers}</strong> viewing now
+            </span>
+          </div>
         </div>
 
-        {/* Social proof */}
-        <div className="flex items-center gap-2 mb-6 text-sm text-[oklch(0.58_0.04_265)]">
-          <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse flex-shrink-0" />
-          <span>
-            <strong className="text-white">{buyers} people</strong> purchased today
-          </span>
-          <span className="ml-auto flex items-center gap-1">
-            {[1,2,3,4,5].map(i => <span key={i} className="text-yellow-400 text-xs">★</span>)}
-            <span className="text-xs ml-1">4.9</span>
-          </span>
+        {/* Star rating */}
+        <div className="flex items-center justify-center gap-2 mb-5">
+          {[1,2,3,4,5].map(i => <span key={i} className="text-yellow-400 text-base">★</span>)}
+          <span className="text-sm font-bold text-white ml-1">4.9</span>
+          <span className="text-xs text-[oklch(0.5_0.04_265)]">(2,847 reviews)</span>
         </div>
 
         {/* Product card — premium glassmorphism */}
@@ -149,6 +189,7 @@ export default function Order() {
               { text: "Morning recovery routine for your type", value: "$12" },
               { text: "Optimal sleep & wake time schedule", value: "$19" },
               { text: "Bonus: 5 most common sleep mistakes", value: "$9" },
+              { text: "Bonus: Chronotype meal timing guide", value: "$12" },
             ].map((item, i) => (
               <div key={i} className="flex items-center justify-between py-1.5">
                 <div className="flex items-center gap-2.5">
@@ -163,12 +204,12 @@ export default function Order() {
           {/* Price reveal */}
           <div className="flex items-center justify-between py-4 border-t border-[oklch(0.22_0.03_265)]">
             <div>
-              <p className="text-xs text-[oklch(0.5_0.04_265)] mb-0.5">Total value: <span className="line-through">$84</span></p>
-              <p className="text-xs font-bold text-green-400">You save 98.8%</p>
+              <p className="text-xs text-[oklch(0.5_0.04_265)] mb-0.5">Total value: <span className="line-through">$96</span></p>
+              <p className="text-xs font-bold text-green-400">You save 94.8%</p>
             </div>
             <div className="text-right">
               <p className="text-sm text-[oklch(0.45_0.03_265)] line-through">$29.00</p>
-              <p className="font-display text-4xl font-black text-white">$1<span className="text-lg">.00</span></p>
+              <p className="font-display text-4xl font-black text-white">$5<span className="text-lg">.00</span></p>
             </div>
           </div>
         </div>
@@ -176,15 +217,15 @@ export default function Order() {
         {/* Primary CTA — Gumroad overlay trigger */}
         <button
           onClick={handleCheckout}
-          className="cta-premium cta-shimmer w-full py-5 rounded-2xl font-black text-xl text-white mb-3"
+          className={`cta-premium cta-shimmer w-full py-5 rounded-2xl font-black text-xl text-white mb-3 ${isUrgent ? "animate-pulse-glow" : ""}`}
         >
-          Get Instant Access — $1 →
+          Get Instant Access — $5 →
         </button>
 
         {/* Payment methods */}
         <div className="flex items-center justify-center gap-2 mb-4 text-xs text-[oklch(0.5_0.04_265)]">
           <span>💳</span>
-          <span>Visa · Mastercard · PayPal · Apple Pay</span>
+          <span>Visa · Mastercard · PayPal · Apple Pay · Google Pay</span>
           <span>🔒</span>
         </div>
 
@@ -193,6 +234,7 @@ export default function Order() {
           <span className="trust-badge">🔒 SSL Secure</span>
           <span className="trust-badge">⚡ Instant delivery</span>
           <span className="trust-badge">↩ 30-day guarantee</span>
+          <span className="trust-badge">🌍 47 countries</span>
         </div>
 
         {/* Risk reversal — premium version */}
@@ -205,32 +247,33 @@ export default function Order() {
           </p>
         </div>
 
+        {/* Testimonials carousel */}
+        <div className="mb-6">
+          <TestimonialsCarousel chronotype={chronotype} count={3} autoPlay={true} />
+        </div>
+
         {/* Premium upsell teaser */}
         <div className="glass-card rounded-xl p-4 mb-6 flex items-center gap-3">
           <div className="text-2xl flex-shrink-0">⚡</div>
           <div className="flex-1 min-w-0">
             <p className="text-xs font-bold text-[oklch(0.75_0.18_280)] mb-0.5">After purchase: Unlock Sleep Optimizers Pro</p>
-            <p className="text-xs text-[oklch(0.55_0.04_265)]">Monthly protocols + AI sleep reports + community. From $27/mo.</p>
+            <p className="text-xs text-[oklch(0.55_0.04_265)]">Monthly protocols + AI sleep reports + community. From $9.99/mo.</p>
           </div>
         </div>
 
-        {/* Micro-testimonials */}
-        <div className="space-y-2 mb-6">
-          {[
-            { name: "Sarah M.", text: "Fell asleep in 8 min on night 1. Worth 100x the $1.", stars: 5 },
-            { name: "James K.", text: "Best $1 I've ever spent. 5 years of bad sleep fixed in a week.", stars: 5 },
-          ].map((t, i) => (
-            <div key={i} className="flex items-start gap-3 p-3 rounded-xl bg-[oklch(0.11_0.02_265)] border border-[oklch(0.2_0.03_265)]">
-              <div className="flex-shrink-0">
-                {[1,2,3,4,5].map(j => <span key={j} className="text-yellow-400 text-xs">★</span>)}
-              </div>
-              <div>
-                <p className="text-xs text-[oklch(0.75_0.03_265)] italic">"{t.text}"</p>
-                <p className="text-[0.65rem] text-[oklch(0.5_0.04_265)] mt-0.5">— {t.name}</p>
-              </div>
-            </div>
-          ))}
-        </div>
+        {/* Secondary CTA — for those who scrolled to bottom */}
+        <button
+          onClick={handleCheckout}
+          className="w-full py-4 rounded-2xl font-black text-base text-white mb-3 transition-all hover:opacity-90"
+          style={{
+            background: "linear-gradient(135deg, oklch(0.65 0.22 280), oklch(0.55 0.22 295))",
+          }}
+        >
+          Yes, Fix My Sleep Tonight — $5 →
+        </button>
+        <p className="text-center text-xs text-[oklch(0.4_0.03_265)] mb-8">
+          Join 12,847+ people who already fixed their sleep
+        </p>
 
       </div>
     </div>
